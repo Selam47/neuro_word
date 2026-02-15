@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🧠 NEURO WORD
-### "Geleceğin Kelime Öğrenme Deneyimi - Şimdi Cebinizde!"
+### "Geleceğin Kelime Öğrenme Deneyimi!"
 
 <br />
 
@@ -55,7 +55,7 @@ Projeyi yerel ortamınızda en yüksek performansta çalıştırmak için:
 2. **Klasöre Geçin:** `cd neuro_word`
 3. **Önbelleği Temizleyin:** `flutter clean`
 4. **Paketleri Çekin:** `flutter pub get`
-5. **Uygulamayı Uçurun:** `flutter run`
+5. **Uygulamayı Çalıştırın:** `flutter run`
 
 ---
 
