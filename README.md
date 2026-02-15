@@ -63,7 +63,7 @@ Projeyi kendi ortamınızda en stabil şekilde çalıştırmak için aşağıdak
 
 Bu fütüristik serüvenin arkasındaki profesyonel kadro:
 
-#### 👑 Proje Lideri & Baş Geliştirici
+#### 👑 Proje Lideri
 * **Abdülselam Kaya**
 
 #### ⚙️ DevOps & Sistem Mimarisi
