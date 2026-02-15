@@ -18,14 +18,20 @@ Yapay zeka estetiği, fütüristik grafikler ve oyunlaştırılmış öğrenme m
 
 ## 📸 Uygulama İçi Görseller (Tanıtım)
 
+<div align="center">
+
 <table>
   <tr>
-    <td><img src="./screenshots/welcome.jpg" width="200"><br/><sub><b>Fütüristik Karşılama</b></sub></td>
-    <td><img src="GÖRSEL_LINKI_2" width="200" alt="Oyun Modu"/><br/><sub><b>Cyber Match & Neon Pulse</b></sub></td>
-    <td><img src="GÖRSEL_LINKI_3" width="200" alt="Kartlar"/><br/><sub><b>Akıllı Flash Kartlar</b></sub></td>
-    <td><img src="GÖRSEL_LINKI_4" width="200" alt="Profil"/><br/><sub><b>İlerleme Takibi</b></sub></td>
+    <td><img src="screenshots/welcome.jpeg" width="200" alt="Giriş Ekranı"/><br/><sub><b>Fütüristik Karşılama</b></sub></td>
+    <td><img src="screenshots/home.jpeg" width="200" alt="Ana Ekran"/><br/><sub><b>Cyber Match & Modlar</b></sub></td>
+    <td><img src="screenshots/database.jpeg" width="200" alt="Kelime Veritabanı"/><br/><sub><b>Gelişmiş Filtreleme</b></sub></td>
+    <td><img src="screenshots/profile.jpeg" width="200" alt="Profil"/><br/><sub><b>İlerleme Takibi</b></sub></td>
   </tr>
 </table>
+
+</div>
+
+</div>
 
 *(Not: Resimlerin üzerine tıklayarak büyütebilirsiniz.)*
 
