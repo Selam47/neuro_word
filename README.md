@@ -63,17 +63,17 @@ Projeyi yerel ortamınızda en yüksek performansta çalıştırmak için:
 
 Bu proje, büyük bir tutku ve ekip çalışmasının ürünüdür:
 
+#### 👑 Proje Lideri
+* **Abdülselam Kaya**
+
 #### ⚙️ DevOps & Sistem Mimarisi
 * **Abdullah Kaya**
 
-#### 👑 Proje Lideri & Baş Geliştirici
-* **Abdülselam Kaya**
+* #### 💻 Frontend Geliştirme
+* **Melik Kaya** | **Sevgi Kaya** | **Abdurrahman Oğuzbey**
 
 #### 🎨 Tasarım & UI/UX Ekibi
 * **Hasan Düzgör** | **Yusuf Serhat Temel** | **Eren Demir**
-
-#### 💻 Frontend Geliştirme
-* **Melik Kaya** | **Sevgi Kaya**
 
 #### 🔙 Backend & Veri Yönetimi
 * **Mehmet Ali Guda** | **Serhat Enes Uçan** | **Adnan Sami**
