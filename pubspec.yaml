@@ -1,0 +1,53 @@
+name: neuro_word
+description: "A premium English-Turkish Language Learning App with a futuristic cyberpunk aesthetic."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Typography
+  google_fonts: ^6.2.1
+
+  # Visual Effects
+  shimmer: ^3.0.0
+
+  # Navigation
+  go_router: ^14.8.1
+  url_launcher: ^6.3.2
+  glass_kit: ^3.0.0
+  animations: ^2.0.8
+  lottie: ^3.3.2
+  shared_preferences: ^2.5.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/data/
+    - assets/svg/
+    - assets/sounds/
+    - assets/icon/
+    - assets/animations/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21

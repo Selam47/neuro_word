@@ -1,0 +1,17 @@
+cat <<EOF > .gitignore
+# Anahtarlar ve Şifreler (KESİNLİKLE GİTMEMELİ)
+*.jks
+*.keystore
+*.p12
+*.key
+local.properties
+key.properties
+
+# Derleme Dosyaları
+/build/
+/.dart_tool/
+/.gradle/
+
+# Sistem Dosyaları
+.DS_Store
+EOF
