@@ -1,73 +1,73 @@
 <div align="center">
 
 # 🧠 NEURO WORD
-### "Geleceğin Kelime Öğrenme Deneyimi"
+### "Geleceğin Kelime Öğrenme Deneyimi - Şimdi Cebinizde!"
 
 <br />
 
 ![Neuro Word Logo](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Stabil-brightgreen?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![UI](https://img.shields.io/badge/UI/UX-Futuristic-blueviolet?style=for-the-badge)
 
 <br />
 
-**Neuro Word**, dil öğrenimini fütüristik bir atmosferle birleştiren, yüksek performanslı ve kullanıcı odaklı bir mobil uygulamadır. 
-Sıradan ezberleme yöntemlerini bir kenara bırakın ve sibernetik bir evrende kelime dağarcığınızı geliştirin.
+**Neuro Word**, sıradan dil öğrenme uygulamalarından sıkılanlar için tasarlandı. 
+Yapay zeka estetiği, fütüristik grafikler ve oyunlaştırılmış öğrenme modülleriyle kelime haznenizi bir üst seviyeye taşıyın.
+
+---
+
+## 📸 Uygulama İçi Görseller (Tanıtım)
+
+<table>
+  <tr>
+    <td><img src="GÖRSEL_LINKI_1" width="200" alt="Giriş Ekranı"/><br/><sub><b>Fütüristik Karşılama</b></sub></td>
+    <td><img src="GÖRSEL_LINKI_2" width="200" alt="Oyun Modu"/><br/><sub><b>Cyber Match & Neon Pulse</b></sub></td>
+    <td><img src="GÖRSEL_LINKI_3" width="200" alt="Kartlar"/><br/><sub><b>Akıllı Flash Kartlar</b></sub></td>
+    <td><img src="GÖRSEL_LINKI_4" width="200" alt="Profil"/><br/><sub><b>İlerleme Takibi</b></sub></td>
+  </tr>
+</table>
+
+*(Not: Resimlerin üzerine tıklayarak büyütebilirsiniz.)*
 
 ---
 
 </div>
 
-## 🚀 Neden Neuro Word?
+## 🚀 Neden Neuro Word ile Öğrenmelisiniz?
 
-Uygulamamız, sadece bir kelime listesi sunmakla kalmaz; size interaktif bir öğrenme yolculuğu vadeder:
+Uygulamamız, modern yazılım dünyasının en yeni trendlerini dil eğitimiyle birleştiriyor:
 
-* 🤖 **Fütüristik Karşılama:** Sizi karşılayan robot asistanımızla teknolojiye adım atın.
-* ⚡ **Neon Pulse & Cyber Match:** Adrenalin ve öğrenmeyi birleştiren özel oyun modları.
-* 📚 **Akıllı Flash Kartlar:** Öğrenmek istediğiniz kelimeleri anında kaydedin ve profilinizden yönetin.
-* 📈 **Gelişmiş İstatistikler:** Öğrenme hızınızı ve toplam ilerlemenizi gerçek zamanlı takip edin.
-
----
-
-## 🛠️ Kurulum ve Başlatma
-
-Projeyi kendi ortamınızda en stabil şekilde çalıştırmak için aşağıdaki adımları sırasıyla uygulayın:
-
-> [!IMPORTANT]
-> Projeyi çalıştırmadan önce mutlaka temizlik komutunu çalıştırınız.
-
-1.  **Depoyu Klonlayın:**
-    ```bash
-    git clone [https://github.com/Selam47/neuro_word.git](https://github.com/Selam47/neuro_word.git)
-    ```
-2.  **Klasöre Giriş Yapın:**
-    ```bash
-    cd neuro_word
-    ```
-3.  **Büyük Temizlik (Kritik):**
-    ```bash
-    flutter clean
-    ```
-4.  **Paketleri Yükleyin:**
-    ```bash
-    flutter pub get
-    ```
-5.  **Çalıştırın:**
-    ```bash
-    flutter run
-    ```
+* 🤖 **Sibernetik Asistan:** Sizi fütüristik bir robot eşliğinde karşılayan görkemli açılış deneyimi.
+* ⚡ **Rekabetçi Modlar:** Neon Pulse ve Cyber Match ile zamanla yarışarak kelime bilginizi test edin.
+* 💾 **Kişisel Sözlük:** Kartlar bölümünde öğrendiğiniz her kelimeyi tek tuşla profilinize kaydedin.
+* 📊 **Veri Analizi:** Hangi gün kaç kelime öğrendiğinizi ve toplam ilerlemenizi anlık olarak takip edin.
 
 ---
 
-## 🎖️ Geliştirici Ekibi & Destek Verenler
+## 🛠️ Teknik Kurulum ve Başlatma
 
-Bu fütüristik serüvenin arkasındaki profesyonel kadro:
+Projeyi yerel ortamınızda en yüksek performansta çalıştırmak için:
 
-#### 👑 Proje Lideri
-* **Abdülselam Kaya**
+> [!IMPORTANT]  
+> Hata almamak için `flutter clean` komutunu atlamayınız.
+
+1.  **Klonlayın:** `git clone https://github.com/Selam47/neuro_word.git`
+2.  **Klasöre Geçin:** `cd neuro_word`
+3.  **Önbelleği Temizleyin:** `flutter clean`
+4.  **Paketleri Çekin:** `flutter pub get`
+5.  **Uygulamayı Uçurun:** `flutter run`
+
+---
+
+## 🎖️ Geliştirici Ekibi
+
+Bu proje, büyük bir tutku ve ekip çalışmasının ürünüdür:
 
 #### ⚙️ DevOps & Sistem Mimarisi
 * **Abdullah Kaya**
+
+#### 👑 Proje Lideri & Baş Geliştirici
+* **Abdülselam Kaya**
 
 #### 🎨 Tasarım & UI/UX Ekibi
 * **Hasan Düzgör** | **Yusuf Serhat Temel** | **Eren Demir**
@@ -80,16 +80,14 @@ Bu fütüristik serüvenin arkasındaki profesyonel kadro:
 
 ---
 
-## 📧 İletişim ve Geri Bildirim
+## 📧 İletişim
 
-Her türlü teknik destek ve iş birliği talebi için:
+Sorularınız ve iş birliği teklifleriniz için bize ulaşın:
 
-📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)
+📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)  
 📍 **Geliştirici:** Abdülselam Kaya
 
 <div align="center">
 <br />
-<i>"Kelimelerin gücü, teknolojinin hızıyla birleşti."</i>
-<br />
-<b>Neuro Word © 2026</b>
+<b>Neuro Word © 2026 - Dil Öğrenmenin Geleceği</b>
 </div>
