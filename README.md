@@ -70,13 +70,13 @@ Bu proje, büyük bir tutku ve ekip çalışmasının ürünüdür:
 * **Abdullah Kaya**
 
 * #### 💻 Frontend Geliştirme
-* **Melik Kaya** | **Sevgi Kaya** | **Abdurrahman Oğuzbey**
+* **Melik Kaya** | **Sevgi Kaya** 
 
 #### 🎨 Tasarım & UI/UX Ekibi
-* **Hasan Düzgör** | **Yusuf Serhat Temel** | **Eren Demir**
+* **Hasan Düzgör** | **Yusuf Serhat Temel** | **Abdurrahman Oğuzbey**
 
 #### 🔙 Backend & Veri Yönetimi
-* **Mehmet Ali Guda** | **Serhat Enes Uçan** | **Adnan Sami**
+* **Mehmet Ali Guda** | **Serhat Enes Uçan** | **Adnan Sami** | **Eren Demir**
 
 ---
 
