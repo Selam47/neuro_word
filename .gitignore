@@ -1,11 +1,16 @@
 cat <<EOF > .gitignore
-# Anahtarlar ve Şifreler (KESİNLİKLE GİTMEMELİ)
+# Anahtarlar ve Şifreler
 *.jks
 *.keystore
 *.p12
 *.key
 local.properties
 key.properties
+serviceAccountKey.json
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+.env
 
 # Derleme Dosyaları
 /build/
@@ -15,9 +20,3 @@ key.properties
 # Sistem Dosyaları
 .DS_Store
 EOF
-# Firebase ve Hassas Dosyalar
-serviceAccountKey.json
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-lib/firebase_options.dart
-.env
