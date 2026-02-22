@@ -8,7 +8,6 @@ import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
 
-/// Contact screen — developer info + mailto intent.
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
@@ -33,7 +32,6 @@ class ContactScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Back bar ──────────────────────────────────────
                 Row(
                   children: [
                     GestureDetector(
@@ -67,7 +65,6 @@ class ContactScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
 
-                // ── Illustration ─────────────────────────────────
                 Center(
                   child: Container(
                     width: 100,
@@ -94,7 +91,6 @@ class ContactScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
 
-                // ── Description ──────────────────────────────────
                 GlassCard(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -110,7 +106,6 @@ class ContactScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // Email card
                       GlassCard(
                         accentColor: AppColors.electricBlue,
                         padding: const EdgeInsets.symmetric(

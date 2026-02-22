@@ -10,9 +10,6 @@ import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
-/// Mode B — Cyber-Match (Word Warp)
-/// 5 English words on the left, 5 shuffled Turkish meanings on the right.
-/// Tap to select pairs; correct matches fade out with a glow effect.
 class CyberMatchScreen extends ConsumerStatefulWidget {
   const CyberMatchScreen({super.key, this.level});
   final String? level;
@@ -81,7 +78,6 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
     final rightWord = _shuffledRight[_selectedRightIndex!];
 
     if (leftWord.id == rightWord.id) {
-      // Correct match!
       HapticFeedback.lightImpact();
       _matchedIndices.add(_selectedLeftIndex!);
       _totalCorrect++;
@@ -90,14 +86,12 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
       HapticFeedback.heavyImpact();
     }
 
-    // Reset selection after a short delay
     Future.delayed(const Duration(milliseconds: 400), () {
       if (!mounted) return;
       setState(() {
         _selectedLeftIndex = null;
         _selectedRightIndex = null;
 
-        // Check if round is complete
         if (_matchedIndices.length == _wordsPerRound) {
           if (_roundNumber < _totalRounds) {
             _roundNumber++;
@@ -147,7 +141,6 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
               _buildTopBar(context),
               const SizedBox(height: 8),
 
-              // Round info
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -189,13 +182,11 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
               ),
               const SizedBox(height: 24),
 
-              // ── Match Grid ──────────────────────────────────────
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      // Left column — English
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -212,7 +203,6 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
                           }),
                         ),
                       ),
-                      // Center divider
                       Container(
                         width: 2,
                         margin: const EdgeInsets.symmetric(
@@ -225,14 +215,13 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              AppColors.electricBlue.withValues(alpha: 0.3),
-                              AppColors.cyberPurple.withValues(alpha: 0.3),
+                              AppColors.electricBlue.withOpacity(0.3),
+                              AppColors.cyberPurple.withOpacity(0.3),
                               Colors.transparent,
                             ],
                           ),
                         ),
                       ),
-                      // Right column — Turkish
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -287,14 +276,14 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
             decoration: BoxDecoration(
               color: isMatched
-                  ? AppColors.neonGreen.withValues(alpha: 0.08)
+                  ? AppColors.neonGreen.withOpacity(0.08)
                   : isSelected
-                  ? accentColor.withValues(alpha: 0.15)
-                  : AppColors.cardDark.withValues(alpha: 0.7),
+                  ? accentColor.withOpacity(0.15)
+                  : AppColors.cardDark.withOpacity(0.7),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isMatched
-                    ? AppColors.neonGreen.withValues(alpha: 0.4)
+                    ? AppColors.neonGreen.withOpacity(0.4)
                     : isSelected
                     ? accentColor
                     : AppColors.cardBorder,
@@ -303,7 +292,7 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: accentColor.withValues(alpha: 0.2),
+                        color: accentColor.withOpacity(0.2),
                         blurRadius: 12,
                         spreadRadius: -2,
                       ),
@@ -371,4 +360,3 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
     );
   }
 }
-

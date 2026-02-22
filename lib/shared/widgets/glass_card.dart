@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 
-/// A reusable glassmorphic card widget with subtle blur, border glow,
-/// and optional neon accent. Used across the entire application.
 class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
@@ -41,26 +39,23 @@ class GlassCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(borderRadius),
-          splashColor: accent.withValues(alpha: 0.1),
-          highlightColor: accent.withValues(alpha: 0.05),
+          splashColor: accent.withOpacity(0.1),
+          highlightColor: accent.withOpacity(0.05),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
             child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: blurAmount,
-                sigmaY: blurAmount,
-              ),
+              filter: ImageFilter.blur(sigmaX: blurAmount, sigmaY: blurAmount),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.cardDark.withValues(alpha: 0.7),
+                  color: AppColors.cardDark.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(borderRadius),
                   border: Border.all(
-                    color: AppColors.cardBorder.withValues(alpha: 0.6),
+                    color: AppColors.cardBorder.withOpacity(0.6),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: accent.withValues(alpha: 0.05),
+                      color: accent.withOpacity(0.05),
                       blurRadius: 20,
                       spreadRadius: -4,
                     ),
@@ -76,4 +71,3 @@ class GlassCard extends StatelessWidget {
     );
   }
 }
-

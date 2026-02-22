@@ -12,8 +12,12 @@ import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
 
-/// Dashboard screen with live word data, level filter chips,
-/// and shimmer loading — wired to the Riverpod word provider.
+import 'package:neuro_word/features/auth/providers/auth_provider.dart';
+import 'package:neuro_word/shared/widgets/neon_search_bar.dart';
+
+// ... (imports)
+
+// ── Level Filter Logic ───────────────────────────────────────────────
 
 Color _getLevelColor(String level) {
   switch (level) {
@@ -59,7 +63,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Auto-refresh data if empty on launch (Fix for startup issue)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = ref.read(wordProvider);
       if (state.allWords.isEmpty && !state.isLoading) {
@@ -88,34 +91,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Top Bar ─────────────────────────────────────────
                 _TopBar(
                   onProfileTap: () => context.push('/profile'),
-                  onMenuAction: (action) {
+                  onMenuAction: (action) async {
                     switch (action) {
                       case 'explore':
                         _scrollToFeatureCards();
+                        break;
                       case 'supporters':
                         context.push('/supporters');
+                        break;
                       case 'contact':
                         context.push('/contact');
+                        break;
+                      case 'logout':
+                        await ref.read(authServiceProvider).signOut();
+                        if (context.mounted) context.go('/login');
+                        break;
+                      default:
+                        break;
                     }
                   },
                 ),
                 const SizedBox(height: 28),
 
-                // ── Hero Section ────────────────────────────────────
-                _HeroSection(
-                  learnedCount: wordState.learnedCount,
-                  onStartLearning: () => context.push('/flashcards'),
-                ),
                 const SizedBox(height: 32),
 
-                // ── Quick Stats Row (now live) ──────────────────────
                 _QuickStatsRow(wordState: wordState),
                 const SizedBox(height: 32),
 
-                // ── Feature Cards ───────────────────────────────────
                 Container(
                   key: _featureCardsKey,
                   child: Text(
@@ -139,22 +143,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 const _FeatureCardsGrid(),
                 const SizedBox(height: 32),
 
-                // ── Kelime Veritabanı (word list) ──────────────────
                 _buildSectionHeader(
                   AppStrings.neuralDataStream,
                   AppStrings.dataStreamSubtitle,
                 ),
-                const SizedBox(height: 12),
 
-                // Level filter chips
-                _LevelFilterChips(wordState: wordState),
+                NeonSearchBar(
+                  onChanged: (query) {
+                    ref.read(wordProvider.notifier).search(query);
+                  },
+                  hintText: 'Ara (Kelime veya Anlam)...',
+                ),
+                const SizedBox(height: 8),
+
+                _AdvancedFilterBar(wordState: wordState),
                 const SizedBox(height: 16),
 
-                // Action buttons
-                _DataActionBar(wordState: wordState),
-                const SizedBox(height: 16),
 
-                // Word list / shimmer / error
                 if (wordState.isLoading)
                   const _ShimmerWordList()
                 else if (wordState.error != null)
@@ -162,7 +167,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 else
                   _LiveWordList(
                     words: wordState.filteredWords,
-                    isFiltered: wordState.activeLevel != null,
+                    isFiltered:
+                        wordState.activeLevel != null ||
+                        wordState.searchQuery.isNotEmpty ||
+                        wordState.onlySaved ||
+                        wordState.activeCategory != null,
                   ),
 
                 const SizedBox(height: 24),
@@ -212,283 +221,76 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════
-// Sub-widgets
-// ═════════════════════════════════════════════════════════════════════════
 
-class _TopBar extends StatelessWidget {
-  const _TopBar({this.onProfileTap, this.onMenuAction});
-  final VoidCallback? onProfileTap;
-  final ValueChanged<String>? onMenuAction;
+// ── Advanced Filter Bar ──────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.electricBlue.withValues(alpha: 0.4),
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: SizedBox(
-            height: 48,
-            width: 140, // Increased width for the animation
-            child: Lottie.asset(
-              'assets/animations/logo_animation.json',
-              fit: BoxFit.contain,
-              alignment: Alignment.centerLeft,
-            ),
-          ),
-        ),
-        const Spacer(),
-        GestureDetector(
-          onTap: onProfileTap,
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [AppColors.electricBlue, AppColors.cyberPurple],
-              ),
-              border: Border.all(
-                color: AppColors.electricBlue.withValues(alpha: 0.5),
-                width: 1.5,
-              ),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        PopupMenuButton<String>(
-          onSelected: onMenuAction,
-          icon: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMedium,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: const Icon(
-              Icons.more_vert_rounded,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
-          ),
-          color: AppColors.surfaceDark,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: AppColors.cardBorder),
-          ),
-          itemBuilder: (_) => [
-            _menuItem(
-              'explore',
-              Icons.explore_rounded,
-              AppStrings.exploreModules,
-            ),
-            _menuItem(
-              'supporters',
-              Icons.favorite_rounded,
-              AppStrings.supporters,
-            ),
-            _menuItem('contact', Icons.mail_rounded, AppStrings.contact),
-          ],
-        ),
-      ],
-    );
-  }
-
-  PopupMenuItem<String> _menuItem(String value, IconData icon, String label) {
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.electricBlue, size: 18),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroSection extends StatelessWidget {
-  const _HeroSection({
-    required this.learnedCount,
-    required this.onStartLearning,
-  });
-  final int learnedCount;
-  final VoidCallback onStartLearning;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassCard(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppStrings.welcomeBack,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.textSecondary,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [AppColors.electricBlue, AppColors.cyberPurple],
-            ).createShader(bounds),
-            child: Text(
-              AppStrings.appTitle,
-              style: GoogleFonts.orbitron(
-                color: Colors.white,
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppStrings.heroDescription,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.textSecondary,
-              fontSize: 15,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: onStartLearning,
-            child: Text(
-              AppStrings.startLearning,
-              style: GoogleFonts.rajdhani(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickStatsRow extends StatelessWidget {
-  const _QuickStatsRow({required this.wordState});
-  final WordState wordState;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _buildStat(
-          '${wordState.learnedCount}',
-          AppStrings.wordsLearned,
-          AppColors.electricBlue,
-        ),
-        const SizedBox(width: 12),
-        _buildStat(
-          '${wordState.allWords.length}',
-          AppStrings.totalWords,
-          AppColors.neonGreen,
-        ),
-        const SizedBox(width: 12),
-        _buildStat(
-          '${wordState.availableLevels.length}',
-          AppStrings.levelsAvailable,
-          AppColors.cyberPurple,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStat(String value, String label, Color accent) {
-    return Expanded(
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        accentColor: accent,
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: GoogleFonts.orbitron(
-                color: accent,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Level Filter Chips ──────────────────────────────────────────────────
-
-class _LevelFilterChips extends ConsumerWidget {
-  const _LevelFilterChips({required this.wordState});
+class _AdvancedFilterBar extends ConsumerWidget {
+  const _AdvancedFilterBar({required this.wordState});
   final WordState wordState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final levels = wordState.availableLevels;
+    final notifier = ref.read(wordProvider.notifier);
 
     return SizedBox(
       height: 38,
       child: ListView(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         children: [
-          // "All" chip
           _buildChip(
-            context,
-            ref,
-            label: AppStrings.all,
-            isSelected: wordState.activeLevel == null,
+            label: 'Tümü', // All
+            isSelected:
+                wordState.activeLevel == null &&
+                !wordState.onlySaved &&
+                wordState.activeCategory == null,
             color: AppColors.electricBlue,
-            onTap: () => ref.read(wordProvider.notifier).filterByLevel(null),
+            onTap: () {
+              notifier.filterByLevel(null);
+              notifier.toggleSaved(false);
+              notifier.filterByCategory(null);
+              // Note: This logic resets all specific filters but keeps search query if any
+            },
           ),
           const SizedBox(width: 8),
+
+          _buildChip(
+            label: 'Kaydedilenler', // Saved
+            isSelected: wordState.onlySaved,
+            color: AppColors.neonPink,
+            onTap: () => notifier.toggleSaved(!wordState.onlySaved),
+            icon: Icons.bookmark_rounded,
+          ),
+          const SizedBox(width: 8),
+
+          _buildChip(
+            label: 'Akademik',
+            isSelected: wordState.activeCategory == 'Academic',
+            color: AppColors.electricBlue,
+            onTap: () {
+              final newCat = wordState.activeCategory == 'Academic'
+                  ? null
+                  : 'Academic';
+              notifier.filterByCategory(newCat);
+            },
+            icon: Icons.school_rounded,
+          ),
+          const SizedBox(width: 8),
+
           ...levels.map(
             (level) => Padding(
               padding: const EdgeInsets.only(right: 8),
               child: _buildChip(
-                context,
-                ref,
                 label: level,
                 isSelected: wordState.activeLevel == level,
                 color: _getLevelColor(level),
-                onTap: () =>
-                    ref.read(wordProvider.notifier).filterByLevel(level),
+                onTap: () {
+                  final newLevel = wordState.activeLevel == level
+                      ? null
+                      : level;
+                  notifier.filterByLevel(newLevel);
+                },
               ),
             ),
           ),
@@ -497,13 +299,12 @@ class _LevelFilterChips extends ConsumerWidget {
     );
   }
 
-  Widget _buildChip(
-    BuildContext context,
-    WidgetRef ref, {
+  Widget _buildChip({
     required String label,
     required bool isSelected,
     required Color color,
     required VoidCallback onTap,
+    IconData? icon,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -520,92 +321,24 @@ class _LevelFilterChips extends ConsumerWidget {
             width: 1.2,
           ),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.orbitron(
-            color: isSelected ? color : AppColors.textSecondary,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Data Action Bar ─────────────────────────────────────────────────────
-
-class _DataActionBar extends ConsumerWidget {
-  const _DataActionBar({required this.wordState});
-  final WordState wordState;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        // Shuffle button
-        _buildAction(
-          icon: Icons.shuffle_rounded,
-          label: AppStrings.shuffle,
-          onTap: () => ref.read(wordProvider.notifier).shuffle(),
-        ),
-        const SizedBox(width: 12),
-        // Reload button
-        _buildAction(
-          icon: Icons.refresh_rounded,
-          label: AppStrings.reload,
-          onTap: () => ref.read(wordProvider.notifier).reload(),
-        ),
-        const Spacer(),
-        // Count badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.electricBlue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.electricBlue.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Text(
-            '${wordState.filteredWords.length} ${AppStrings.entries}',
-            style: GoogleFonts.rajdhani(
-              color: AppColors.electricBlue,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAction({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceMedium,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 16),
-            const SizedBox(width: 6),
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? color : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+            ],
             Text(
               label,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+              style: GoogleFonts.orbitron(
+                color: isSelected ? color : AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
               ),
             ),
           ],
@@ -615,83 +348,7 @@ class _DataActionBar extends ConsumerWidget {
   }
 }
 
-// ── Shimmer Loading List ────────────────────────────────────────────────
-
-class _ShimmerWordList extends StatelessWidget {
-  const _ShimmerWordList();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(5, (index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Shimmer.fromColors(
-            baseColor: AppColors.surfaceMedium,
-            highlightColor: AppColors.cardBorder,
-            child: Container(
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceMedium,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-// ── Error Card ──────────────────────────────────────────────────────────
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.error});
-  final String error;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassCard(
-      accentColor: AppColors.warningRed,
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          const NeonIconBox(
-            icon: Icons.error_outline_rounded,
-            color: AppColors.warningRed,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.dataStreamError,
-                  style: GoogleFonts.orbitron(
-                    color: AppColors.warningRed,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  error,
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ... (DataActionBar, ShimmerWordList, ErrorCard remain unchanged)
 
 // ── Live Word List (lazy loading) ───────────────────────────────────────
 
@@ -721,21 +378,32 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
     if (widget.words.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
+          padding: const EdgeInsets.symmetric(vertical: 40),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.search_off_rounded,
-                color: AppColors.textMuted,
-                size: 40,
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.surfaceMedium,
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: const Icon(
+                  Icons.search_off_rounded,
+                  color: AppColors.textMuted,
+                  size: 32,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               Text(
-                AppStrings.noWordsFound,
+                'Sistemde böyle bir veri bulunamadı',
                 style: GoogleFonts.rajdhani(
                   color: AppColors.textMuted,
-                  fontSize: 14,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -767,7 +435,9 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
           separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final word = widget.words[index];
-            return _WordTile(word: word);
+            return _WordTile(
+              word: word,
+            ); // Assuming _WordTile is defined later in the file
           },
         ),
         if (hasMore) _buildLoadMore(),
@@ -879,11 +549,9 @@ class _WordTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final levelColor = _getLevelColor(word.level);
-
     return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      accentColor: word.isLearned ? AppColors.neonGreen : levelColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      // Restore card tap to toggle learned status
       onTap: () {
         if (word.isLearned) {
           ref.read(wordProvider.notifier).markUnlearned(word.id);
@@ -893,95 +561,145 @@ class _WordTile extends ConsumerWidget {
       },
       child: Row(
         children: [
-          // Level badge
+          // Level Badge (New Style)
           Container(
-            width: 42,
-            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: levelColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: levelColor.withValues(alpha: 0.3)),
-            ),
-            child: Center(
-              child: Text(
-                word.level,
-                style: GoogleFonts.orbitron(
-                  color: levelColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+              color: _getLevelColor(word.level).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _getLevelColor(word.level).withValues(alpha: 0.5),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _getLevelColor(word.level).withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  spreadRadius: 0,
                 ),
+              ],
+            ),
+            child: Text(
+              word.level,
+              style: GoogleFonts.orbitron(
+                color: _getLevelColor(word.level),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
 
-          // Word content
+          // Word Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   word.english,
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.orbitron(
                     color: AppColors.textPrimary,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
                   word.turkish,
                   style: GoogleFonts.rajdhani(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                // Category Tag (Restored)
+                if (word.category.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMedium,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      word.category,
+                      style: GoogleFonts.rajdhani(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
 
-          // Category tag
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMedium,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              word.category,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.textMuted,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+          // Actions Row
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Favorite Button (New)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    // Prevent card tap
+                    ref.read(wordProvider.notifier).toggleFavorite(word.id);
+                  },
+                  borderRadius: BorderRadius.circular(50),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: word.isFavorite
+                          ? AppColors.neonPink.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                    ),
+                    child: Icon(
+                      word.isFavorite
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
+                      color: word.isFavorite
+                          ? AppColors.neonPink
+                          : AppColors.textSecondary,
+                      size: 22,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
-          // Learned indicator
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: word.isLearned
-                  ? AppColors.neonGreen.withValues(alpha: 0.15)
-                  : AppColors.surfaceMedium,
-              border: Border.all(
-                color: word.isLearned
-                    ? AppColors.neonGreen
-                    : AppColors.cardBorder,
-                width: 1.5,
+              // Learned Indicator (Restored visual)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: word.isLearned
+                      ? AppColors.neonGreen.withValues(alpha: 0.15)
+                      : AppColors.surfaceMedium,
+                  border: Border.all(
+                    color: word.isLearned
+                        ? AppColors.neonGreen
+                        : AppColors.cardBorder,
+                    width: 1.5,
+                  ),
+                ),
+                child: word.isLearned
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: AppColors.neonGreen,
+                        size: 16,
+                      )
+                    : null,
               ),
-            ),
-            child: word.isLearned
-                ? const Icon(
-                    Icons.check_rounded,
-                    color: AppColors.neonGreen,
-                    size: 16,
-                  )
-                : null,
+            ],
           ),
         ],
       ),
@@ -990,6 +708,205 @@ class _WordTile extends ConsumerWidget {
 }
 
 // ── Feature Cards Grid (from Phase 1) ───────────────────────────────────
+
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.onProfileTap, required this.onMenuAction});
+
+  final VoidCallback onProfileTap;
+  final Function(String) onMenuAction;
+
+  Null get style => null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Lottie.asset(
+              'assets/animations/logo_animation.json',
+              height: 32,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'NEURO WORD',
+              style: GoogleFonts.orbitron(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: onProfileTap,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.electricBlue, width: 2),
+                ),
+                child: const CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.surfaceMedium,
+                  child: Icon(
+                    Icons.person,
+                    color: AppColors.textPrimary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: AppColors.electricBlue),
+              color: AppColors.surfaceMedium,
+              offset: const Offset(0, 40),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: AppColors.cardBorder),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              onSelected: onMenuAction,
+              itemBuilder: (BuildContext context) {
+                return [
+                  _buildPopupMenuItem(
+                    'supporters',
+                    'Destek Verenler',
+                    Icons.favorite,
+                  ),
+                  _buildPopupMenuItem('contact', 'İletişim', Icons.mail),
+                  _buildPopupMenuItem('explore', 'Keşfet', Icons.explore),
+                  const PopupMenuItem<String>(
+                    height: 0,
+                    child: Divider(color: AppColors.cardBorder),
+                  ),
+                  _buildPopupMenuItem(
+                    'logout',
+                    'Çıkış Yap',
+                    Icons.logout,
+                    color: AppColors.error,
+                  ),
+                ];
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem(
+    String value,
+    String text,
+    IconData icon, {
+    Color? color,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color ?? AppColors.electricBlue, size: 20),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: GoogleFonts.rajdhani(
+              color: color ?? AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickStatsRow extends StatelessWidget {
+  const _QuickStatsRow({required this.wordState});
+
+  final WordState wordState;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _StatCard(
+            label: 'Toplam',
+            value: wordState.allWords.length.toString(),
+            icon: Icons.data_usage_rounded,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _StatCard(
+            label: 'Öğrenilen',
+            value: wordState.learnedCount.toString(),
+            icon: Icons.check_circle_outline_rounded,
+            color: AppColors.neonGreen,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _StatCard(
+            label: 'Favori',
+            value: wordState.favoriteCount.toString(),
+            icon: Icons.bookmark_border_rounded,
+            color: AppColors.neonPink,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.orbitron(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.rajdhani(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _FeatureCardsGrid extends StatelessWidget {
   const _FeatureCardsGrid();
@@ -1129,3 +1046,82 @@ class _FeatureItem {
   final String? route;
 }
 
+class _ShimmerWordList extends StatelessWidget {
+  const _ShimmerWordList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.surfaceMedium,
+      highlightColor: AppColors.surfaceLight,
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 6,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, __) => Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMedium,
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends ConsumerWidget {
+  const _ErrorCard({required this.error});
+
+  final String error;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.warningRed.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.warningRed.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.error_outline,
+            color: AppColors.warningRed,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Veri Akış Hatası',
+            style: GoogleFonts.orbitron(
+              color: AppColors.warningRed,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.rajdhani(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+          TextButton.icon(
+            onPressed: () => ref.read(wordProvider.notifier).reload(),
+            icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
+            label: Text(
+              'YENİDEN DENE',
+              style: GoogleFonts.orbitron(color: AppColors.textPrimary),
+            ),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.warningRed.withValues(alpha: 0.2),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

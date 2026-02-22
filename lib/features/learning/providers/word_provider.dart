@@ -1,87 +1,115 @@
 ﻿import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuro_word/core/services/storage_service.dart';
+import 'package:neuro_word/core/services/firebase_service.dart';
+import 'package:neuro_word/features/auth/providers/auth_provider.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
-import 'package:neuro_word/features/learning/services/word_service.dart';
 
-// ── State ───────────────────────────────────────────────────────────────
-
-/// Immutable state container for the word engine.
 class WordState {
   const WordState({
     this.allWords = const [],
     this.filteredWords = const [],
     this.activeLevel,
+    this.activeCategory,
+    this.searchQuery = '',
+    this.onlySaved = false,
     this.isLoading = false,
     this.error,
+    this.userXp = 0,
   });
 
   final List<WordModel> allWords;
   final List<WordModel> filteredWords;
   final String? activeLevel;
+  final String? activeCategory;
+  final String searchQuery;
+  final bool onlySaved;
   final bool isLoading;
   final String? error;
+  final int userXp;
 
   WordState copyWith({
     List<WordModel>? allWords,
     List<WordModel>? filteredWords,
     String? activeLevel,
+    String? activeCategory,
+    String? searchQuery,
+    bool? onlySaved,
     bool? isLoading,
     String? error,
+    int? userXp,
     bool clearLevel = false,
+    bool clearCategory = false,
     bool clearError = false,
   }) {
     return WordState(
       allWords: allWords ?? this.allWords,
       filteredWords: filteredWords ?? this.filteredWords,
       activeLevel: clearLevel ? null : (activeLevel ?? this.activeLevel),
+      activeCategory: clearCategory
+          ? null
+          : (activeCategory ?? this.activeCategory),
+      searchQuery: searchQuery ?? this.searchQuery,
+      onlySaved: onlySaved ?? this.onlySaved,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
+      userXp: userXp ?? this.userXp,
     );
   }
 
-  /// Count of learned words.
   int get learnedCount => allWords.where((w) => w.isLearned).length;
 
-  /// Count of favorite words.
   int get favoriteCount => allWords.where((w) => w.isFavorite).length;
 
-  /// Distinct level tags present in the data.
   List<String> get availableLevels =>
       allWords.map((w) => w.level).toSet().toList()..sort();
 }
 
-// ── Notifier ────────────────────────────────────────────────────────────
-
 class WordNotifier extends Notifier<WordState> {
-  late final WordService _service;
-  late final StorageService _storage;
+  final _service = FirebaseService();
+  StorageService? _storageInstance;
+  StorageService get _storage => _storageInstance ??= StorageService();
+
   final _random = Random();
 
   @override
   WordState build() {
-    _service = const WordService();
-    _storage = StorageService(); // Initialize storage
+    ref.watch(authStateProvider);
     _loadWords();
     return const WordState(isLoading: true);
   }
 
-  // ── Load ──────────────────────────────────────────────────────────
-
   Future<void> _loadWords() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      // 1. Init storage
       await _storage.init();
-      
-      // 2. Fetch remote/local JSON words
+
       final words = await _service.fetchWords();
 
-      // 3. Load persisted IDs
-      final learnedIds = _storage.getLearnedWords().toSet();
-      final favoriteIds = _storage.getFavoriteWords().toSet();
+      final authService = ref.read(authServiceProvider);
+      final userId = authService.userId;
 
-      // 4. Merge
+      Set<int> learnedIds = {};
+      Set<int> favoriteIds = {};
+      int xp = 0;
+
+      if (userId.isNotEmpty) {
+        final userData = await _service.getUserData(userId);
+        if (userData != null) {
+          learnedIds = Set<int>.from(
+            userData['learned_words']?.cast<int>() ?? [],
+          );
+          favoriteIds = Set<int>.from(
+            userData['favorite_words']?.cast<int>() ?? [],
+          );
+          xp = userData['xp'] ?? 0;
+        }
+      } else {
+        learnedIds = _storage.getLearnedWords().toSet();
+        favoriteIds = _storage.getFavoriteWords().toSet();
+        xp = _storage.getXp();
+      }
+
       final mergedWords = words.map((w) {
         return w.copyWith(
           isLearned: learnedIds.contains(w.id),
@@ -93,79 +121,149 @@ class WordNotifier extends Notifier<WordState> {
         allWords: mergedWords,
         filteredWords: mergedWords,
         isLoading: false,
+        userXp: xp,
       );
+      _applyFilters();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  /// Reload from JSON and re-sync with storage.
   Future<void> reload() => _loadWords();
 
-  // ── Filter by Level ───────────────────────────────────────────────
+  void search(String query) {
+    state = state.copyWith(searchQuery: query);
+    _applyFilters();
+  }
 
   void filterByLevel(String? level) {
     if (level == null || level.isEmpty) {
-      state = state.copyWith(
-        filteredWords: state.allWords,
-        clearLevel: true,
-      );
+      state = state.copyWith(clearLevel: true);
     } else {
-      state = state.copyWith(
-        filteredWords:
-            state.allWords.where((w) => w.level == level).toList(),
-        activeLevel: level,
-      );
+      state = state.copyWith(activeLevel: level);
     }
+    _applyFilters();
   }
 
-  // ── Mark as Learned / Unlearned ───────────────────────────────────
+  void filterByCategory(String? category) {
+    if (category == null || category.isEmpty) {
+      state = state.copyWith(clearCategory: true);
+    } else {
+      state = state.copyWith(activeCategory: category);
+    }
+    _applyFilters();
+  }
+
+  void toggleSaved(bool enabled) {
+    state = state.copyWith(onlySaved: enabled);
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    var result = state.allWords;
+
+    if (state.activeLevel != null) {
+      result = result.where((w) => w.level == state.activeLevel).toList();
+    }
+
+    if (state.activeCategory != null) {
+      result = result.where((w) => w.category == state.activeCategory).toList();
+    }
+
+    if (state.onlySaved) {
+      result = result.where((w) => w.isFavorite).toList();
+    }
+
+    if (state.searchQuery.isNotEmpty) {
+      final q = state.searchQuery.toLowerCase();
+      result = result.where((w) {
+        return w.english.toLowerCase().contains(q) ||
+            w.turkish.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    state = state.copyWith(filteredWords: result);
+  }
 
   void markLearned(int wordId) {
-    _storage.saveLearnedWord(wordId);
-    final updated = state.allWords.map((w) {
-      return w.id == wordId ? w.copyWith(isLearned: true) : w;
-    }).toList().cast<WordModel>();
+    final userId = ref.read(authServiceProvider).userId;
+    if (userId.isNotEmpty) {
+      _service.updateLearnedWord(userId, wordId, true);
+    } else {
+      _storage.saveLearnedWord(wordId);
+    }
+
+    final updated = state.allWords
+        .map((w) {
+          return w.id == wordId ? w.copyWith(isLearned: true) : w;
+        })
+        .toList()
+        .cast<WordModel>();
     state = state.copyWith(allWords: updated);
-    filterByLevel(state.activeLevel);
+    _applyFilters();
   }
 
   void markUnlearned(int wordId) {
-    // Note: We don't have a 'removeLearnedWord' in StorageService yet if we strictly follow 'saveLearnedWord'.
-    // But typically we just add. If user wants to unlearn, we might need to add that method to StorageService.
-    // For now assuming mostly additive learning.
-    
-    final updated = state.allWords.map((w) {
-      return w.id == wordId ? w.copyWith(isLearned: false) : w;
-    }).toList().cast<WordModel>();
+    final userId = ref.read(authServiceProvider).userId;
+    if (userId.isNotEmpty) {
+      _service.updateLearnedWord(userId, wordId, false);
+    }
+
+    final updated = state.allWords
+        .map((w) {
+          return w.id == wordId ? w.copyWith(isLearned: false) : w;
+        })
+        .toList()
+        .cast<WordModel>();
     state = state.copyWith(allWords: updated);
-    filterByLevel(state.activeLevel);
+    _applyFilters();
   }
 
-  /// Batch-mark a list of word IDs as learned.
   void markLearnedBatch(List<int> wordIds) {
     if (wordIds.isEmpty) return;
-    _storage.saveLearnedWordsBatch(wordIds);
-    final idSet = wordIds.toSet();
-    final updated = state.allWords.map((w) {
-      return idSet.contains(w.id) ? w.copyWith(isLearned: true) : w;
-    }).toList().cast<WordModel>();
-    state = state.copyWith(allWords: updated);
-    filterByLevel(state.activeLevel);
-  }
 
-  // ── Toggle Favorite ───────────────────────────────────────────────
+    final userId = ref.read(authServiceProvider).userId;
+    if (userId.isNotEmpty) {
+      for (final id in wordIds) {
+        _service.updateLearnedWord(userId, id, true);
+      }
+    } else {
+      _storage.saveLearnedWordsBatch(wordIds);
+    }
+
+    final idSet = wordIds.toSet();
+    final updated = state.allWords
+        .map((w) {
+          return idSet.contains(w.id) ? w.copyWith(isLearned: true) : w;
+        })
+        .toList()
+        .cast<WordModel>();
+
+    state = state.copyWith(allWords: updated);
+    _applyFilters();
+  }
 
   void toggleFavorite(int wordId) {
-    _storage.toggleFavoriteWord(wordId);
-    final updated = state.allWords.map((w) {
-      return w.id == wordId ? w.copyWith(isFavorite: !w.isFavorite) : w;
-    }).toList().cast<WordModel>();
-    state = state.copyWith(allWords: updated);
-    filterByLevel(state.activeLevel);
-  }
+    final userId = ref.read(authServiceProvider).userId;
+    final isFavorite = !state.allWords
+        .firstWhere((w) => w.id == wordId)
+        .isFavorite;
 
-  // ── Shuffle ───────────────────────────────────────────────────────
+    if (userId.isNotEmpty) {
+      _service.updateFavoriteWord(userId, wordId, isFavorite);
+    } else {
+      _storage.toggleFavoriteWord(wordId);
+    }
+
+    final updated = state.allWords
+        .map((w) {
+          return w.id == wordId ? w.copyWith(isFavorite: isFavorite) : w;
+        })
+        .toList()
+        .cast<WordModel>();
+    state = state.copyWith(allWords: updated);
+    _applyFilters();
+  }
 
   void shuffle() {
     final shuffled = List<WordModel>.from(state.filteredWords)
@@ -173,11 +271,6 @@ class WordNotifier extends Notifier<WordState> {
     state = state.copyWith(filteredWords: shuffled);
   }
 
-  // ── Random Word Selection (for games) ─────────────────────────────
-
-  /// Returns [count] random *unlearned* words for the given [level].
-  /// If [level] is null, picks from all levels.
-  /// Falls back to learned words if not enough unlearned exist.
   List<WordModel> getRandomWords(int count, {String? level}) {
     var pool = state.allWords.where((w) => !w.isLearned);
     if (level != null && level.isNotEmpty) {
@@ -185,11 +278,8 @@ class WordNotifier extends Notifier<WordState> {
     }
     var list = pool.toList()..shuffle(_random);
 
-    // If not enough unlearned words, pad with learned ones
     if (list.length < count) {
-      var extra = state.allWords
-          .where((w) => w.isLearned)
-          .toList()
+      var extra = state.allWords.where((w) => w.isLearned).toList()
         ..shuffle(_random);
       if (level != null && level.isNotEmpty) {
         extra = extra.where((w) => w.level == level).toList();
@@ -200,25 +290,25 @@ class WordNotifier extends Notifier<WordState> {
     return list.take(count).toList();
   }
 
-  /// Returns [count] random words that act as wrong-answer distractors,
-  /// excluding the provided [excludeIds].
   List<WordModel> getDistractors(int count, {required Set<int> excludeIds}) {
-    final pool = state.allWords
-        .where((w) => !excludeIds.contains(w.id))
-        .toList()
-      ..shuffle(_random);
+    final pool =
+        state.allWords.where((w) => !excludeIds.contains(w.id)).toList()
+          ..shuffle(_random);
     return pool.take(count).toList();
   }
 
-  // ── XP Management ─────────────────────────────────────────────────
-
   Future<void> addXp(int amount) async {
-    await _storage.addXp(amount);
+    final userId = ref.read(authServiceProvider).userId;
+    if (userId.isNotEmpty) {
+      await _service.updateXp(userId, amount);
+      state = state.copyWith(userXp: state.userXp + amount);
+    } else {
+      await _storage.addXp(amount);
+      state = state.copyWith(userXp: _storage.getXp());
+    }
   }
 }
 
-// ── Provider ────────────────────────────────────────────────────────────
-
-final wordProvider =
-    NotifierProvider<WordNotifier, WordState>(WordNotifier.new);
-
+final wordProvider = NotifierProvider<WordNotifier, WordState>(
+  WordNotifier.new,
+);

@@ -5,12 +5,6 @@ import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
-/// Premium Splash Screen 2.0
-/// Features:
-/// - Staggered animations (Robot -> Text -> Progress)
-/// - Large scale "Hero" robot
-/// - Neon typography with glow effects
-/// - Futuristic particles background
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -35,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 2500),
     );
 
-    // 1. Robot enters (0.0 -> 1.0s)
     _robotScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _mainController,
@@ -50,7 +43,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // 2. Text reveals (0.5s -> 1.0s)
     _textFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _mainController,
@@ -67,7 +59,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     _mainController.forward();
 
-    // Navigate to dashboard after delay
     Future.delayed(const Duration(milliseconds: 3500), () {
       if (mounted) {
         context.go('/dashboard');
@@ -94,8 +85,6 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 const Spacer(flex: 3),
 
-                // ── Hero Robot ──────────────────────────────────────────
-                // Large, central, dominant
                 ScaleTransition(
                   scale: _robotScaleAnimation,
                   child: FadeTransition(
@@ -106,13 +95,11 @@ class _SplashScreenState extends State<SplashScreen>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         boxShadow: [
-                          // Deep blue glow behind the robot
                           BoxShadow(
                             color: AppColors.electricBlue.withOpacity(0.15),
                             blurRadius: 60,
                             spreadRadius: 10,
                           ),
-                          // Subtle purple core glow
                           BoxShadow(
                             color: AppColors.cyberPurple.withOpacity(0.1),
                             blurRadius: 30,
@@ -130,7 +117,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                 const Spacer(flex: 1),
 
-                // ── Typography ──────────────────────────────────────────
                 AnimatedBuilder(
                   animation: _mainController,
                   builder: (context, child) {
@@ -140,7 +126,6 @@ class _SplashScreenState extends State<SplashScreen>
                         offset: Offset(0, _textSlideAnimation.value),
                         child: Column(
                           children: [
-                            // Main Title: NEURO WORD
                             ShaderMask(
                               shaderCallback: (bounds) => const LinearGradient(
                                 colors: [
@@ -172,7 +157,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                             const SizedBox(height: 16),
 
-                            // Subtitle: Hoş Geldiniz
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -206,7 +190,6 @@ class _SplashScreenState extends State<SplashScreen>
 
                 const Spacer(flex: 3),
 
-                // ── Loading Indicator ───────────────────────────────────
                 FadeTransition(
                   opacity: _textFadeAnimation,
                   child: SizedBox(

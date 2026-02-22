@@ -7,7 +7,6 @@ import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
-/// Supporters/credits screen.
 class SupportersScreen extends StatelessWidget {
   const SupportersScreen({super.key});
 
@@ -20,7 +19,6 @@ class SupportersScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               children: [
-                // ── Back bar ──────────────────────────────────────
                 Row(
                   children: [
                     GestureDetector(
@@ -51,7 +49,6 @@ class SupportersScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Developer Section ─────────────────────────────
                 GlassCard(
                   accentColor: AppColors.electricBlue,
                   padding: const EdgeInsets.all(24),
@@ -109,7 +106,6 @@ class SupportersScreen extends StatelessWidget {
                 
                 const SizedBox(height: 30),
 
-                // ── Animation ─────────────────────────────────────
                 ConstrainedBox(
                   constraints: const BoxConstraints(
                     maxWidth: 250,
@@ -123,7 +119,6 @@ class SupportersScreen extends StatelessWidget {
 
                 const SizedBox(height: 30),
 
-                // ── Support Team ──────────────────────────────────
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(

@@ -2,17 +2,14 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 
-/// Futuristic / cyberpunk application theme.
 class AppTheme {
   AppTheme._();
 
-  // ─── Typography ────────────────────────────────────────────────────
   static TextTheme _buildTextTheme() {
     final orbitron = GoogleFonts.orbitronTextTheme();
     final rajdhani = GoogleFonts.rajdhaniTextTheme();
 
     return TextTheme(
-      // Headers – Orbitron for the sci-fi feel
       displayLarge: orbitron.displayLarge?.copyWith(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w700,
@@ -42,7 +39,6 @@ class AppTheme {
         fontWeight: FontWeight.w600,
       ),
 
-      // Title & Label – Rajdhani for UI legibility
       titleLarge: rajdhani.titleLarge?.copyWith(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w600,
@@ -59,7 +55,6 @@ class AppTheme {
         fontSize: 16,
       ),
 
-      // Body
       bodyLarge: rajdhani.bodyLarge?.copyWith(
         color: AppColors.textPrimary,
         fontSize: 16,
@@ -73,7 +68,6 @@ class AppTheme {
         fontSize: 12,
       ),
 
-      // Labels
       labelLarge: rajdhani.labelLarge?.copyWith(
         color: AppColors.electricBlue,
         fontWeight: FontWeight.w600,
@@ -93,7 +87,6 @@ class AppTheme {
     );
   }
 
-  // ─── ThemeData ─────────────────────────────────────────────────────
   static ThemeData get darkTheme {
     final textTheme = _buildTextTheme();
 
@@ -113,7 +106,6 @@ class AppTheme {
         onError: Colors.white,
       ),
 
-      // ── AppBar ──────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -124,7 +116,6 @@ class AppTheme {
         iconTheme: const IconThemeData(color: AppColors.electricBlue),
       ),
 
-      // ── Cards ───────────────────────────────────────────────────
       cardTheme: CardThemeData(
         color: AppColors.cardDark,
         elevation: 0,
@@ -135,7 +126,6 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
 
-      // ── Elevated Buttons (neon glow CTA) ────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.electricBlue,
@@ -145,7 +135,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 8,
-          shadowColor: AppColors.electricBlue.withValues(alpha: 0.5),
+          shadowColor: AppColors.electricBlue.withOpacity(0.5),
           textStyle: textTheme.labelLarge?.copyWith(
             color: AppColors.deepSpace,
             fontWeight: FontWeight.w700,
@@ -154,7 +144,6 @@ class AppTheme {
         ),
       ),
 
-      // ── Outlined Buttons ────────────────────────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.electricBlue,
@@ -167,7 +156,6 @@ class AppTheme {
         ),
       ),
 
-      // ── Input Fields ────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceMedium,
@@ -190,7 +178,6 @@ class AppTheme {
         ),
       ),
 
-      // ── Bottom Navigation ───────────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         selectedItemColor: AppColors.electricBlue,
@@ -199,13 +186,11 @@ class AppTheme {
         elevation: 0,
       ),
 
-      // ── Divider ─────────────────────────────────────────────────
       dividerTheme: const DividerThemeData(
         color: AppColors.cardBorder,
         thickness: 1,
       ),
 
-      // ── Floating Action Button ──────────────────────────────────
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.electricBlue,
         foregroundColor: AppColors.deepSpace,
@@ -214,4 +199,3 @@ class AppTheme {
     );
   }
 }
-

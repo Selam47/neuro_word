@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 
-/// A reusable animated deep-space background with subtle neon gradients
-/// and floating particle effect that sits behind all screens.
 class FuturisticBackground extends StatelessWidget {
   const FuturisticBackground({
     super.key,
@@ -20,32 +18,17 @@ class FuturisticBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // ── Base gradient ────────────────────────────────────────
         const _BaseGradient(),
-
-        // ── Subtle radial glow spots ─────────────────────────────
         const _NeonGlowSpots(),
-
-        // ── Animated floating particles ──────────────────────────
         if (showParticles) const _FloatingParticles(),
-
-        // ── Grid overlay for HUD feel ────────────────────────────
         const _GridOverlay(),
-
-        // ── Optional dark overlay (for modals / focus) ───────────
         if (overlayOpacity > 0)
-          Container(color: AppColors.deepSpace.withValues(alpha: overlayOpacity)),
-
-        // ── Content ──────────────────────────────────────────────
+          Container(color: AppColors.deepSpace.withOpacity(overlayOpacity)),
         child,
       ],
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// Private sub-widgets
-// ═══════════════════════════════════════════════════════════════════════
 
 class _BaseGradient extends StatelessWidget {
   const _BaseGradient();
@@ -77,7 +60,6 @@ class _NeonGlowSpots extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Top-right electric blue glow
         Positioned(
           top: -80,
           right: -60,
@@ -88,15 +70,14 @@ class _NeonGlowSpots extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.electricBlue.withValues(alpha: 0.08),
-                  AppColors.electricBlue.withValues(alpha: 0.02),
+                  AppColors.electricBlue.withOpacity(0.08),
+                  AppColors.electricBlue.withOpacity(0.02),
                   Colors.transparent,
                 ],
               ),
             ),
           ),
         ),
-        // Bottom-left cyber purple glow
         Positioned(
           bottom: -100,
           left: -80,
@@ -107,15 +88,14 @@ class _NeonGlowSpots extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.cyberPurple.withValues(alpha: 0.06),
-                  AppColors.cyberPurple.withValues(alpha: 0.02),
+                  AppColors.cyberPurple.withOpacity(0.06),
+                  AppColors.cyberPurple.withOpacity(0.02),
                   Colors.transparent,
                 ],
               ),
             ),
           ),
         ),
-        // Centre subtle highlight
         Positioned(
           top: MediaQuery.sizeOf(context).height * 0.3,
           left: MediaQuery.sizeOf(context).width * 0.2,
@@ -126,7 +106,7 @@ class _NeonGlowSpots extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.electricBlue.withValues(alpha: 0.03),
+                  AppColors.electricBlue.withOpacity(0.03),
                   Colors.transparent,
                 ],
               ),
@@ -226,7 +206,7 @@ class _ParticlePainter extends CustomPainter {
         Offset(dx * size.width, dy * size.height),
         p.size,
         Paint()
-          ..color = AppColors.electricBlue.withValues(alpha: p.opacity)
+          ..color = AppColors.electricBlue.withOpacity(p.opacity)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
     }
@@ -269,4 +249,3 @@ class _GridPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

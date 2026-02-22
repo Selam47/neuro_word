@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-/// Represents a single English-Turkish word entry.
 class WordModel {
   const WordModel({
     required this.id,
@@ -20,8 +17,6 @@ class WordModel {
   final bool isLearned;
   final bool isFavorite;
 
-  // ── JSON Serialization ──────────────────────────────────────────────
-
   factory WordModel.fromJson(Map<String, dynamic> json) {
     return WordModel(
       id: json['id'] as int,
@@ -31,6 +26,18 @@ class WordModel {
       category: json['category'] as String,
       isLearned: json['isLearned'] as bool? ?? false,
       isFavorite: json['isFavorite'] as bool? ?? false,
+    );
+  }
+
+  factory WordModel.fromFirestore(Map<String, dynamic> data) {
+    return WordModel(
+      id: data['id'] as int? ?? 0,
+      english: data['en'] as String? ?? (data['english'] as String? ?? ''),
+      turkish: data['tr'] as String? ?? (data['turkish'] as String? ?? ''),
+      level: data['level'] as String? ?? 'A1',
+      category: data['category'] as String? ?? 'General',
+      isLearned: false,
+      isFavorite: false,
     );
   }
 
@@ -45,8 +52,6 @@ class WordModel {
       'isFavorite': isFavorite,
     };
   }
-
-  // ── copyWith ────────────────────────────────────────────────────────
 
   WordModel copyWith({
     int? id,
@@ -68,8 +73,6 @@ class WordModel {
     );
   }
 
-  // ── Equality & toString ─────────────────────────────────────────────
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -85,10 +88,9 @@ class WordModel {
       'WordModel(id: $id, en: $english, tr: $turkish, lvl: $level)';
 }
 
-/// Parses a raw JSON string into a list of [WordModel].
-List<WordModel> parseWords(String jsonString) {
-  final List<dynamic> decoded = json.decode(jsonString) as List<dynamic>;
-  return decoded
-      .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
-      .toList();
-}
+// List<WordModel> parseWords(String jsonString) {
+//   final List<dynamic> decoded = json.decode(jsonString) as List<dynamic>;
+//   return decoded
+//       .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
+//       .toList();
+// }

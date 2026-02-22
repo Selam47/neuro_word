@@ -11,9 +11,6 @@ import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
-/// Mode C — Neon Pulse (Timed Quiz)
-/// 10-second countdown per word.
-/// 1 English word displayed, 4 Turkish options (1 correct + 3 distractors).
 class NeonPulseScreen extends ConsumerStatefulWidget {
   const NeonPulseScreen({super.key, this.level});
   final String? level;
@@ -30,12 +27,10 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   final List<int> _learnedIds = [];
   bool _initialized = false;
 
-  // Timer
   late AnimationController _timerController;
   Timer? _countdownTimer;
   int _secondsLeft = 10;
 
-  // Answer state
   int? _selectedOptionIndex;
   late List<String> _currentOptions;
   late int _correctOptionIndex;
@@ -78,7 +73,6 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
     final word = _words[_currentIndex];
     final notifier = ref.read(wordProvider.notifier);
 
-    // Get 3 distractors
     final distractors = notifier.getDistractors(3, excludeIds: {word.id});
     final options = [word.turkish, ...distractors.map((d) => d.turkish)]
       ..shuffle(Random());
@@ -90,7 +84,6 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
       _secondsLeft = 10;
     });
 
-    // Start timer
     _timerController.reset();
     _timerController.forward();
     _countdownTimer?.cancel();
@@ -192,7 +185,6 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
               _buildTopBar(context),
               const SizedBox(height: 8),
 
-              // ── Timer bar ───────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -255,11 +247,9 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
               ),
               const SizedBox(height: 32),
 
-              // ── Question word (holographic circle) ──────────────
               _buildQuestionCircle(word),
               const SizedBox(height: 32),
 
-              // ── Score ───────────────────────────────────────────
               Text(
                 '${AppStrings.score}: $_score / $_totalQuestions',
                 style: GoogleFonts.rajdhani(
@@ -270,7 +260,6 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
               ),
               const SizedBox(height: 24),
 
-              // ── Options ─────────────────────────────────────────
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),

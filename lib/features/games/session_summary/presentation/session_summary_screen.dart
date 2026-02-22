@@ -9,7 +9,6 @@ import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
 
-/// Session Summary screen shown after completing any game mode.
 class SessionSummaryScreen extends ConsumerStatefulWidget {
   const SessionSummaryScreen({
     super.key,
@@ -58,12 +57,10 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
 
   Future<void> _persistData() async {
     try {
-      // Mark learned words
       if (widget.learnedIds.isNotEmpty) {
         ref.read(wordProvider.notifier).markLearnedBatch(widget.learnedIds);
       }
 
-      // Award XP (10 per word)
       if (widget.learnedIds.isNotEmpty) {
         final xpEarned = widget.learnedIds.length * 10;
         await ref.read(wordProvider.notifier).addXp(xpEarned);
@@ -127,7 +124,6 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
               children: [
                 const SizedBox(height: 24),
 
-                // ── Title ─────────────────────────────────────────
                 Text(
                   AppStrings.sessionComplete,
                   style: GoogleFonts.orbitron(
@@ -148,7 +144,6 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                 ),
                 const SizedBox(height: 32),
 
-                // ── Grade circle ──────────────────────────────────
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Container(
@@ -183,7 +178,6 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                 ),
                 const SizedBox(height: 32),
 
-                // ── Stats ─────────────────────────────────────────
                 Row(
                   children: [
                     _buildStatCard(
@@ -210,7 +204,6 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                 ),
                 const SizedBox(height: 24),
 
-                // ── Overall progress bar ──────────────────────────
                 GlassCard(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -281,7 +274,6 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                 ),
                 const SizedBox(height: 32),
 
-                // ── Action buttons ────────────────────────────────
                 Row(
                   children: [
                     Expanded(

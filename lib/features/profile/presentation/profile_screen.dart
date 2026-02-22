@@ -9,7 +9,6 @@ import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
-/// Holographic profile & statistics dashboard.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -22,10 +21,8 @@ class ProfileScreen extends ConsumerWidget {
     final total = ws.allWords.length;
     final progress = total > 0 ? learned / _wordGoal : 0.0;
 
-    // Determine user level based on majority of mastered words
     final userLevel = _computeLevel(ws);
 
-    // Category breakdown
     final catMap = <String, int>{};
     for (final w in ws.allWords) {
       catMap[w.category] = (catMap[w.category] ?? 0) + 1;
@@ -33,7 +30,6 @@ class ProfileScreen extends ConsumerWidget {
     final categories = catMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    // Level breakdown
     final levelMap = <String, int>{};
     final learnedLevelMap = <String, int>{};
     for (final w in ws.allWords) {
@@ -51,11 +47,9 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               children: [
-                // ── Top Bar ────────────────────────────────────────
                 _buildTopBar(context),
                 const SizedBox(height: 28),
 
-                // ── Avatar & Progress Ring ─────────────────────────
                 _ProgressRing(progress: progress, learned: learned),
                 const SizedBox(height: 16),
 
@@ -83,7 +77,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _levelColor(userLevel).withValues(alpha: 0.5),
+                      color: _levelColor(userLevel).withOpacity(0.5),
                     ),
                   ),
                   child: Text(
@@ -98,7 +92,6 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
-                // ── Stats Cards ────────────────────────────────────
                 Row(
                   children: [
                     _StatCard(
@@ -122,7 +115,6 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
-                // ── Level Breakdown ────────────────────────────────
                 _buildSectionTitle(AppStrings.levelBreakdown),
                 const SizedBox(height: 12),
                 ...levelMap.entries.map((e) {
@@ -141,7 +133,6 @@ class ProfileScreen extends ConsumerWidget {
                 }),
                 const SizedBox(height: 20),
 
-                // ── Saved Words ────────────────────────────────────
                 _buildSectionTitle('SAVED COLLECTION'),
                 const SizedBox(height: 12),
                 if (ws.favoriteCount == 0)
@@ -160,13 +151,16 @@ class ProfileScreen extends ConsumerWidget {
                   )
                 else
                   SizedBox(
-                    height: 120,
+                    height:
+                        140, // Increased height slightly to accommodate the button comfortably
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: ws.allWords.where((w) => w.isFavorite).length,
                       separatorBuilder: (_, __) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
-                        final word = ws.allWords.where((w) => w.isFavorite).toList()[index];
+                        final word = ws.allWords
+                            .where((w) => w.isFavorite)
+                            .toList()[index];
                         return Container(
                           width: 160,
                           padding: const EdgeInsets.all(12),
@@ -174,21 +168,41 @@ class ProfileScreen extends ConsumerWidget {
                             color: AppColors.surfaceMedium,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: AppColors.neonPink.withValues(alpha: 0.3),
+                              color: AppColors.neonPink.withOpacity(0.3),
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                word.english,
-                                style: GoogleFonts.orbitron(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      word.english,
+                                      style: GoogleFonts.orbitron(
+                                        color: AppColors.textPrimary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ref
+                                          .read(wordProvider.notifier)
+                                          .toggleFavorite(word.id);
+                                    },
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      color: AppColors.textSecondary,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -201,9 +215,12 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                               const Spacer(),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.neonPink.withValues(alpha: 0.1),
+                                  color: AppColors.neonPink.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -222,7 +239,6 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 const SizedBox(height: 28),
 
-                // ── Category Distribution ──────────────────────────
                 _buildSectionTitle(AppStrings.categoryDistribution),
                 const SizedBox(height: 12),
                 Wrap(
@@ -325,7 +341,6 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-// ── Progress Ring ───────────────────────────────────────────────────────
 
 class _ProgressRing extends StatelessWidget {
   const _ProgressRing({required this.progress, required this.learned});
@@ -394,7 +409,6 @@ class _RingPainter extends CustomPainter {
     final radius = size.width / 2 - 8;
     const strokeWidth = 6.0;
 
-    // Background ring
     canvas.drawCircle(
       center,
       radius,
@@ -404,7 +418,6 @@ class _RingPainter extends CustomPainter {
         ..strokeWidth = strokeWidth,
     );
 
-    // Progress arc
     final sweepAngle = 2 * pi * progress;
     final gradient = SweepGradient(
       startAngle: -pi / 2,
@@ -434,7 +447,6 @@ class _RingPainter extends CustomPainter {
   bool shouldRepaint(_RingPainter old) => old.progress != progress;
 }
 
-// ── Stat Card ──────────────────────────────────────────────────────────
 
 class _StatCard extends StatelessWidget {
   const _StatCard({
@@ -479,7 +491,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Level Progress Bar ─────────────────────────────────────────────────
 
 class _LevelProgressBar extends StatelessWidget {
   const _LevelProgressBar({
@@ -537,7 +548,6 @@ class _LevelProgressBar extends StatelessWidget {
   }
 }
 
-// ── Category Chip ──────────────────────────────────────────────────────
 
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({required this.name, required this.count});
@@ -585,4 +595,3 @@ class _CategoryChip extends StatelessWidget {
     );
   }
 }
-

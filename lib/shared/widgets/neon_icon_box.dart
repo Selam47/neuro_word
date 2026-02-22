@@ -1,8 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 
-/// A small icon container with a neon-tinted background —
-/// similar to the service-overview icon boxes in the reference UI.
 class NeonIconBox extends StatelessWidget {
   const NeonIconBox({
     super.key,
@@ -25,12 +23,11 @@ class NeonIconBox extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
+        color: accent.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accent.withValues(alpha: 0.25), width: 1),
+        border: Border.all(color: accent.withOpacity(0.25), width: 1),
       ),
       child: Icon(icon, color: accent, size: iconSize),
     );
   }
 }
-

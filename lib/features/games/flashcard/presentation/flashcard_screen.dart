@@ -11,9 +11,6 @@ import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
-/// Mode A — Holographic Flashcards
-/// Swipeable cards with a 3D flip animation.
-/// Fetches 20 random unlearned words from the provider.
 class FlashcardScreen extends ConsumerStatefulWidget {
   const FlashcardScreen({super.key, this.level});
   final String? level;
@@ -39,7 +36,6 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   void _onSwipeLeft() {
-    // Not learned — move to next
     HapticFeedback.mediumImpact();
     if (_currentIndex < _words.length - 1) {
       setState(() => _currentIndex++);
@@ -49,7 +45,6 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   void _onSwipeRight() {
-    // Mark as learned
     HapticFeedback.lightImpact();
     _learnedIds.add(_words[_currentIndex].id);
     if (_currentIndex < _words.length - 1) {
@@ -96,11 +91,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // ── Top bar ─────────────────────────────────────────
               _buildTopBar(context),
               const SizedBox(height: 8),
 
-              // ── Progress ────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -142,7 +135,6 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               ),
               const SizedBox(height: 24),
 
-              // ── Flashcard ───────────────────────────────────────
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -160,7 +152,6 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                         },
                         child: _FlipCard(word: word),
                       ),
-                      // Favorite Button
                       Positioned(
                         top: 0,
                         right: 0,
@@ -171,7 +162,6 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 ),
               ),
 
-              // ── Swipe hints ─────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 40,
@@ -254,9 +244,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.4)),
+          border: Border.all(color: color.withOpacity(0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -284,14 +274,15 @@ class _FavoriteButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // We watch the specific word status from provider to reflect changes
-    final isFav = ref.watch(wordProvider.select((s) {
-      final updated = s.allWords.firstWhere(
-        (w) => w.id == word.id,
-        orElse: () => word,
-      );
-      return updated.isFavorite;
-    }));
+    final isFav = ref.watch(
+      wordProvider.select((s) {
+        final updated = s.allWords.firstWhere(
+          (w) => w.id == word.id,
+          orElse: () => word,
+        );
+        return updated.isFavorite;
+      }),
+    );
 
     return GestureDetector(
       onTap: () {
@@ -301,7 +292,7 @@ class _FavoriteButton extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.backgroundDark.withValues(alpha: 0.8),
+          color: AppColors.backgroundDark.withOpacity(0.8),
           shape: BoxShape.circle,
           border: Border.all(
             color: isFav ? AppColors.neonPink : AppColors.textMuted,
@@ -317,7 +308,6 @@ class _FavoriteButton extends ConsumerWidget {
   }
 }
 
-/// 3D flip card widget
 class _FlipCard extends StatefulWidget {
   const _FlipCard({required this.word});
   final WordModel word;
@@ -412,13 +402,12 @@ class _FlipCardState extends State<_FlipCard>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Level badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.15),
+                color: accent.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: accent.withValues(alpha: 0.3)),
+                border: Border.all(color: accent.withOpacity(0.3)),
               ),
               child: Text(
                 '${widget.word.level} · ${widget.word.category}',
@@ -431,18 +420,16 @@ class _FlipCardState extends State<_FlipCard>
             ),
             const SizedBox(height: 24),
 
-            // Language label
             Text(
               language,
               style: GoogleFonts.orbitron(
-                color: accent.withValues(alpha: 0.6),
+                color: accent.withOpacity(0.6),
                 fontSize: 11,
                 letterSpacing: 4,
               ),
             ),
             const SizedBox(height: 12),
 
-            // Word
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
@@ -457,7 +444,6 @@ class _FlipCardState extends State<_FlipCard>
             ),
             const SizedBox(height: 32),
 
-            // Tap hint
             Text(
               'TAP TO FLIP',
               style: GoogleFonts.rajdhani(
@@ -472,4 +458,3 @@ class _FlipCardState extends State<_FlipCard>
     );
   }
 }
-

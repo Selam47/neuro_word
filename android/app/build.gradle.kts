@@ -8,12 +8,12 @@ if (keystorePropertiesFile.exists()) {
 
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    // Paket adını Neuro Word olarak güncelledik
     namespace = "com.neuroword.app"
     compileSdk = flutter.compileSdkVersion
 
@@ -23,16 +23,16 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // Mağaza kimliğin bu olacak
         applicationId = "com.neuroword.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     signingConfigs {
@@ -46,7 +46,6 @@ android {
 
     buildTypes {
         getByName("release") {
-            // İmzalama ayarlarını bağladık
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
@@ -57,4 +56,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1")
+    }
 }
