@@ -15,3 +15,9 @@ key.properties
 # Sistem Dosyaları
 .DS_Store
 EOF
+# Firebase ve Hassas Dosyalar
+serviceAccountKey.json
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+.env
