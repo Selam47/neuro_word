@@ -1,9 +1,11 @@
-﻿import 'dart:math';
+import 'dart:convert';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neuro_word/core/services/storage_service.dart';
 import 'package:neuro_word/core/services/firebase_service.dart';
-import 'package:neuro_word/features/auth/providers/auth_provider.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WordState {
   const WordState({
@@ -67,48 +69,34 @@ class WordState {
 
 class WordNotifier extends Notifier<WordState> {
   final _service = FirebaseService();
-  StorageService? _storageInstance;
-  StorageService get _storage => _storageInstance ??= StorageService();
-
+  final _profile = UserProfileService();
   final _random = Random();
+
+  static const _wordCacheKey = 'cached_words_json';
 
   @override
   WordState build() {
-    ref.watch(authStateProvider);
-    _loadWords();
+    Future.microtask(_loadWords);
     return const WordState(isLoading: true);
   }
 
   Future<void> _loadWords() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      await _storage.init();
+      List<WordModel> words;
 
-      final words = await _service.fetchWords();
-
-      final authService = ref.read(authServiceProvider);
-      final userId = authService.userId;
-
-      Set<int> learnedIds = {};
-      Set<int> favoriteIds = {};
-      int xp = 0;
-
-      if (userId.isNotEmpty) {
-        final userData = await _service.getUserData(userId);
-        if (userData != null) {
-          learnedIds = Set<int>.from(
-            userData['learned_words']?.cast<int>() ?? [],
-          );
-          favoriteIds = Set<int>.from(
-            userData['favorite_words']?.cast<int>() ?? [],
-          );
-          xp = userData['xp'] ?? 0;
-        }
-      } else {
-        learnedIds = _storage.getLearnedWords().toSet();
-        favoriteIds = _storage.getFavoriteWords().toSet();
-        xp = _storage.getXp();
+      try {
+        words = await _service.fetchWords();
+        await _saveWordsToCache(words);
+      } catch (e) {
+        debugPrint('[WordProvider] Firestore failed, trying cache: $e');
+        words = await _loadWordsFromCache();
+        if (words.isEmpty) rethrow;
       }
+
+      final learnedIds = _profile.getLearnedWords().toSet();
+      final favoriteIds = _profile.getFavoriteWords().toSet();
+      final xp = _profile.getXp();
 
       final mergedWords = words.map((w) {
         return w.copyWith(
@@ -125,7 +113,33 @@ class WordNotifier extends Notifier<WordState> {
       );
       _applyFilters();
     } catch (e) {
+      debugPrint('[WordProvider] fatal error: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> _saveWordsToCache(List<WordModel> words) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = jsonEncode(words.map((w) => w.toJson()).toList());
+      await prefs.setString(_wordCacheKey, json);
+    } catch (e) {
+      debugPrint('[WordProvider] cache save failed: $e');
+    }
+  }
+
+  Future<List<WordModel>> _loadWordsFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_wordCacheKey);
+      if (json == null) return [];
+      final List<dynamic> decoded = jsonDecode(json);
+      return decoded
+          .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('[WordProvider] cache load failed: $e');
+      return [];
     }
   }
 
@@ -186,17 +200,10 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   void markLearned(int wordId) {
-    final userId = ref.read(authServiceProvider).userId;
-    if (userId.isNotEmpty) {
-      _service.updateLearnedWord(userId, wordId, true);
-    } else {
-      _storage.saveLearnedWord(wordId);
-    }
+    _profile.saveLearnedWord(wordId);
 
     final updated = state.allWords
-        .map((w) {
-          return w.id == wordId ? w.copyWith(isLearned: true) : w;
-        })
+        .map((w) => w.id == wordId ? w.copyWith(isLearned: true) : w)
         .toList()
         .cast<WordModel>();
     state = state.copyWith(allWords: updated);
@@ -204,15 +211,10 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   void markUnlearned(int wordId) {
-    final userId = ref.read(authServiceProvider).userId;
-    if (userId.isNotEmpty) {
-      _service.updateLearnedWord(userId, wordId, false);
-    }
+    _profile.removeLearnedWord(wordId);
 
     final updated = state.allWords
-        .map((w) {
-          return w.id == wordId ? w.copyWith(isLearned: false) : w;
-        })
+        .map((w) => w.id == wordId ? w.copyWith(isLearned: false) : w)
         .toList()
         .cast<WordModel>();
     state = state.copyWith(allWords: updated);
@@ -222,20 +224,11 @@ class WordNotifier extends Notifier<WordState> {
   void markLearnedBatch(List<int> wordIds) {
     if (wordIds.isEmpty) return;
 
-    final userId = ref.read(authServiceProvider).userId;
-    if (userId.isNotEmpty) {
-      for (final id in wordIds) {
-        _service.updateLearnedWord(userId, id, true);
-      }
-    } else {
-      _storage.saveLearnedWordsBatch(wordIds);
-    }
+    _profile.saveLearnedWordsBatch(wordIds);
 
     final idSet = wordIds.toSet();
     final updated = state.allWords
-        .map((w) {
-          return idSet.contains(w.id) ? w.copyWith(isLearned: true) : w;
-        })
+        .map((w) => idSet.contains(w.id) ? w.copyWith(isLearned: true) : w)
         .toList()
         .cast<WordModel>();
 
@@ -244,21 +237,14 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   void toggleFavorite(int wordId) {
-    final userId = ref.read(authServiceProvider).userId;
+    _profile.toggleFavoriteWord(wordId);
+
     final isFavorite = !state.allWords
         .firstWhere((w) => w.id == wordId)
         .isFavorite;
 
-    if (userId.isNotEmpty) {
-      _service.updateFavoriteWord(userId, wordId, isFavorite);
-    } else {
-      _storage.toggleFavoriteWord(wordId);
-    }
-
     final updated = state.allWords
-        .map((w) {
-          return w.id == wordId ? w.copyWith(isFavorite: isFavorite) : w;
-        })
+        .map((w) => w.id == wordId ? w.copyWith(isFavorite: isFavorite) : w)
         .toList()
         .cast<WordModel>();
     state = state.copyWith(allWords: updated);
@@ -298,14 +284,8 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   Future<void> addXp(int amount) async {
-    final userId = ref.read(authServiceProvider).userId;
-    if (userId.isNotEmpty) {
-      await _service.updateXp(userId, amount);
-      state = state.copyWith(userXp: state.userXp + amount);
-    } else {
-      await _storage.addXp(amount);
-      state = state.copyWith(userXp: _storage.getXp());
-    }
+    await _profile.addXp(amount);
+    state = state.copyWith(userXp: _profile.getXp());
   }
 }
 

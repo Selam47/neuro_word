@@ -12,12 +12,7 @@ import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
 
-import 'package:neuro_word/features/auth/providers/auth_provider.dart';
 import 'package:neuro_word/shared/widgets/neon_search_bar.dart';
-
-// ... (imports)
-
-// ── Level Filter Logic ───────────────────────────────────────────────
 
 Color _getLevelColor(String level) {
   switch (level) {
@@ -103,10 +98,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         break;
                       case 'contact':
                         context.push('/contact');
-                        break;
-                      case 'logout':
-                        await ref.read(authServiceProvider).signOut();
-                        if (context.mounted) context.go('/login');
                         break;
                       default:
                         break;
@@ -222,7 +213,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 }
 
 
-// ── Advanced Filter Bar ──────────────────────────────────────────────────
 
 class _AdvancedFilterBar extends ConsumerWidget {
   const _AdvancedFilterBar({required this.wordState});
@@ -250,7 +240,6 @@ class _AdvancedFilterBar extends ConsumerWidget {
               notifier.filterByLevel(null);
               notifier.toggleSaved(false);
               notifier.filterByCategory(null);
-              // Note: This logic resets all specific filters but keeps search query if any
             },
           ),
           const SizedBox(width: 8),
@@ -348,9 +337,6 @@ class _AdvancedFilterBar extends ConsumerWidget {
   }
 }
 
-// ... (DataActionBar, ShimmerWordList, ErrorCard remain unchanged)
-
-// ── Live Word List (lazy loading) ───────────────────────────────────────
 
 class _LiveWordList extends ConsumerStatefulWidget {
   const _LiveWordList({required this.words, required this.isFiltered});
@@ -411,8 +397,6 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
       );
     }
 
-    // If filtered by specific level, show flat list.
-    // If showing all, group by Level.
     if (widget.isFiltered) {
       return _buildFlatList();
     } else {
@@ -446,16 +430,13 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
   }
 
   Widget _buildGroupedList() {
-    // 1. Group words by level
     final grouped = <String, List<WordModel>>{};
     for (final w in widget.words) {
       grouped.putIfAbsent(w.level, () => []).add(w);
     }
 
-    // 2. Sort levels (A1, A2, B1, B2, C1, C2)
     final levels = grouped.keys.toList()..sort();
 
-    // 3. Build linear list of items (headers + words)
     final items = <dynamic>[];
     for (final level in levels) {
       items.add('HEADER:$level');
@@ -551,7 +532,6 @@ class _WordTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      // Restore card tap to toggle learned status
       onTap: () {
         if (word.isLearned) {
           ref.read(wordProvider.notifier).markUnlearned(word.id);
@@ -561,7 +541,6 @@ class _WordTile extends ConsumerWidget {
       },
       child: Row(
         children: [
-          // Level Badge (New Style)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -591,7 +570,6 @@ class _WordTile extends ConsumerWidget {
           ),
           const SizedBox(width: 16),
 
-          // Word Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,7 +591,6 @@ class _WordTile extends ConsumerWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                // Category Tag (Restored)
                 if (word.category.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Container(
@@ -639,16 +616,13 @@ class _WordTile extends ConsumerWidget {
             ),
           ),
 
-          // Actions Row
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Favorite Button (New)
               Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    // Prevent card tap
                     ref.read(wordProvider.notifier).toggleFavorite(word.id);
                   },
                   borderRadius: BorderRadius.circular(50),
@@ -674,7 +648,6 @@ class _WordTile extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
 
-              // Learned Indicator (Restored visual)
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: 28,
@@ -707,7 +680,6 @@ class _WordTile extends ConsumerWidget {
   }
 }
 
-// ── Feature Cards Grid (from Phase 1) ───────────────────────────────────
 
 class _TopBar extends StatelessWidget {
   const _TopBar({required this.onProfileTap, required this.onMenuAction});
@@ -781,16 +753,6 @@ class _TopBar extends StatelessWidget {
                   ),
                   _buildPopupMenuItem('contact', 'İletişim', Icons.mail),
                   _buildPopupMenuItem('explore', 'Keşfet', Icons.explore),
-                  const PopupMenuItem<String>(
-                    height: 0,
-                    child: Divider(color: AppColors.cardBorder),
-                  ),
-                  _buildPopupMenuItem(
-                    'logout',
-                    'Çıkış Yap',
-                    Icons.logout,
-                    color: AppColors.error,
-                  ),
                 ];
               },
             ),

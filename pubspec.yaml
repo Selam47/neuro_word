@@ -30,7 +30,6 @@ dependencies:
   shared_preferences: ^2.5.4
   firebase_core: ^4.4.0
   cloud_firestore: ^6.1.2
-  firebase_auth: ^6.1.4
 
 dev_dependencies:
   flutter_test:
@@ -42,10 +41,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
-
-
-    - assets/svg/
     - assets/sounds/
     - assets/icon/
     - assets/animations/

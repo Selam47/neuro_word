@@ -1,9 +1,6 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neuro_word/services/auth_service.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
 
-final authServiceProvider = Provider<AuthService>((ref) => AuthService());
-
-final authStateProvider = StreamProvider<User?>((ref) {
-  return Stream.value(null);
+final userProfileServiceProvider = Provider<UserProfileService>((ref) {
+  return UserProfileService();
 });

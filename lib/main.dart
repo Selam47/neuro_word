@@ -7,7 +7,7 @@ import 'package:neuro_word/core/router/app_router.dart';
 import 'package:neuro_word/core/theme/app_theme.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/storage_service.dart';
-import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:neuro_word/firebase_options.dart';
 
@@ -15,16 +15,33 @@ void main() {
   runZonedGuarded<void>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Initialize Firebase (for Firestore word fetching)
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
+      final profileService = UserProfileService();
+      await profileService.init();
+
+      // Initialize legacy SharedPreferences storage
       final storage = StorageService();
       try {
         await storage.init();
+
+        // Migrate existing data from SharedPreferences to Hive on first Hive launch
+        if (profileService.isFirstLaunch) {
+          final learnedIds = storage.getLearnedWords();
+          final favoriteIds = storage.getFavoriteWords();
+          final xp = storage.getXp();
+          if (learnedIds.isNotEmpty || favoriteIds.isNotEmpty || xp > 0) {
+            await profileService.migrateFromLegacy(learnedIds, favoriteIds, xp);
+          }
+        }
       } catch (e, stack) {
         debugPrint('StorageService init failed: $e\n$stack');
       }
+
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -34,16 +51,7 @@ void main() {
         ),
       );
 
-      final container = ProviderContainer();
-
-      container.read(wordProvider.notifier).reload();
-
-      runApp(
-        UncontrolledProviderScope(
-          container: container,
-          child: const NeuroWordApp(),
-        ),
-      );
+      runApp(const ProviderScope(child: NeuroWordApp()));
     },
     (error, stack) {
       debugPrint('runZonedGuarded Error: $error');

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
@@ -20,6 +21,7 @@ class ProfileScreen extends ConsumerWidget {
     final learned = ws.learnedCount;
     final total = ws.allWords.length;
     final progress = total > 0 ? learned / _wordGoal : 0.0;
+    final username = UserProfileService().username.toUpperCase();
 
     final userLevel = _computeLevel(ws);
 
@@ -54,7 +56,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 Text(
-                  AppStrings.learner,
+                  username,
                   style: GoogleFonts.orbitron(
                     color: AppColors.textPrimary,
                     fontSize: 20,

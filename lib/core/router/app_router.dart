@@ -1,10 +1,8 @@
-﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animations/animations.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:neuro_word/features/auth/presentation/login_screen.dart';
-import 'package:neuro_word/features/auth/presentation/signup_screen.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
+import 'package:neuro_word/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:neuro_word/features/splash/presentation/splash_screen.dart';
 import 'package:neuro_word/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:neuro_word/features/profile/presentation/profile_screen.dart';
@@ -21,14 +19,15 @@ class AppRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'root');
 
-  static final _authStream = FirebaseAuth.instance.authStateChanges();
-  static final _refreshListenable = GoRouterRefreshStream(_authStream);
-
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/dashboard',
-    refreshListenable: _refreshListenable,
     redirect: (context, state) {
+      // Redirect to onboarding on first launch (no username set yet)
+      final isOnboarding = state.matchedLocation == '/onboarding';
+      if (UserProfileService().isFirstLaunch && !isOnboarding) {
+        return '/onboarding';
+      }
       return null;
     },
     routes: [
@@ -38,14 +37,9 @@ class AppRouter {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/signup',
-        name: 'signup',
-        builder: (context, state) => const SignupScreen(),
+        path: '/onboarding',
+        name: 'onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: '/dashboard',
@@ -148,29 +142,10 @@ class AppRouter {
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           transitionType: SharedAxisTransitionType.scaled,
-          fillColor: Colors.black, // Match app theme
+          fillColor: Colors.black,
           child: child,
         );
       },
     );
   }
 }
-
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
-  }
-
-  late final StreamSubscription<dynamic> _subscription;
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-}
-
-

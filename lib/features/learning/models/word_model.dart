@@ -29,11 +29,11 @@ class WordModel {
     );
   }
 
-  factory WordModel.fromFirestore(Map<String, dynamic> data) {
+  factory WordModel.fromFirestore(Map<String, dynamic> data, {String? docId}) {
     return WordModel(
-      id: data['id'] as int? ?? 0,
-      english: data['en'] as String? ?? (data['english'] as String? ?? ''),
-      turkish: data['tr'] as String? ?? (data['turkish'] as String? ?? ''),
+      id: (data['id'] as num?)?.toInt() ?? int.tryParse(docId ?? '') ?? 0,
+      english: data['en'] as String? ?? data['english'] as String? ?? '',
+      turkish: data['tr'] as String? ?? data['turkish'] as String? ?? '',
       level: data['level'] as String? ?? 'A1',
       category: data['category'] as String? ?? 'General',
       isLearned: false,
