@@ -7,7 +7,8 @@
       "Bash(grep -r \"FirebaseAuth\\\\|GoogleSignIn\\\\|firebase_auth\\\\|google_sign_in\" \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" --include=\"*.dart\" --include=\"*.yaml\" 2>/dev/null | head -20)",
       "Bash(grep -r \"signIn\\\\|login\\\\|Login\\\\|SignIn\\\\|sign_in\\\\|authenticate\" \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\\\\lib\" --include=\"*.dart\" 2>/dev/null | head -30)",
       "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze 2>&1)",
-      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze lib/features/dashboard/presentation/screens/dashboard_screen.dart 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze lib/features/dashboard/presentation/screens/dashboard_screen.dart 2>&1)",
+      "Bash(flutter analyze:*)"
     ]
   }
 }

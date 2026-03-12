@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
+import 'package:neuro_word/features/learning/models/rank_model.dart';
+import 'package:neuro_word/features/learning/providers/rank_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
@@ -21,12 +23,11 @@ class ProfileScreen extends ConsumerWidget {
     final ws = ref.watch(wordProvider);
     final learnedIds = ref.watch(learnedWordsProvider);
     final savedIds = ref.watch(savedWordsProvider);
+    final rankState = ref.watch(rankProvider);
     final learned = learnedIds.length;
     final total = ws.allWords.length;
     final progress = total > 0 ? learned / _wordGoal : 0.0;
     final username = UserProfileService().username.toUpperCase();
-
-    final userLevel = _computeLevel(ws, learnedIds);
 
     final catMap = <String, int>{};
     for (final w in ws.allWords) {
@@ -70,33 +71,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        _levelColor(userLevel).withValues(alpha: 0.2),
-                        _levelColor(userLevel).withValues(alpha: 0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: _levelColor(userLevel).withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Text(
-                    '${AppStrings.level} $userLevel',
-                    style: GoogleFonts.orbitron(
-                      color: _levelColor(userLevel),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ),
+                _RankBadge(rankState: rankState),
                 const SizedBox(height: 28),
 
                 Row(
@@ -122,6 +97,9 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
+                _RankInfoCard(rankState: rankState),
+                const SizedBox(height: 28),
+
                 _buildSectionTitle(AppStrings.levelBreakdown),
                 const SizedBox(height: 12),
                 ...levelMap.entries.map((e) {
@@ -134,7 +112,7 @@ class ProfileScreen extends ConsumerWidget {
                       level: lv,
                       learned: lea,
                       total: tot,
-                      color: _levelColor(lv),
+                      color: AppColors.forLevel(lv),
                     ),
                   );
                 }),
@@ -425,27 +403,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  String _computeLevel(WordState ws, Set<int> learnedIds) {
-    if (ws.allWords.isEmpty) return 'B2';
-    final learnedWords = ws.allWords.where((w) => learnedIds.contains(w.id));
-    if (learnedWords.isEmpty) return 'B2';
-    final counts = <String, int>{};
-    for (final w in learnedWords) {
-      counts[w.level] = (counts[w.level] ?? 0) + 1;
-    }
-    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
-  }
-
-  Color _levelColor(String level) {
-    switch (level) {
-      case 'C2':
-        return AppColors.warningRed;
-      case 'C1':
-        return AppColors.accentOrange;
-      default:
-        return AppColors.neonGreen;
-    }
-  }
 }
 
 
@@ -614,6 +571,7 @@ class _LevelProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = total > 0 ? learned / total : 0.0;
+    final pctInt = (pct * 100).toInt();
     return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -622,13 +580,36 @@ class _LevelProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                level,
-                style: GoogleFonts.orbitron(
-                  color: color,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+              Row(
+                children: [
+                  Text(
+                    level,
+                    style: GoogleFonts.orbitron(
+                      color: color,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '%$pctInt',
+                      style: GoogleFonts.orbitron(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               Text(
                 '$learned / $total',
@@ -697,6 +678,245 @@ class _CategoryChip extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _RankBadge extends StatelessWidget {
+  const _RankBadge({required this.rankState});
+  final RankState rankState;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPremium = rankState.isPremiumRank;
+    final color = isPremium ? AppColors.accentOrange : AppColors.electricBlue;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+        boxShadow: isPremium
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
+      ),
+      child: Text(
+        rankState.currentTitle.toUpperCase(),
+        style: GoogleFonts.orbitron(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 2,
+        ),
+      ),
+    );
+  }
+}
+
+
+class _RankInfoCard extends StatelessWidget {
+  const _RankInfoCard({required this.rankState});
+  final RankState rankState;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPremium = rankState.isPremiumRank;
+    final accentColor =
+        isPremium ? AppColors.accentOrange : AppColors.electricBlue;
+    final nextRank = rankState.nextRank;
+
+    return GlassCard(
+      accentColor: accentColor,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  if (isPremium)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.auto_awesome,
+                        color: accentColor,
+                        size: 18,
+                      ),
+                    ),
+                  Text(
+                    'ÜNVAN',
+                    style: GoogleFonts.orbitron(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: isPremium
+                      ? [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  'DİL PUANI: ${rankState.levelScore}',
+                  style: GoogleFonts.orbitron(
+                    color: accentColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            rankState.currentTitle,
+            style: GoogleFonts.orbitron(
+              color: accentColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+              shadows: isPremium
+                  ? [
+                      Shadow(
+                        color: accentColor.withValues(alpha: 0.6),
+                        blurRadius: 12,
+                      ),
+                    ]
+                  : null,
+            ),
+          ),
+          if (nextRank != null) ...[
+            const SizedBox(height: 10),
+            Builder(builder: (context) {
+              final currentMastery =
+                  rankState.levelMastery[nextRank.requiredLevel] ?? 0.0;
+              final target = nextRank.requiredMastery;
+              final masteryProgress =
+                  target > 0 ? (currentMastery / target).clamp(0.0, 1.0) : 0.0;
+              final nextColor =
+                  AppColors.forLevel(nextRank.requiredLevel);
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMedium,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.cardBorder.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: nextColor,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Sonraki Ünvan: ${nextRank.title}',
+                            style: GoogleFonts.rajdhani(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          '${nextRank.requiredLevel} %${(currentMastery * 100).toInt()}',
+                          style: GoogleFonts.orbitron(
+                            color: nextColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '%${(target * 100).toInt()} gerekli',
+                          style: GoogleFonts.rajdhani(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: masteryProgress,
+                        backgroundColor:
+                            AppColors.cardBorder.withValues(alpha: 0.5),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(nextColor),
+                        minHeight: 5,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    color: AppColors.neonGreen,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'En yüksek ünvana ulaştınız!',
+                    style: GoogleFonts.rajdhani(
+                      color: AppColors.neonGreen,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

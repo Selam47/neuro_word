@@ -5,6 +5,8 @@ class UserProfileService {
   static const String _keyLearnedWords = 'profile_learned_words';
   static const String _keyFavoriteWords = 'profile_favorite_words';
   static const String _keyXp = 'profile_xp';
+  static const String _keyLevelScore = 'profile_level_score';
+  static const String _keyRankId = 'profile_rank_id';
 
   static final UserProfileService _instance = UserProfileService._internal();
   factory UserProfileService() => _instance;
@@ -91,6 +93,18 @@ class UserProfileService {
 
   Future<void> addXp(int amount) async {
     await _prefs?.setInt(_keyXp, getXp() + amount);
+  }
+
+  int getLevelScore() => _prefs?.getInt(_keyLevelScore) ?? 0;
+
+  Future<void> saveLevelScore(int score) async {
+    await _prefs?.setInt(_keyLevelScore, score);
+  }
+
+  int getRankId() => _prefs?.getInt(_keyRankId) ?? 0;
+
+  Future<void> saveRankId(int id) async {
+    await _prefs?.setInt(_keyRankId, id);
   }
 
   Future<void> migrateFromLegacy(
