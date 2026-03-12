@@ -1,5 +1,4 @@
 ﻿import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +15,6 @@ void main() {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Initialize Firebase (for Firestore word fetching)
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
@@ -24,12 +22,10 @@ void main() {
       final profileService = UserProfileService();
       await profileService.init();
 
-      // Initialize legacy SharedPreferences storage
       final storage = StorageService();
       try {
         await storage.init();
 
-        // Migrate existing data from SharedPreferences to Hive on first Hive launch
         if (profileService.isFirstLaunch) {
           final learnedIds = storage.getLearnedWords();
           final favoriteIds = storage.getFavoriteWords();

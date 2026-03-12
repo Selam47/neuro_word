@@ -23,7 +23,6 @@ class AppRouter {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/dashboard',
     redirect: (context, state) {
-      // Redirect to onboarding on first launch (no username set yet)
       final isOnboarding = state.matchedLocation == '/onboarding';
       if (UserProfileService().isFirstLaunch && !isOnboarding) {
         return '/onboarding';

@@ -1,5 +1,3 @@
-cat <<EOF > .gitignore
-# Anahtarlar ve Şifreler
 *.jks
 *.keystore
 *.p12
@@ -11,12 +9,19 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 .env
+claude.json
 
-# Derleme Dosyaları
 /build/
 /.dart_tool/
 /.gradle/
+.firebase/
 
-# Sistem Dosyaları
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+.packages
+
+.idea/
+*.iml
 .DS_Store
-EOF
+*.txt

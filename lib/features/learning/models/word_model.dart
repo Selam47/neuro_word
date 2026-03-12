@@ -30,8 +30,12 @@ class WordModel {
   }
 
   factory WordModel.fromFirestore(Map<String, dynamic> data, {String? docId}) {
+    final rawId = (data['id'] as num?)?.toInt()
+        ?? int.tryParse(docId ?? '')
+        ?? docId?.hashCode.abs()
+        ?? Object().hashCode.abs();
     return WordModel(
-      id: (data['id'] as num?)?.toInt() ?? int.tryParse(docId ?? '') ?? 0,
+      id: rawId,
       english: data['en'] as String? ?? data['english'] as String? ?? '',
       turkish: data['tr'] as String? ?? data['turkish'] as String? ?? '',
       level: data['level'] as String? ?? 'A1',
@@ -87,10 +91,3 @@ class WordModel {
   String toString() =>
       'WordModel(id: $id, en: $english, tr: $turkish, lvl: $level)';
 }
-
-// List<WordModel> parseWords(String jsonString) {
-//   final List<dynamic> decoded = json.decode(jsonString) as List<dynamic>;
-//   return decoded
-//       .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
-//       .toList();
-// }

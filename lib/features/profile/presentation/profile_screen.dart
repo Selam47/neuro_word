@@ -7,6 +7,7 @@ import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
@@ -18,12 +19,14 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ws = ref.watch(wordProvider);
-    final learned = ws.learnedCount;
+    final learnedIds = ref.watch(learnedWordsProvider);
+    final savedIds = ref.watch(savedWordsProvider);
+    final learned = learnedIds.length;
     final total = ws.allWords.length;
     final progress = total > 0 ? learned / _wordGoal : 0.0;
     final username = UserProfileService().username.toUpperCase();
 
-    final userLevel = _computeLevel(ws);
+    final userLevel = _computeLevel(ws, learnedIds);
 
     final catMap = <String, int>{};
     for (final w in ws.allWords) {
@@ -36,10 +39,12 @@ class ProfileScreen extends ConsumerWidget {
     final learnedLevelMap = <String, int>{};
     for (final w in ws.allWords) {
       levelMap[w.level] = (levelMap[w.level] ?? 0) + 1;
-      if (w.isLearned) {
+      if (learnedIds.contains(w.id)) {
         learnedLevelMap[w.level] = (learnedLevelMap[w.level] ?? 0) + 1;
       }
     }
+    final savedWords = ws.allWords.where((w) => savedIds.contains(w.id)).toList();
+    final learnedWords = ws.allWords.where((w) => learnedIds.contains(w.id)).toList();
 
     return Scaffold(
       body: FuturisticBackground(
@@ -73,13 +78,13 @@ class ProfileScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        _levelColor(userLevel).withOpacity(0.2),
-                        _levelColor(userLevel).withOpacity(0.05),
+                        _levelColor(userLevel).withValues(alpha: 0.2),
+                        _levelColor(userLevel).withValues(alpha: 0.05),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _levelColor(userLevel).withOpacity(0.5),
+                      color: _levelColor(userLevel).withValues(alpha: 0.5),
                     ),
                   ),
                   child: Text(
@@ -137,12 +142,12 @@ class ProfileScreen extends ConsumerWidget {
 
                 _buildSectionTitle('SAVED COLLECTION'),
                 const SizedBox(height: 12),
-                if (ws.favoriteCount == 0)
+                if (savedWords.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        'No saved words yet.\nTap the heart icon on flashcards to save.',
+                        'No saved words yet.\nTap the bookmark icon on words to save.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary,
@@ -153,16 +158,13 @@ class ProfileScreen extends ConsumerWidget {
                   )
                 else
                   SizedBox(
-                    height:
-                        140, // Increased height slightly to accommodate the button comfortably
+                    height: 140,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: ws.allWords.where((w) => w.isFavorite).length,
+                      itemCount: savedWords.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
-                        final word = ws.allWords
-                            .where((w) => w.isFavorite)
-                            .toList()[index];
+                        final word = savedWords[index];
                         return Container(
                           width: 160,
                           padding: const EdgeInsets.all(12),
@@ -170,7 +172,7 @@ class ProfileScreen extends ConsumerWidget {
                             color: AppColors.surfaceMedium,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: AppColors.neonPink.withOpacity(0.3),
+                              color: AppColors.neonPink.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Column(
@@ -195,8 +197,8 @@ class ProfileScreen extends ConsumerWidget {
                                   GestureDetector(
                                     onTap: () {
                                       ref
-                                          .read(wordProvider.notifier)
-                                          .toggleFavorite(word.id);
+                                          .read(savedWordsProvider.notifier)
+                                          .toggle(word.id);
                                     },
                                     child: const Icon(
                                       Icons.close_rounded,
@@ -222,13 +224,116 @@ class ProfileScreen extends ConsumerWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.neonPink.withOpacity(0.1),
+                                  color: AppColors.neonPink.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   word.level,
                                   style: GoogleFonts.orbitron(
                                     color: AppColors.neonPink,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 28),
+
+                _buildSectionTitle('${AppStrings.learned.toUpperCase()} COLLECTION'),
+                const SizedBox(height: 12),
+                if (learnedWords.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        'Henüz öğrenilen kelime yok.\nKelimelere tıklayarak öğrenildi olarak işaretle.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 140,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: learnedWords.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final word = learnedWords[index];
+                        return Container(
+                          width: 160,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceMedium,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.neonGreen.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      word.english,
+                                      style: GoogleFonts.orbitron(
+                                        color: AppColors.textPrimary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ref
+                                          .read(learnedWordsProvider.notifier)
+                                          .toggle(word.id);
+                                    },
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      color: AppColors.textSecondary,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                word.turkish,
+                                style: GoogleFonts.rajdhani(
+                                  color: AppColors.neonGreen,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.neonGreen.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  word.level,
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.neonGreen,
                                     fontSize: 10,
                                   ),
                                 ),
@@ -320,9 +425,9 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  String _computeLevel(WordState ws) {
+  String _computeLevel(WordState ws, Set<int> learnedIds) {
     if (ws.allWords.isEmpty) return 'B2';
-    final learnedWords = ws.allWords.where((w) => w.isLearned);
+    final learnedWords = ws.allWords.where((w) => learnedIds.contains(w.id));
     if (learnedWords.isEmpty) return 'B2';
     final counts = <String, int>{};
     for (final w in learnedWords) {
@@ -372,7 +477,7 @@ class _ProgressRing extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.electricBlue.withOpacity(0.3),
+                      color: AppColors.electricBlue.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 4,
                     ),
@@ -580,7 +685,7 @@ class _CategoryChip extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
             decoration: BoxDecoration(
-              color: AppColors.electricBlue.withOpacity(0.15),
+              color: AppColors.electricBlue.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(

@@ -29,4 +29,23 @@ class AppColors {
   static const Color surfaceLight = Color(0xFF202A3C);
 
   static Color? get error => null;
+
+  static Color forLevel(String level) {
+    switch (level) {
+      case 'A1':
+        return const Color(0xFF4CAF50);
+      case 'A2':
+        return const Color(0xFF8BC34A);
+      case 'B1':
+        return const Color(0xFFFFEB3B);
+      case 'B2':
+        return const Color(0xFFFF9800);
+      case 'C1':
+        return const Color(0xFFFF5722);
+      case 'C2':
+        return const Color(0xFFF44336);
+      default:
+        return electricBlue;
+    }
+  }
 }

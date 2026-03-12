@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
@@ -58,7 +59,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
   Future<void> _persistData() async {
     try {
       if (widget.learnedIds.isNotEmpty) {
-        ref.read(wordProvider.notifier).markLearnedBatch(widget.learnedIds);
+        ref.read(learnedWordsProvider.notifier).addAll(widget.learnedIds);
       }
 
       if (widget.learnedIds.isNotEmpty) {
@@ -110,7 +111,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
   @override
   Widget build(BuildContext context) {
     final wordState = ref.watch(wordProvider);
-    final totalLearned = wordState.learnedCount;
+    final totalLearned = ref.watch(learnedWordsProvider).length;
     final totalWords = wordState.allWords.length;
     final overallProgress = totalWords > 0 ? totalLearned / totalWords : 0.0;
     final missedCount = widget.totalWords - widget.learnedIds.length;

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze lib/features/learning/providers/word_provider.dart lib/core/services/firebase_service.dart lib/features/dashboard/presentation/screens/dashboard_screen.dart lib/features/learning/models/word_model.dart 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze lib/ 2>&1 | grep -E \"error|warning\" | head -20)",
+      "mcp__ide__getDiagnostics",
+      "Bash(grep -r \"FirebaseAuth\\\\|GoogleSignIn\\\\|firebase_auth\\\\|google_sign_in\" \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" --include=\"*.dart\" --include=\"*.yaml\" 2>/dev/null | head -20)",
+      "Bash(grep -r \"signIn\\\\|login\\\\|Login\\\\|SignIn\\\\|sign_in\\\\|authenticate\" \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\\\\lib\" --include=\"*.dart\" 2>/dev/null | head -30)",
+      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\selamky\\\\Desktop\\\\Selam\\\\neuro_word\" && flutter analyze lib/features/dashboard/presentation/screens/dashboard_screen.dart 2>&1)"
+    ]
+  }
+}

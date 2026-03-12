@@ -8,30 +8,14 @@ import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
 
 import 'package:neuro_word/shared/widgets/neon_search_bar.dart';
+import 'package:neuro_word/shared/widgets/word_tile.dart';
 
-Color _getLevelColor(String level) {
-  switch (level) {
-    case 'A1':
-      return const Color(0xFF4CAF50);
-    case 'A2':
-      return const Color(0xFF8BC34A);
-    case 'B1':
-      return const Color(0xFFFFEB3B);
-    case 'B2':
-      return const Color(0xFFFF9800);
-    case 'C1':
-      return const Color(0xFFFF5722);
-    case 'C2':
-      return const Color(0xFFF44336);
-    default:
-      return AppColors.electricBlue;
-  }
-}
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -106,7 +90,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 const SizedBox(height: 28),
 
-                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Text(
+                    'Oxford standartlarında 3000+ kelime ile profesyonel bir deneyim.',
+                    style: GoogleFonts.rajdhani(
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
 
                 _QuickStatsRow(wordState: wordState),
                 const SizedBox(height: 32),
@@ -273,7 +270,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
               child: _buildChip(
                 label: level,
                 isSelected: wordState.activeLevel == level,
-                color: _getLevelColor(level),
+                color: AppColors.forLevel(level),
                 onTap: () {
                   final newLevel = wordState.activeLevel == level
                       ? null
@@ -419,9 +416,10 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
           separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final word = widget.words[index];
-            return _WordTile(
+            return WordTile(
+              key: ValueKey(word.id),
               word: word,
-            ); // Assuming _WordTile is defined later in the file
+            );
           },
         ),
         if (hasMore) _buildLoadMore(),
@@ -458,7 +456,7 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
             if (item is String && item.startsWith('HEADER:')) {
               return _buildLevelHeader(item.substring(7));
             } else if (item is WordModel) {
-              return _WordTile(word: item);
+              return WordTile(key: ValueKey(item.id), word: item);
             }
             return const SizedBox.shrink();
           },
@@ -476,7 +474,7 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
         color: AppColors.surfaceMedium,
         borderRadius: BorderRadius.circular(8),
         border: Border(
-          left: BorderSide(color: _getLevelColor(level), width: 3),
+          left: BorderSide(color: AppColors.forLevel(level), width: 3),
         ),
       ),
       child: Text(
@@ -523,163 +521,6 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
     );
   }
 }
-
-class _WordTile extends ConsumerWidget {
-  const _WordTile({required this.word});
-  final WordModel word;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      onTap: () {
-        if (word.isLearned) {
-          ref.read(wordProvider.notifier).markUnlearned(word.id);
-        } else {
-          ref.read(wordProvider.notifier).markLearned(word.id);
-        }
-      },
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: _getLevelColor(word.level).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _getLevelColor(word.level).withValues(alpha: 0.5),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _getLevelColor(word.level).withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Text(
-              word.level,
-              style: GoogleFonts.orbitron(
-                color: _getLevelColor(word.level),
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  word.english,
-                  style: GoogleFonts.orbitron(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Text(
-                  word.turkish,
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (word.category.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceMedium,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      word.category,
-                      style: GoogleFonts.rajdhani(
-                        color: AppColors.textMuted,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    ref.read(wordProvider.notifier).toggleFavorite(word.id);
-                  },
-                  borderRadius: BorderRadius.circular(50),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: word.isFavorite
-                          ? AppColors.neonPink.withValues(alpha: 0.1)
-                          : Colors.transparent,
-                    ),
-                    child: Icon(
-                      word.isFavorite
-                          ? Icons.bookmark_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: word.isFavorite
-                          ? AppColors.neonPink
-                          : AppColors.textSecondary,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: word.isLearned
-                      ? AppColors.neonGreen.withValues(alpha: 0.15)
-                      : AppColors.surfaceMedium,
-                  border: Border.all(
-                    color: word.isLearned
-                        ? AppColors.neonGreen
-                        : AppColors.cardBorder,
-                    width: 1.5,
-                  ),
-                ),
-                child: word.isLearned
-                    ? const Icon(
-                        Icons.check_rounded,
-                        color: AppColors.neonGreen,
-                        size: 16,
-                      )
-                    : null,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 
 class _TopBar extends StatelessWidget {
   const _TopBar({required this.onProfileTap, required this.onMenuAction});
@@ -788,13 +629,15 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _QuickStatsRow extends StatelessWidget {
+class _QuickStatsRow extends ConsumerWidget {
   const _QuickStatsRow({required this.wordState});
 
   final WordState wordState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final learnedCount = ref.watch(learnedWordsProvider).length;
+    final favoriteCount = ref.watch(savedWordsProvider).length;
     return Row(
       children: [
         Expanded(
@@ -809,7 +652,7 @@ class _QuickStatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             label: 'Öğrenilen',
-            value: wordState.learnedCount.toString(),
+            value: learnedCount.toString(),
             icon: Icons.check_circle_outline_rounded,
             color: AppColors.neonGreen,
           ),
@@ -818,7 +661,7 @@ class _QuickStatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             label: 'Favori',
-            value: wordState.favoriteCount.toString(),
+            value: favoriteCount.toString(),
             icon: Icons.bookmark_border_rounded,
             color: AppColors.neonPink,
           ),

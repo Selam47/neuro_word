@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuro_word/core/services/firebase_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WordState {
@@ -59,10 +60,6 @@ class WordState {
     );
   }
 
-  int get learnedCount => allWords.where((w) => w.isLearned).length;
-
-  int get favoriteCount => allWords.where((w) => w.isFavorite).length;
-
   List<String> get availableLevels =>
       allWords.map((w) => w.level).toSet().toList()..sort();
 }
@@ -76,6 +73,9 @@ class WordNotifier extends Notifier<WordState> {
 
   @override
   WordState build() {
+    ref.listen<Set<int>>(savedWordsProvider, (_, __) {
+      if (state.onlySaved && state.allWords.isNotEmpty) _applyFilters();
+    });
     Future.microtask(_loadWords);
     return const WordState(isLoading: true);
   }
@@ -97,6 +97,9 @@ class WordNotifier extends Notifier<WordState> {
       final learnedIds = _profile.getLearnedWords().toSet();
       final favoriteIds = _profile.getFavoriteWords().toSet();
       final xp = _profile.getXp();
+
+      ref.read(learnedWordsProvider.notifier).init(learnedIds);
+      ref.read(savedWordsProvider.notifier).init(favoriteIds);
 
       final mergedWords = words.map((w) {
         return w.copyWith(
@@ -185,7 +188,7 @@ class WordNotifier extends Notifier<WordState> {
     }
 
     if (state.onlySaved) {
-      result = result.where((w) => w.isFavorite).toList();
+      result = result.where((w) => ref.read(savedWordsProvider).contains(w.id)).toList();
     }
 
     if (state.searchQuery.isNotEmpty) {
@@ -199,58 +202,6 @@ class WordNotifier extends Notifier<WordState> {
     state = state.copyWith(filteredWords: result);
   }
 
-  void markLearned(int wordId) {
-    _profile.saveLearnedWord(wordId);
-
-    final updated = state.allWords
-        .map((w) => w.id == wordId ? w.copyWith(isLearned: true) : w)
-        .toList()
-        .cast<WordModel>();
-    state = state.copyWith(allWords: updated);
-    _applyFilters();
-  }
-
-  void markUnlearned(int wordId) {
-    _profile.removeLearnedWord(wordId);
-
-    final updated = state.allWords
-        .map((w) => w.id == wordId ? w.copyWith(isLearned: false) : w)
-        .toList()
-        .cast<WordModel>();
-    state = state.copyWith(allWords: updated);
-    _applyFilters();
-  }
-
-  void markLearnedBatch(List<int> wordIds) {
-    if (wordIds.isEmpty) return;
-
-    _profile.saveLearnedWordsBatch(wordIds);
-
-    final idSet = wordIds.toSet();
-    final updated = state.allWords
-        .map((w) => idSet.contains(w.id) ? w.copyWith(isLearned: true) : w)
-        .toList()
-        .cast<WordModel>();
-
-    state = state.copyWith(allWords: updated);
-    _applyFilters();
-  }
-
-  void toggleFavorite(int wordId) {
-    _profile.toggleFavoriteWord(wordId);
-
-    final isFavorite = !state.allWords
-        .firstWhere((w) => w.id == wordId)
-        .isFavorite;
-
-    final updated = state.allWords
-        .map((w) => w.id == wordId ? w.copyWith(isFavorite: isFavorite) : w)
-        .toList()
-        .cast<WordModel>();
-    state = state.copyWith(allWords: updated);
-    _applyFilters();
-  }
-
   void shuffle() {
     final shuffled = List<WordModel>.from(state.filteredWords)
       ..shuffle(_random);
@@ -258,14 +209,17 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   List<WordModel> getRandomWords(int count, {String? level}) {
-    var pool = state.allWords.where((w) => !w.isLearned);
+    final learned = ref.read(learnedWordsProvider);
+    var pool = state.allWords.where((w) => !learned.contains(w.id));
     if (level != null && level.isNotEmpty) {
       pool = pool.where((w) => w.level == level);
     }
     var list = pool.toList()..shuffle(_random);
 
     if (list.length < count) {
-      var extra = state.allWords.where((w) => w.isLearned).toList()
+      var extra = state.allWords
+          .where((w) => learned.contains(w.id))
+          .toList()
         ..shuffle(_random);
       if (level != null && level.isNotEmpty) {
         extra = extra.where((w) => w.level == level).toList();

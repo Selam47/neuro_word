@@ -8,6 +8,7 @@ import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
@@ -275,19 +276,13 @@ class _FavoriteButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isFav = ref.watch(
-      wordProvider.select((s) {
-        final updated = s.allWords.firstWhere(
-          (w) => w.id == word.id,
-          orElse: () => word,
-        );
-        return updated.isFavorite;
-      }),
+      savedWordsProvider.select((s) => s.contains(word.id)),
     );
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        ref.read(wordProvider.notifier).toggleFavorite(word.id);
+        ref.read(savedWordsProvider.notifier).toggle(word.id);
       },
       child: Container(
         padding: const EdgeInsets.all(12),
