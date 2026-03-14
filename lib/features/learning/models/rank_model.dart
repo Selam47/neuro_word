@@ -63,8 +63,8 @@ const kWeights = <String, int>{
   'A1': 1,
   'A2': 2,
   'B1': 3,
-  'B2': 4,
-  'C1': 5,
+  'B2': 5,
+  'C1': 6,
 };
 
 class RankState {
