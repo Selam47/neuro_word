@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,6 +56,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final wordState = ref.watch(wordProvider);
@@ -103,7 +104,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 16),
+
+
+                const SizedBox(height: 12),
 
                 _QuickStatsRow(wordState: wordState),
                 const SizedBox(height: 32),
@@ -227,7 +231,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         children: [
           _buildChip(
-            label: 'Tümü', // All
+            label: 'Tümü',
             isSelected:
                 wordState.activeLevel == null &&
                 !wordState.onlySaved &&
@@ -242,7 +246,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
           const SizedBox(width: 8),
 
           _buildChip(
-            label: 'Kaydedilenler', // Saved
+            label: 'Kaydedilenler',
             isSelected: wordState.onlySaved,
             color: AppColors.neonPink,
             onTap: () => notifier.toggleSaved(!wordState.onlySaved),

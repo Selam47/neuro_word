@@ -5,6 +5,8 @@ class WordModel {
     required this.turkish,
     required this.level,
     required this.category,
+    this.difficultyWeight = 1,
+    this.cefr,
     this.isLearned = false,
     this.isFavorite = false,
   });
@@ -14,6 +16,8 @@ class WordModel {
   final String turkish;
   final String level;
   final String category;
+  final int difficultyWeight;
+  final String? cefr;
   final bool isLearned;
   final bool isFavorite;
 
@@ -24,6 +28,8 @@ class WordModel {
       turkish: json['turkish'] as String,
       level: json['level'] as String,
       category: json['category'] as String,
+      difficultyWeight: json['difficultyWeight'] as int? ?? 1,
+      cefr: json['cefr'] as String?,
       isLearned: json['isLearned'] as bool? ?? false,
       isFavorite: json['isFavorite'] as bool? ?? false,
     );
@@ -34,15 +40,33 @@ class WordModel {
         ?? int.tryParse(docId ?? '')
         ?? docId?.hashCode.abs()
         ?? Object().hashCode.abs();
+
+    final level = data['level'] as String?
+        ?? data['cefr'] as String?
+        ?? 'A1';
+
     return WordModel(
       id: rawId,
-      english: data['en'] as String? ?? data['english'] as String? ?? '',
-      turkish: data['tr'] as String? ?? data['turkish'] as String? ?? '',
-      level: data['level'] as String? ?? 'A1',
+      english: data['en'] as String? ?? data['english'] as String? ?? data['word'] as String? ?? '',
+      turkish: data['tr'] as String? ?? data['turkish'] as String? ?? data['meaning'] as String? ?? '',
+      level: level,
       category: data['category'] as String? ?? 'General',
+      difficultyWeight: (data['difficultyWeight'] as num?)?.toInt() ?? _defaultWeight(level),
+      cefr: data['cefr'] as String? ?? level,
       isLearned: false,
       isFavorite: false,
     );
+  }
+
+  static int _defaultWeight(String level) {
+    switch (level) {
+      case 'A1': return 1;
+      case 'A2': return 2;
+      case 'B1': return 3;
+      case 'B2': return 4;
+      case 'C1': return 5;
+      default: return 1;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -52,6 +76,8 @@ class WordModel {
       'turkish': turkish,
       'level': level,
       'category': category,
+      'difficultyWeight': difficultyWeight,
+      'cefr': cefr,
       'isLearned': isLearned,
       'isFavorite': isFavorite,
     };
@@ -63,6 +89,8 @@ class WordModel {
     String? turkish,
     String? level,
     String? category,
+    int? difficultyWeight,
+    String? cefr,
     bool? isLearned,
     bool? isFavorite,
   }) {
@@ -72,6 +100,8 @@ class WordModel {
       turkish: turkish ?? this.turkish,
       level: level ?? this.level,
       category: category ?? this.category,
+      difficultyWeight: difficultyWeight ?? this.difficultyWeight,
+      cefr: cefr ?? this.cefr,
       isLearned: isLearned ?? this.isLearned,
       isFavorite: isFavorite ?? this.isFavorite,
     );

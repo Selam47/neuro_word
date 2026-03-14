@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +31,7 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
   bool _initialized = false;
 
   static const _wordsPerRound = 5;
-  static const _totalRounds = 4; // 4 rounds × 5 = 20 words
+  static const _totalRounds = 4;
 
   @override
   void didChangeDependencies() {

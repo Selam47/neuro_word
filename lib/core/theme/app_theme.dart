@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 
@@ -38,7 +38,6 @@ class AppTheme {
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
-
       titleLarge: rajdhani.titleLarge?.copyWith(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w600,
@@ -54,7 +53,6 @@ class AppTheme {
         fontWeight: FontWeight.w500,
         fontSize: 16,
       ),
-
       bodyLarge: rajdhani.bodyLarge?.copyWith(
         color: AppColors.textPrimary,
         fontSize: 16,
@@ -67,7 +65,6 @@ class AppTheme {
         color: AppColors.textMuted,
         fontSize: 12,
       ),
-
       labelLarge: rajdhani.labelLarge?.copyWith(
         color: AppColors.electricBlue,
         fontWeight: FontWeight.w600,
@@ -105,7 +102,6 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -115,7 +111,6 @@ class AppTheme {
         ),
         iconTheme: const IconThemeData(color: AppColors.electricBlue),
       ),
-
       cardTheme: CardThemeData(
         color: AppColors.cardDark,
         elevation: 0,
@@ -125,7 +120,6 @@ class AppTheme {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.electricBlue,
@@ -143,7 +137,6 @@ class AppTheme {
           ),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.electricBlue,
@@ -155,7 +148,6 @@ class AppTheme {
           textStyle: textTheme.labelLarge,
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceMedium,
@@ -177,7 +169,6 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.electricBlue, width: 2),
         ),
       ),
-
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         selectedItemColor: AppColors.electricBlue,
@@ -185,12 +176,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-
       dividerTheme: const DividerThemeData(
         color: AppColors.cardBorder,
         thickness: 1,
       ),
-
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.electricBlue,
         foregroundColor: AppColors.deepSpace,

@@ -25,3 +25,7 @@ claude.json
 *.iml
 .DS_Store
 *.txt
+
+# Claude çalışma dosyaları ve yapılandırmaları
+claude_calisma
+.claude

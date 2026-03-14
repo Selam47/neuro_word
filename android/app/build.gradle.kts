@@ -66,10 +66,3 @@ android {
 flutter {
     source = "../.."
 }
-
-configurations.all {
-    resolutionStrategy {
-        force("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1")
-        force("androidx.multidex:multidex:2.0.1")
-    }
-}

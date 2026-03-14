@@ -25,7 +25,9 @@ class RankNotifier extends Notifier<RankState> {
     for (final w in ws.allWords) {
       if (learnedIds.contains(w.id)) {
         levelLearned[w.level] = (levelLearned[w.level] ?? 0) + 1;
-        score += kWeights[w.level] ?? 1;
+        score += w.difficultyWeight > 0
+            ? w.difficultyWeight
+            : (kWeights[w.level] ?? 1);
       }
     }
 

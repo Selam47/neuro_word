@@ -45,7 +45,7 @@ class AppStrings {
   static const dataStreamError = 'VERİ HATASI';
   static const all = 'TÜMÜ';
 
-  static const supporters = 'Destek Verenler';
+  static const supporters = 'Uygulama Hakkında';
   static const contact = 'İletişim';
 
   static const profile = 'PROFİL';
@@ -90,7 +90,7 @@ class AppStrings {
       'Geri bildirimleriniz uygulamamızı geliştirmemize yardımcı olur. '
       'Teşekkür ederiz!';
 
-  static const supportersTitle = 'DESTEK VERENLER';
+  static const supportersTitle = 'UYGULAMA HAKKINDA';
   static const supportersDescription =
       'Bu uygulamanın geliştirilmesine katkıda bulunan herkese teşekkürler.';
   static const developerLabel = 'Geliştirici';

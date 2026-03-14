@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,13 +103,13 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   void _onTimeout() {
     HapticFeedback.heavyImpact();
     setState(() {
-      _selectedOptionIndex = -1; // none selected
+      _selectedOptionIndex = -1;
     });
     _advanceAfterDelay();
   }
 
   void _onOptionSelected(int index) {
-    if (_selectedOptionIndex != null) return; // already answered
+    if (_selectedOptionIndex != null) return;
 
     _countdownTimer?.cancel();
     _timerController.stop();
@@ -412,7 +412,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
                 ),
                 child: Center(
                   child: Text(
-                    String.fromCharCode(65 + index), // A, B, C, D
+                    String.fromCharCode(65 + index),
                     style: GoogleFonts.orbitron(
                       color: borderColor,
                       fontSize: 11,
