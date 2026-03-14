@@ -1,0 +1,2672 @@
+[
+  {
+    "en": "aberrant",
+    "tr": "sapkın",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "abhor",
+    "tr": "nefret etmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "abject",
+    "tr": "aşağılık",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "abrogate",
+    "tr": "feshetmek",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "abscond",
+    "tr": "kaçmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "absolve",
+    "tr": "bağışlamak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "abstemious",
+    "tr": "ölçülü",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "abstain",
+    "tr": "çekimser kalmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "absurdity",
+    "tr": "saçmalık",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "abyss",
+    "tr": "uçurum",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "accentuate",
+    "tr": "vurgulamak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "acquiesce",
+    "tr": "boyun eğmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "acrid",
+    "tr": "keskin kokulu",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "acrimony",
+    "tr": "husumet",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "acumen",
+    "tr": "sezgi",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "adept",
+    "tr": "usta",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "adhere",
+    "tr": "sadık kalmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "admonish",
+    "tr": "azarlamak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "adulation",
+    "tr": "aşırı övgü",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "adulterate",
+    "tr": "kirletmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "advocate",
+    "tr": "savunmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "aesthetics",
+    "tr": "estetik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "affable",
+    "tr": "güler yüzlü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "affectation",
+    "tr": "yapmacıklık",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "affinity",
+    "tr": "yakınlık",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "affluent",
+    "tr": "varlıklı",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "aggrandize",
+    "tr": "abartmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "alacrity",
+    "tr": "çeviklik",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "alienate",
+    "tr": "yabancılaştırmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "alleviate",
+    "tr": "hafifletmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "aloof",
+    "tr": "mesafeli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "altruistic",
+    "tr": "özgeci",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "ambiguity",
+    "tr": "belirsizlik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ambiguous",
+    "tr": "muğlak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ambivalent",
+    "tr": "kararsız",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ameliorate",
+    "tr": "iyileştirmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "amiable",
+    "tr": "sevimli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "anachronism",
+    "tr": "anakronizm",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "annihilate",
+    "tr": "yok etmek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "antagonism",
+    "tr": "düşmanlık",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "antagonize",
+    "tr": "düşmanlaştırmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "apathy",
+    "tr": "ilgisizlik",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "appease",
+    "tr": "yatıştırmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "apprehensive",
+    "tr": "endişeli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "arbitrary",
+    "tr": "keyfi",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "archaic",
+    "tr": "arkaik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ardor",
+    "tr": "tutku",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "arduous",
+    "tr": "çetin",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "arrogance",
+    "tr": "küstahlık",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "articulate",
+    "tr": "akıcı konuşan",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ascertain",
+    "tr": "tespit etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "aspiration",
+    "tr": "özlem",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "aspire",
+    "tr": "hedeflemek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "assiduous",
+    "tr": "özenli",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "astute",
+    "tr": "zeki",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "atrocious",
+    "tr": "korkunç",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "atrocity",
+    "tr": "vahşet",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "atrophy",
+    "tr": "körelme",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "audacious",
+    "tr": "gözüpek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "audacity",
+    "tr": "cüret",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "augment",
+    "tr": "artırmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "austerity",
+    "tr": "kemer sıkma",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "austere",
+    "tr": "sade",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "authoritative",
+    "tr": "yetkili",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "autonomous",
+    "tr": "özerk",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "avarice",
+    "tr": "açgözlülük",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "aversion",
+    "tr": "tiksinti",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "baffled",
+    "tr": "şaşırmış",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "banal",
+    "tr": "bayağı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "belated",
+    "tr": "gecikmiş",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "belittle",
+    "tr": "küçümsemek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "belligerent",
+    "tr": "saldırgan",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "benevolent",
+    "tr": "hayırsever",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "benign",
+    "tr": "iyi huylu",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "bewilderment",
+    "tr": "şaşkınlık",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "bewitch",
+    "tr": "büyülemek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "biased",
+    "tr": "önyargılı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "blatant",
+    "tr": "göze batan",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "blight",
+    "tr": "mahvetmek",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "boisterous",
+    "tr": "gürültülü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "bolster",
+    "tr": "desteklemek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "bombastic",
+    "tr": "şişirilmiş",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "brazen",
+    "tr": "yüzsüz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "breach",
+    "tr": "ihlal",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "brevity",
+    "tr": "kısalık",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "brusque",
+    "tr": "kaba",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "buoyant",
+    "tr": "neşeli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "callous",
+    "tr": "katı kalpli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "candid",
+    "tr": "açık sözlü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "candor",
+    "tr": "açık sözlülük",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "capitulate",
+    "tr": "teslim olmak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "capricious",
+    "tr": "kaprisli",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "caustic",
+    "tr": "yakıcı",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "censure",
+    "tr": "kınama",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "chastise",
+    "tr": "cezalandırmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "chronic",
+    "tr": "kronik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "circumspect",
+    "tr": "temkinli",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "circumvent",
+    "tr": "atlatmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "clamor",
+    "tr": "gürültü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "clandestine",
+    "tr": "gizli",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "coalesce",
+    "tr": "birleşmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "coerce",
+    "tr": "zorlamak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "coercion",
+    "tr": "zorlama",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "cogent",
+    "tr": "ikna edici",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "coherent",
+    "tr": "tutarlı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "collusion",
+    "tr": "gizli anlaşma",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "complacent",
+    "tr": "umursamaz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "compassion",
+    "tr": "şefkat",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "conciliatory",
+    "tr": "uzlaşmacı",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "condescending",
+    "tr": "küçümseyici",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "confiscate",
+    "tr": "müsadere etmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "conjecture",
+    "tr": "tahmin",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "conscientious",
+    "tr": "vicdanlı",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "conspicuous",
+    "tr": "göze çarpan",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "contemplate",
+    "tr": "düşünmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "contentious",
+    "tr": "tartışmalı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "contrite",
+    "tr": "pişman",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "converge",
+    "tr": "yakınsamak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "conviction",
+    "tr": "inanç",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "convoluted",
+    "tr": "dolambaçlı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "copious",
+    "tr": "bol",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "corroborate",
+    "tr": "doğrulamak",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "corrosive",
+    "tr": "aşındırıcı",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "crave",
+    "tr": "arzulamak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "credibility",
+    "tr": "güvenilirlik",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "credulous",
+    "tr": "saf",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "culminate",
+    "tr": "doruğa ulaşmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "cursory",
+    "tr": "yüzeysel",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "curtail",
+    "tr": "kısaltmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "cynical",
+    "tr": "kinik",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "daunting",
+    "tr": "yıldırıcı",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dearth",
+    "tr": "kıtlık",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "debilitate",
+    "tr": "zayıflatmak",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "deceitful",
+    "tr": "aldatıcı",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "decipher",
+    "tr": "çözmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deduce",
+    "tr": "çıkarsama yapmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "defame",
+    "tr": "iftira atmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "deference",
+    "tr": "saygı gösterme",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "deflect",
+    "tr": "saptırmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deliberate",
+    "tr": "kasıtlı",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deleterious",
+    "tr": "zararlı",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "demeanor",
+    "tr": "tavır",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "denigrate",
+    "tr": "aşağılamak",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "denounce",
+    "tr": "kınamak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "depict",
+    "tr": "tasvir etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deplete",
+    "tr": "tüketmek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deprivation",
+    "tr": "yoksunluk",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "derision",
+    "tr": "alay",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "derogatory",
+    "tr": "aşağılayıcı",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "despondent",
+    "tr": "umutsuz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "deter",
+    "tr": "caydırmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "devious",
+    "tr": "sinsi",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "devout",
+    "tr": "dindar",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dexterity",
+    "tr": "beceri",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "didactic",
+    "tr": "öğretici",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "dilemma",
+    "tr": "ikilem",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "diligent",
+    "tr": "çalışkan",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "diminish",
+    "tr": "azaltmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "discern",
+    "tr": "ayırt etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "discrepancy",
+    "tr": "tutarsızlık",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "disdain",
+    "tr": "küçümseme",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "disillusioned",
+    "tr": "hayal kırıklığına uğramış",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dismantle",
+    "tr": "sökmek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "disparage",
+    "tr": "kötülemek",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "disparate",
+    "tr": "uyumsuz",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "disparity",
+    "tr": "eşitsizlik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dissipate",
+    "tr": "dağılmak",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "dissuade",
+    "tr": "vazgeçirmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "distort",
+    "tr": "çarpıtmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "distraught",
+    "tr": "perişan",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "docile",
+    "tr": "uysal",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dogmatic",
+    "tr": "bağnaz",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "dominant",
+    "tr": "baskın",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "dubious",
+    "tr": "şüpheli",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "duplicity",
+    "tr": "iki yüzlülük",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "earnest",
+    "tr": "ciddi",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "eccentric",
+    "tr": "eksantrik",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "elaborate",
+    "tr": "ayrıntılı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "elate",
+    "tr": "coşturmak",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "elicit",
+    "tr": "elde etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "eloquent",
+    "tr": "belagatli",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "elusive",
+    "tr": "kaypak",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "embezzle",
+    "tr": "zimmetine geçirmek",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "eminent",
+    "tr": "seçkin",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "emphatic",
+    "tr": "vurgulu",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "empirical",
+    "tr": "ampirik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "emulate",
+    "tr": "örnek almak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "endorse",
+    "tr": "onaylamak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "enervate",
+    "tr": "güçten düşürmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "enigmatic",
+    "tr": "esrarengiz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "enthrall",
+    "tr": "büyülemek",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "envisage",
+    "tr": "öngörmek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ephemeral",
+    "tr": "geçici",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "equivocal",
+    "tr": "muğlak",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "erratic",
+    "tr": "düzensiz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "erroneous",
+    "tr": "hatalı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "erudite",
+    "tr": "bilgili",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "esteem",
+    "tr": "saygınlık",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "evasive",
+    "tr": "kaçamak yapan",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "evince",
+    "tr": "göstermek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "evoke",
+    "tr": "uyandırmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exacerbate",
+    "tr": "ağırlaştırmak",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "exalt",
+    "tr": "yüceltmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "exasperate",
+    "tr": "sinir bozmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exemplary",
+    "tr": "örnek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exemplify",
+    "tr": "örneklendirmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exhaustive",
+    "tr": "kapsamlı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exonerate",
+    "tr": "aklamak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "exorbitant",
+    "tr": "fahiş",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "expedient",
+    "tr": "elverişli",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "explicit",
+    "tr": "açık seçik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exploit",
+    "tr": "sömürmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "extravagant",
+    "tr": "savurgan",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "extricate",
+    "tr": "kurtarmak",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "exuberant",
+    "tr": "coşkun",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "fabricate",
+    "tr": "uydurmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "fallacious",
+    "tr": "yanıltıcı",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "fastidious",
+    "tr": "seçici",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "fathom",
+    "tr": "kavramak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "feign",
+    "tr": "numara yapmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "fervent",
+    "tr": "ateşli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "fervor",
+    "tr": "şevk",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "fickle",
+    "tr": "dönek",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "flagrant",
+    "tr": "rezil",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "fluent",
+    "tr": "akıcı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "foreboding",
+    "tr": "kaygı",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "foresight",
+    "tr": "öngörü",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "formidable",
+    "tr": "ürkütücü",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "forthright",
+    "tr": "doğrudan",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "frugal",
+    "tr": "tutumlu",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "futile",
+    "tr": "sonuçsuz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "garner",
+    "tr": "biriktirmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "genuine",
+    "tr": "gerçek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "gloom",
+    "tr": "kasvet",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "gratify",
+    "tr": "memnun etmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "gratuitous",
+    "tr": "yersiz",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "gregarious",
+    "tr": "sosyal",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "grievance",
+    "tr": "şikâyet",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "guile",
+    "tr": "hile",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "gullible",
+    "tr": "kolayca kandırılır",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hamper",
+    "tr": "engellemek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "haughty",
+    "tr": "kibirli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hazardous",
+    "tr": "tehlikeli",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "heed",
+    "tr": "kulak vermek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "heighten",
+    "tr": "yoğunlaştırmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hideous",
+    "tr": "iğrenç",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "holistic",
+    "tr": "bütünsel",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hostile",
+    "tr": "düşmanca",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hyperbole",
+    "tr": "abartı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "hypocritical",
+    "tr": "ikiyüzlü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "illuminate",
+    "tr": "aydınlatmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "imminent",
+    "tr": "yakın",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "impartial",
+    "tr": "tarafsız",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "impeccable",
+    "tr": "kusursuz",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "impede",
+    "tr": "baltalamak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "imperative",
+    "tr": "zorunlu",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "impetuous",
+    "tr": "aceleci",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "implicit",
+    "tr": "örtük",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "implicate",
+    "tr": "karıştırmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "impose",
+    "tr": "dayatmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "inadvertent",
+    "tr": "kazara",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "incessant",
+    "tr": "durmaksızın",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "incisive",
+    "tr": "keskin",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "incongruous",
+    "tr": "bağdaşmayan",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "indifferent",
+    "tr": "ilgisiz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "indignation",
+    "tr": "öfke",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "induce",
+    "tr": "ikna etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "indulgent",
+    "tr": "şımartıcı",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "inevitable",
+    "tr": "kaçınılmaz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "inexorable",
+    "tr": "amansız",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "infer",
+    "tr": "çıkarım yapmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "inflict",
+    "tr": "acı çektirmek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ingenious",
+    "tr": "dahiyane",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "inhibit",
+    "tr": "kısıtlamak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "innate",
+    "tr": "doğuştan",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "instigate",
+    "tr": "kışkırtmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "integrity",
+    "tr": "dürüstlük",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "intricate",
+    "tr": "karmaşık",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "intuitive",
+    "tr": "sezgisel",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "invoke",
+    "tr": "çağırmak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "irate",
+    "tr": "öfkeli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "jeopardize",
+    "tr": "tehlikeye atmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "jubilant",
+    "tr": "sevinçli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "judicious",
+    "tr": "basiretli",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "keen",
+    "tr": "hevesli",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "kindle",
+    "tr": "alevlendirmek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "lament",
+    "tr": "yas tutmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "latent",
+    "tr": "gizil",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "lavish",
+    "tr": "cömert",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "legitimate",
+    "tr": "meşru",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "lenient",
+    "tr": "hoşgörülü",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "levity",
+    "tr": "hafiflik",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "liberate",
+    "tr": "özgürleştirmek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "linger",
+    "tr": "oyalanmak",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "loathe",
+    "tr": "tiksinti duymak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "lofty",
+    "tr": "yüce",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "loquacious",
+    "tr": "konuşkan",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "lucid",
+    "tr": "berrak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "lucrative",
+    "tr": "kârlı",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "lurk",
+    "tr": "gizlenmek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "magnanimous",
+    "tr": "büyük gönüllü",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "malevolent",
+    "tr": "kötü niyetli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "manipulative",
+    "tr": "manipülatif",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "meander",
+    "tr": "dolaşmak",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "mediocre",
+    "tr": "vasat",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "meticulous",
+    "tr": "titiz",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "mitigate",
+    "tr": "yumuşatmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "mock",
+    "tr": "alay etmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "momentous",
+    "tr": "önemli",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "monotonous",
+    "tr": "monoton",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "morose",
+    "tr": "asık suratlı",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "mundane",
+    "tr": "sıradan",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "murky",
+    "tr": "bulanık",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "negligence",
+    "tr": "ihmal",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "nonchalant",
+    "tr": "soğukkanlı",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "notion",
+    "tr": "kavram",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "notorious",
+    "tr": "kötü şöhretli",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "obfuscate",
+    "tr": "karmaşıklaştırmak",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "obsolete",
+    "tr": "eskimiş",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "obstinate",
+    "tr": "inatçı",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "obscure",
+    "tr": "muğlak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "offset",
+    "tr": "dengelemek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ominous",
+    "tr": "uğursuz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "opulent",
+    "tr": "görkemli",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "ordeal",
+    "tr": "çile",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ostensible",
+    "tr": "görünürdeki",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "overbearing",
+    "tr": "baskıcı",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pacify",
+    "tr": "yatıştırmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "paramount",
+    "tr": "başat",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "partisan",
+    "tr": "tarafgir",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "patronize",
+    "tr": "küçümsemek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pedantic",
+    "tr": "bilgiçlik taslayan",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "perceive",
+    "tr": "algılamak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "perfunctory",
+    "tr": "üstünkörü",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "perpetual",
+    "tr": "sürekli",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "persist",
+    "tr": "ısrar etmek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pervasive",
+    "tr": "yaygın",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pessimistic",
+    "tr": "kötümser",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "plausible",
+    "tr": "makul",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pompous",
+    "tr": "şişinmiş",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "potent",
+    "tr": "güçlü",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "pragmatic",
+    "tr": "pratik",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "precarious",
+    "tr": "istikrarsız",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "precipitate",
+    "tr": "tetiklemek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "presumptuous",
+    "tr": "küstah",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "prevalent",
+    "tr": "hâkim",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "procrastinate",
+    "tr": "ertelemek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "profound",
+    "tr": "derin",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "prohibit",
+    "tr": "yasaklamak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "prolific",
+    "tr": "üretken",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "propagate",
+    "tr": "yaymak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "prudent",
+    "tr": "ihtiyatlı",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "provoke",
+    "tr": "kışkırtmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "quell",
+    "tr": "bastırmak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "radical",
+    "tr": "radikal",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ramification",
+    "tr": "sonuç",
+    "category": "Professional",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "reckless",
+    "tr": "düşüncesiz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "reconcile",
+    "tr": "uzlaştırmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "rectify",
+    "tr": "düzeltmek",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "refute",
+    "tr": "çürütmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "relentless",
+    "tr": "durdurulmaz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "reluctant",
+    "tr": "isteksiz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "remorse",
+    "tr": "pişmanlık",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "renounce",
+    "tr": "vazgeçmek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "repudiate",
+    "tr": "reddetmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "resentment",
+    "tr": "kırgınlık",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "resilient",
+    "tr": "dayanıklı",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "restrain",
+    "tr": "dizginlemek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "retaliate",
+    "tr": "misilleme yapmak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "reticent",
+    "tr": "suskun",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "reverence",
+    "tr": "derin saygı",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "rhetoric",
+    "tr": "retorik",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "rigid",
+    "tr": "katı",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "rudimentary",
+    "tr": "ilkel",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ruthless",
+    "tr": "acımasız",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "sagacious",
+    "tr": "bilge",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "sanctify",
+    "tr": "kutsamak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "satirize",
+    "tr": "hicvetmek",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "scrutinize",
+    "tr": "didik didik etmek",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "segregate",
+    "tr": "ayırmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "serenity",
+    "tr": "huzur",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "skeptical",
+    "tr": "şüpheci",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "slander",
+    "tr": "iftira",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "sluggish",
+    "tr": "ağır",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "sovereign",
+    "tr": "egemen",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "spontaneous",
+    "tr": "kendiliğinden",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "spurious",
+    "tr": "asılsız",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "steadfast",
+    "tr": "sarsılmaz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "stimulate",
+    "tr": "uyarmak",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "stoic",
+    "tr": "duygusuz",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "stringent",
+    "tr": "sıkı",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "strenuous",
+    "tr": "yorucu",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "subjugate",
+    "tr": "boyunduruk altına almak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "substantiate",
+    "tr": "kanıtlamak",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "subtle",
+    "tr": "ince",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "succumb",
+    "tr": "yenik düşmek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "superfluous",
+    "tr": "lüzumsuz",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "suppress",
+    "tr": "baskılamak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "surmount",
+    "tr": "üstesinden gelmek",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "susceptible",
+    "tr": "savunmasız",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tactful",
+    "tr": "nazik",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tenacious",
+    "tr": "azimli",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tenacity",
+    "tr": "azim",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tenuous",
+    "tr": "temelsiz",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "tentative",
+    "tr": "geçici",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tepid",
+    "tr": "ılık",
+    "category": "General",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "terminate",
+    "tr": "sonlandırmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "transient",
+    "tr": "kısa süreli",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "trivial",
+    "tr": "önemsiz",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "turbulent",
+    "tr": "çalkantılı",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "tyrannical",
+    "tr": "zorba",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ubiquitous",
+    "tr": "her yerde bulunan",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "undermine",
+    "tr": "zayıflatmak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "unequivocal",
+    "tr": "kesin",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "unprecedented",
+    "tr": "emsalsiz",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "uphold",
+    "tr": "desteklemek",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "usurp",
+    "tr": "gaspetmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "utilitarian",
+    "tr": "faydacı",
+    "category": "Academic",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "vacillate",
+    "tr": "bocalamak",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "vacuous",
+    "tr": "boş",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "valiant",
+    "tr": "yiğit",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "validate",
+    "tr": "geçerliliğini onaylamak",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "vanity",
+    "tr": "kibir",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "vehement",
+    "tr": "şiddetli",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "vendetta",
+    "tr": "kan davası",
+    "category": "Social",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "venerate",
+    "tr": "yüceltmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "verbose",
+    "tr": "söz kalabalıklı",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "versatile",
+    "tr": "çok yönlü",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "viable",
+    "tr": "uygulanabilir",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "vindicate",
+    "tr": "temize çıkarmak",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "volatile",
+    "tr": "değişken",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "wary",
+    "tr": "ihtiyatlı",
+    "category": "General",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "wield",
+    "tr": "kullanmak",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "yearn",
+    "tr": "hasret çekmek",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "zeal",
+    "tr": "coşku",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "zealous",
+    "tr": "hevesli",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "abdicate",
+    "tr": "tahttan çekilmek",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "aberration",
+    "tr": "sapma",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "apocryphal",
+    "tr": "gerçekliği şüpheli",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "cynicism",
+    "tr": "kinizm",
+    "category": "Academic",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "deft",
+    "tr": "becerikli",
+    "category": "Professional",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "demise",
+    "tr": "son",
+    "category": "Formal",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "depravity",
+    "tr": "ahlaki bozukluk",
+    "category": "Formal",
+    "difficultyWeight": 5
+  },
+  {
+    "en": "disconcert",
+    "tr": "şaşırtmak",
+    "category": "Social",
+    "difficultyWeight": 4
+  },
+  {
+    "en": "ebullient",
+    "tr": "taşkın neşeli",
+    "category": "Social",
+    "difficultyWeight": 5
+  }
+]

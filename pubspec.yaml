@@ -36,6 +36,7 @@ flutter:
     - assets/sounds/
     - assets/icon/
     - assets/animations/
+    - assets/data/
 
 
 flutter_launcher_icons:

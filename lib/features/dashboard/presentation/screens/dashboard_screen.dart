@@ -7,15 +7,14 @@ import 'package:shimmer/shimmer.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
+import 'package:neuro_word/features/learning/providers/rank_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
-
 import 'package:neuro_word/shared/widgets/neon_search_bar.dart';
 import 'package:neuro_word/shared/widgets/word_tile.dart';
-
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -56,7 +55,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final wordState = ref.watch(wordProvider);
@@ -93,19 +91,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Text(
-                    'Oxford standartlarında 3000+ kelime ile profesyonel bir deneyim.',
-                    style: GoogleFonts.rajdhani(
-                      color: AppColors.textSecondary.withValues(alpha: 0.7),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
-                      height: 1.4,
-                    ),
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Oxford standartlarında ',
+                        style: GoogleFonts.rajdhani(
+                          color: AppColors.textSecondary.withValues(alpha: 0.7),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                          height: 1.4,
+                        ),
+                      ),
+                      const _NeonGlitch3500(),
+                      Text(
+                        ' kelime ile profesyonel bir deneyim.',
+                        style: GoogleFonts.rajdhani(
+                          color: AppColors.textSecondary.withValues(alpha: 0.7),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
-
 
                 const SizedBox(height: 12),
 
@@ -150,7 +163,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 _AdvancedFilterBar(wordState: wordState),
                 const SizedBox(height: 16),
-
 
                 if (wordState.isLoading)
                   const _ShimmerWordList()
@@ -212,8 +224,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 }
-
-
 
 class _AdvancedFilterBar extends ConsumerWidget {
   const _AdvancedFilterBar({required this.wordState});
@@ -338,7 +348,6 @@ class _AdvancedFilterBar extends ConsumerWidget {
   }
 }
 
-
 class _LiveWordList extends ConsumerStatefulWidget {
   const _LiveWordList({required this.words, required this.isFiltered});
   final List<WordModel> words;
@@ -420,10 +429,7 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
           separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final word = widget.words[index];
-            return WordTile(
-              key: ValueKey(word.id),
-              word: word,
-            );
+            return WordTile(key: ValueKey(word.id), word: word);
           },
         ),
         if (hasMore) _buildLoadMore(),
@@ -717,8 +723,10 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _FeatureCardsGrid extends StatelessWidget {
+class _FeatureCardsGrid extends ConsumerWidget {
   const _FeatureCardsGrid();
+
+  static const _gameRoutes = {'/flashcards', '/cyber-match', '/neon-pulse'};
 
   static const _features = [
     _FeatureItem(
@@ -765,8 +773,17 @@ class _FeatureCardsGrid extends StatelessWidget {
     ),
   ];
 
+  void _onGameTap(BuildContext context, String route) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _LevelSelectorSheet(route: route),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -779,10 +796,15 @@ class _FeatureCardsGrid extends StatelessWidget {
       itemCount: _features.length,
       itemBuilder: (context, index) {
         final f = _features[index];
+        final isGame = f.route != null && _gameRoutes.contains(f.route);
         return GlassCard(
           padding: const EdgeInsets.all(16),
           accentColor: f.color,
-          onTap: f.route != null ? () => context.push(f.route!) : null,
+          onTap: f.route != null
+              ? () => isGame
+                    ? _onGameTap(context, f.route!)
+                    : context.push(f.route!)
+              : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -853,6 +875,258 @@ class _FeatureItem {
   final String description;
   final Color color;
   final String? route;
+}
+
+class _LevelSelectorSheet extends ConsumerWidget {
+  const _LevelSelectorSheet({required this.route});
+  final String route;
+
+  static const _orderedLevels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wordState = ref.watch(wordProvider);
+    final rankState = ref.watch(rankProvider);
+
+    final b2Mastery = rankState.levelMastery['B2'] ?? 0.0;
+    final c1Unlocked = b2Mastery >= 0.60;
+
+    final levelCounts = <String, int>{};
+    for (final w in wordState.allWords) {
+      levelCounts[w.level] = (levelCounts[w.level] ?? 0) + 1;
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: AppColors.cardBorder, width: 1)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: AppColors.cardBorder,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          Row(
+            children: [
+              Container(
+                width: 3,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: AppColors.electricBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'SEVİYE SEÇ',
+                style: GoogleFonts.orbitron(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 13),
+            child: Text(
+              'Hangi seviyede pratik yapmak istiyorsun?',
+              style: GoogleFonts.rajdhani(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _LevelTile(
+            label: 'Tüm Seviyeler',
+            sublabel: '${wordState.allWords.length} kelime',
+            color: AppColors.electricBlue,
+            isLocked: false,
+            onTap: () {
+              Navigator.pop(context);
+              context.push(route);
+            },
+          ),
+          const SizedBox(height: 8),
+
+          ...(_orderedLevels.map((level) {
+            final count = levelCounts[level] ?? 0;
+            final isC1 = level == 'C1';
+            final locked = isC1 && !c1Unlocked;
+            final b2Pct = (b2Mastery * 100).toStringAsFixed(0);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _LevelTile(
+                label: level,
+                sublabel: locked
+                    ? 'Kilidi aç: B2\'yi %$b2Pct → %60 tamamla'
+                    : count > 0
+                    ? '$count kelime'
+                    : 'Kelime yüklenmedi',
+                color: AppColors.forLevel(level),
+                isLocked: locked,
+                isDisabled: count == 0 && !locked,
+                onTap: locked || count == 0
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                        context.push('$route?level=$level');
+                      },
+              ),
+            );
+          })),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelTile extends StatelessWidget {
+  const _LevelTile({
+    required this.label,
+    required this.sublabel,
+    required this.color,
+    required this.isLocked,
+    this.isDisabled = false,
+    this.onTap,
+  });
+
+  final String label;
+  final String sublabel;
+  final Color color;
+  final bool isLocked;
+  final bool isDisabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = (isLocked || isDisabled)
+        ? AppColors.textMuted
+        : color;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: (isLocked || isDisabled)
+              ? AppColors.surfaceMedium.withValues(alpha: 0.6)
+              : effectiveColor.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: (isLocked || isDisabled)
+                ? AppColors.cardBorder
+                : effectiveColor.withValues(alpha: 0.4),
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: effectiveColor.withValues(alpha: 0.12),
+                border: Border.all(
+                  color: effectiveColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: isLocked
+                    ? Icon(
+                        Icons.lock_rounded,
+                        color: AppColors.textMuted,
+                        size: 18,
+                      )
+                    : Text(
+                        label.length <= 2 ? label : label[0],
+                        style: GoogleFonts.orbitron(
+                          color: effectiveColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.orbitron(
+                      color: (isLocked || isDisabled)
+                          ? AppColors.textMuted
+                          : AppColors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    sublabel,
+                    style: GoogleFonts.rajdhani(
+                      color: isLocked
+                          ? AppColors.accentOrange.withValues(alpha: 0.8)
+                          : AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!isLocked && !isDisabled)
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: effectiveColor.withValues(alpha: 0.6),
+                size: 14,
+              ),
+            if (isLocked)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.accentOrange.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.accentOrange.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  'KİLİTLİ',
+                  style: GoogleFonts.orbitron(
+                    color: AppColors.accentOrange,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ShimmerWordList extends StatelessWidget {
@@ -931,6 +1205,123 @@ class _ErrorCard extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NeonGlitch3500 extends StatefulWidget {
+  const _NeonGlitch3500();
+
+  @override
+  State<_NeonGlitch3500> createState() => _NeonGlitch3500State();
+}
+
+class _NeonGlitch3500State extends State<_NeonGlitch3500>
+    with TickerProviderStateMixin {
+  late AnimationController _pulseCtrl;
+  late AnimationController _glitchCtrl;
+  late Animation<double> _pulse;
+  late Animation<double> _glitch;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat(reverse: true);
+
+    _pulse = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
+    );
+
+    _glitchCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+    );
+    _glitch = CurvedAnimation(parent: _glitchCtrl, curve: Curves.linear);
+
+    _scheduleGlitch();
+  }
+
+  void _scheduleGlitch() {
+    Future.delayed(const Duration(milliseconds: 3200), () async {
+      if (!mounted) return;
+      await _glitchCtrl.forward();
+      if (!mounted) return;
+      _glitchCtrl.reset();
+      await Future.delayed(const Duration(milliseconds: 60));
+      if (!mounted) return;
+      await _glitchCtrl.forward();
+      if (!mounted) return;
+      _glitchCtrl.reset();
+      _scheduleGlitch();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    _glitchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_pulseCtrl, _glitchCtrl]),
+      builder: (context, child) {
+        final isGlitching = _glitch.value > 0;
+        final offsetX = isGlitching ? (_glitch.value * 3) : 0.0;
+
+        return Transform.translate(
+          offset: Offset(offsetX, 0),
+          child: ShaderMask(
+            shaderCallback: (bounds) => LinearGradient(
+              colors: isGlitching
+                  ? [
+                      const Color(0xFFFF2D55),
+                      const Color(0xFF00D2FF),
+                      const Color(0xFF7DF9FF),
+                    ]
+                  : [
+                      AppColors.electricBlue,
+                      const Color(0xFF7DF9FF),
+                      AppColors.electricBlue,
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(bounds),
+            child: Text(
+              '3500+',
+              style: GoogleFonts.orbitron(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+                height: 1.4,
+                shadows: [
+                  Shadow(
+                    color: isGlitching
+                        ? const Color(0xFFFF2D55).withOpacity(0.9)
+                        : AppColors.electricBlue.withOpacity(
+                            0.5 + 0.4 * _pulse.value,
+                          ),
+                    blurRadius: isGlitching ? 20 : 10,
+                    offset: Offset(isGlitching ? -2 : 0, 0),
+                  ),
+                  if (isGlitching)
+                    Shadow(
+                      color: const Color(0xFF00D2FF).withOpacity(0.8),
+                      blurRadius: 16,
+                      offset: const Offset(2, 0),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
