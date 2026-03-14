@@ -73,7 +73,6 @@ Bu proje, tek bir vizyon ve yoğun bir geliştirme sürecinin ürünüdür:
 Sorularınız ve iş birliği teklifleriniz için bana ulaşın:
 
 📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)    
-📍 **Geliştirici:** Abdülselam Kaya
 
 <div align="center">
 <br />
