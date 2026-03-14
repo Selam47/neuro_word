@@ -29,3 +29,4 @@ claude.json
 # Claude çalışma dosyaları ve yapılandırmaları
 claude_calisma
 .claude
+.firebase\logs

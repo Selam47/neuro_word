@@ -11,7 +11,7 @@
 
 <br />
 
-**Neuro Word**, sıradan dil öğrenme uygulamalarından sıkılanlar için tasarlandı. 
+**Neuro Word**, sıradan dil öğrenme uygulamalarından sıkılanlar için tasarlandı.  
 Yapay zeka estetiği, fütüristik grafikler ve oyunlaştırılmış öğrenme modülleriyle kelime haznenizi bir üst seviyeye taşıyın.
 
 ---
@@ -59,33 +59,20 @@ Projeyi yerel ortamınızda en yüksek performansta çalıştırmak için:
 
 ---
 
-## 🎖️ Geliştirici Ekibi
+## 🎖️ Geliştirici
 
-Bu proje, büyük bir tutku ve ekip çalışmasının ürünüdür:
+Bu proje, tek bir vizyon ve yoğun bir geliştirme sürecinin ürünüdür:
 
-#### 👑 Proje Lideri
+#### 👑 Geliştirici & Proje Sahibi
 * **Abdülselam Kaya**
-
-#### ⚙️ DevOps & Sistem Mimarisi
-* **Abdullah Kaya**
-
-* #### 💻 Frontend Geliştirme
-* **Melik Kaya** | **Sevgi Kaya** 
-
-#### 🎨 Tasarım & UI/UX Ekibi
-* **Hasan Düzgör** | **Yusuf Serhat Temel** | **Abdurrahman Oğuzbey**
-
-#### 🔙 Backend & Veri Yönetimi
-* **Mehmet Ali Guda** | **Serhat Enes Uçan** | **Adnan Sami** | **Eren Demir**
 
 ---
 
 ## 📧 İletişim
 
-Sorularınız ve iş birliği teklifleriniz için bize ulaşın:
+Sorularınız ve iş birliği teklifleriniz için bana ulaşın:
 
-📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)  
-📍 **Geliştirici:** Abdülselam Kaya
+📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)    
 
 <div align="center">
 <br />
