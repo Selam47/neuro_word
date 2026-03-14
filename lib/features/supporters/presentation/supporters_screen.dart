@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
+import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
 class SupportersScreen extends StatelessWidget {
@@ -82,6 +83,40 @@ class SupportersScreen extends StatelessWidget {
                   name: 'Mehmet Emin Dikmen',
                   accentColor: AppColors.cyberPurple,
                   iconData: Icons.favorite_rounded,
+                ),
+
+                const SizedBox(height: 32),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMedium,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.cardBorder,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: AppColors.textMuted,
+                        size: 28,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        AppStrings.legalDisclaimer,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          color: AppColors.textMuted,
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 48),

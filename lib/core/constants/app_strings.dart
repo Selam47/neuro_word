@@ -1,21 +1,7 @@
 class AppStrings {
   AppStrings._();
 
-  static const appTitle = 'Neuro Word';
-  static const appSubtitle = 'İngilizce Öğrenme Platformu';
-
-  static const splashLoading = 'Sistem başlatılıyor...';
-
-  static const welcomeBack = 'Tekrar Hoş Geldin';
-  static const heroDescription =
-      'Kapsamlı İngilizce-Türkçe dil öğrenme platformun. '
-      'Akıllı alıştırmalarla kelime, gramer ve konuşma becerilerini geliştir.';
-  static const startLearning = 'Öğrenmeye Başla';
-  static const exploreModules = 'Modülleri Keşfet';
-
-  static const wordsLearned = 'Öğrenilen\nKelime';
-  static const totalWords = 'Toplam\nKelime';
-  static const levelsAvailable = 'Mevcut\nSeviye';
+  static const appTitle = 'Neuro Word: Academic English';
 
   static const learningModules = 'Öğrenme Modülleri';
   static const learningModulesSubtitle =
@@ -36,17 +22,8 @@ class AppStrings {
 
   static const neuralDataStream = 'Kelime Veritabanı';
   static const dataStreamSubtitle = 'Firebase veritabanından yüklenen veri.';
-  static const shuffle = 'Karıştır';
-  static const reload = 'Yenile';
-  static const entries = 'kayıt';
-  static const noWordsFound = 'Bu filtre için kelime bulunamadı.';
   static const loadMore = 'DAHA FAZLA YÜKLE';
   static const remaining = 'kalan';
-  static const dataStreamError = 'VERİ HATASI';
-  static const all = 'TÜMÜ';
-
-  static const supporters = 'Uygulama Hakkında';
-  static const contact = 'İletişim';
 
   static const profile = 'PROFİL';
   static const learner = 'ÖĞRENCİ';
@@ -91,11 +68,9 @@ class AppStrings {
       'Teşekkür ederiz!';
 
   static const supportersTitle = 'UYGULAMA HAKKINDA';
-  static const supportersDescription =
-      'Bu uygulamanın geliştirilmesine katkıda bulunan herkese teşekkürler.';
-  static const developerLabel = 'Geliştirici';
-  static const developerName = 'Abdülselam Kaya';
-  static const specialThanks = 'Özel Teşekkürler';
-  static const communitySupport =
-      'Tüm beta test kullanıcılarına ve geri bildirim sağlayan topluluğumuza teşekkür ederiz.';
+
+  static const legalDisclaimer =
+      'Bu uygulama, Oxford University Press tarafından yayınlanan '
+      'halka açık kelime listelerinden esinlenerek hazırlanmış '
+      'bağımsız bir araçtır.';
 }

@@ -212,12 +212,6 @@ class WordNotifier extends Notifier<WordState> {
     state = state.copyWith(filteredWords: result);
   }
 
-  void shuffle() {
-    final shuffled = List<WordModel>.from(state.filteredWords)
-      ..shuffle(_random);
-    state = state.copyWith(filteredWords: shuffled);
-  }
-
   List<WordModel> getRandomWords(int count, {String? level}) {
     final learned = ref.read(learnedWordsProvider);
     var pool = state.allWords.where((w) => !learned.contains(w.id));

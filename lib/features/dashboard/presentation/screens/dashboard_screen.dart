@@ -62,13 +62,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       body: FuturisticBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 _TopBar(
                   onProfileTap: () => context.push('/profile'),
                   onMenuAction: (action) async {
@@ -95,7 +97,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        'Oxford standartlarında ',
+                        'Oxford University Press açık listelerinden esinlenmiş ',
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary.withValues(alpha: 0.7),
                           fontSize: 15,
@@ -106,7 +108,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                       const _NeonGlitch3500(),
                       Text(
-                        ' kelime ile profesyonel bir deneyim.',
+                        ' akademik kelime ile profesyonel bir deneyim.',
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary.withValues(alpha: 0.7),
                           fontSize: 15,
@@ -179,7 +181,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
 
                 const SizedBox(height: 24),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -537,8 +540,6 @@ class _TopBar extends StatelessWidget {
 
   final VoidCallback onProfileTap;
   final Function(String) onMenuAction;
-
-  Null get style => null;
 
   @override
   Widget build(BuildContext context) {

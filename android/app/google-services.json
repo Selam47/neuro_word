@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "289099207166",
+    "project_id": "neuro-word",
+    "storage_bucket": "neuro-word.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289099207166:android:8eabb4a1a0620ebc1b30af",
+        "android_client_info": {
+          "package_name": "com.neuroword.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "289099207166-mig0mqnq852opbth1tu36jfndgbgt94d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.neuroword.app",
+            "certificate_hash": "3c4cc2eb67e825fefb93be9e38fc9f69a183b9b7"
+          }
+        },
+        {
+          "client_id": "289099207166-ah2da5o5bu7dohkolpintke8e16jfnuc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkpltkgZ7pnzuz6si06mGHSAUB_S-ilr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "289099207166-ah2da5o5bu7dohkolpintke8e16jfnuc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "289099207166-5slcqbio8tqt7b4nci30v8aqcctfon70.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.neuroword.app.neuroWord"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

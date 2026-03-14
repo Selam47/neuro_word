@@ -109,7 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
-                _RankInfoCard(rankState: rankState),
+                const _RankInfoCard(),
                 const SizedBox(height: 28),
 
                 _buildSectionTitle(AppStrings.levelBreakdown),
@@ -348,7 +348,7 @@ class ProfileScreen extends ConsumerWidget {
 
                 _buildSectionTitle('RANK HİYERARŞİSİ'),
                 const SizedBox(height: 16),
-                _RankHierarchySection(rankState: rankState),
+                const _RankHierarchySection(),
                 const SizedBox(height: 32),
               ],
             ),
@@ -750,12 +750,12 @@ class _RankBadge extends StatelessWidget {
 }
 
 
-class _RankInfoCard extends StatelessWidget {
-  const _RankInfoCard({required this.rankState});
-  final RankState rankState;
+class _RankInfoCard extends ConsumerWidget {
+  const _RankInfoCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rankState = ref.watch(rankProvider);
     final isPremium = rankState.isPremiumRank;
     final accentColor =
         isPremium ? AppColors.accentOrange : AppColors.electricBlue;
@@ -945,9 +945,8 @@ class _RankInfoCard extends StatelessWidget {
 }
 
 
-class _RankHierarchySection extends StatelessWidget {
-  const _RankHierarchySection({required this.rankState});
-  final RankState rankState;
+class _RankHierarchySection extends ConsumerWidget {
+  const _RankHierarchySection();
 
   static const Map<int, IconData> _rankIcons = {
     1: Icons.bolt_rounded,
@@ -959,7 +958,8 @@ class _RankHierarchySection extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rankState = ref.watch(rankProvider);
     final effectiveId = rankState.effectiveRankId;
 
     return Column(

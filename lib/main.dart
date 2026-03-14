@@ -10,14 +10,30 @@ import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:neuro_word/firebase_options.dart';
 
+Future<bool> _initializeFirebase() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    return true;
+  } on FirebaseException catch (e) {
+    debugPrint('Firebase init failed [${e.code}]: ${e.message}');
+    return false;
+  } catch (e, stack) {
+    debugPrint('Firebase init unexpected error: $e\n$stack');
+    return false;
+  }
+}
+
 void main() {
   runZonedGuarded<void>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      final firebaseReady = await _initializeFirebase();
+      if (!firebaseReady) {
+        debugPrint('CRITICAL: Firebase failed. Check google-services.json SHA-1 fingerprints.');
+      }
 
       final profileService = UserProfileService();
       await profileService.init();
