@@ -5,30 +5,34 @@ class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collectionPath = 'words';
 
-  Future<List<WordModel>> fetchWords({String? level}) async {
+  Future<List<WordModel>> fetchWords({List<String>? levels}) async {
     try {
-      final List<WordModel> allWords = [];
-
       Query query = _firestore.collection(_collectionPath);
-      if (level != null && level.isNotEmpty) {
-        query = query.where('level', isEqualTo: level);
+      if (levels != null && levels.isNotEmpty) {
+        query = query.where('level', whereIn: levels);
       }
-
       final snapshot = await query.get();
-      allWords.addAll(
-        snapshot.docs.map((doc) {
-          return WordModel.fromFirestore(
-            doc.data() as Map<String, dynamic>,
-            docId: doc.id,
-          );
-        }),
-      );
-
-      return allWords;
+      return snapshot.docs.map((doc) {
+        return WordModel.fromFirestore(
+          doc.data() as Map<String, dynamic>,
+          docId: doc.id,
+        );
+      }).toList();
     } on FirebaseException catch (e) {
       throw Exception('Firestore [${e.code}]: ${e.message}');
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> saveUserProfile(
+    String username,
+    String proficiencyLevel,
+  ) async {
+    await _firestore.collection('users').add({
+      'username': username,
+      'proficiencyLevel': proficiencyLevel,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 }

@@ -16,18 +16,22 @@ import 'package:neuro_word/shared/widgets/glass_card.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  static const int _wordGoal = 2000;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ws = ref.watch(wordProvider);
     final learnedIds = ref.watch(learnedWordsProvider);
     final savedIds = ref.watch(savedWordsProvider);
     final rankState = ref.watch(rankProvider);
-    final learned = learnedIds.length;
-    final total = ws.allWords.length;
-    final progress = total > 0 ? learned / _wordGoal : 0.0;
-    final username = UserProfileService().username.toUpperCase();
+    final profile = UserProfileService();
+    final learnedInPool = learnedIds.length;
+    final preLearnedCount = profile.preLearnedCount;
+    final effectiveLearned = learnedInPool + preLearnedCount;
+    final poolTotal = ws.allWords.length;
+    final effectiveTotal = poolTotal + preLearnedCount;
+    final progress = effectiveTotal > 0
+        ? (effectiveLearned / effectiveTotal).clamp(0.0, 1.0)
+        : 0.0;
+    final username = profile.username.toUpperCase();
 
     final catMap = <String, int>{};
     for (final w in ws.allWords) {
@@ -36,6 +40,7 @@ class ProfileScreen extends ConsumerWidget {
     final categories = catMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
+    const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1'];
     final levelMap = <String, int>{};
     final learnedLevelMap = <String, int>{};
     for (final w in ws.allWords) {
@@ -44,6 +49,9 @@ class ProfileScreen extends ConsumerWidget {
         learnedLevelMap[w.level] = (learnedLevelMap[w.level] ?? 0) + 1;
       }
     }
+    final orderedLevels = levelOrder
+        .where((lv) => levelMap.containsKey(lv))
+        .toList();
     final savedWords = ws.allWords.where((w) => savedIds.contains(w.id)).toList();
     final learnedWords = ws.allWords.where((w) => learnedIds.contains(w.id)).toList();
 
@@ -58,7 +66,11 @@ class ProfileScreen extends ConsumerWidget {
                 _buildTopBar(context),
                 const SizedBox(height: 28),
 
-                _ProgressRing(progress: progress, learned: learned),
+                _ProgressRing(
+                  progress: progress,
+                  learned: effectiveLearned,
+                  total: effectiveTotal,
+                ),
                 const SizedBox(height: 16),
 
                 Text(
@@ -77,13 +89,13 @@ class ProfileScreen extends ConsumerWidget {
                 Row(
                   children: [
                     _StatCard(
-                      value: '$learned',
+                      value: '$effectiveLearned',
                       label: AppStrings.learned,
                       color: AppColors.neonGreen,
                     ),
                     const SizedBox(width: 12),
                     _StatCard(
-                      value: '$total',
+                      value: '$effectiveTotal',
                       label: AppStrings.totalWordsLabel,
                       color: AppColors.electricBlue,
                     ),
@@ -102,9 +114,8 @@ class ProfileScreen extends ConsumerWidget {
 
                 _buildSectionTitle(AppStrings.levelBreakdown),
                 const SizedBox(height: 12),
-                ...levelMap.entries.map((e) {
-                  final lv = e.key;
-                  final tot = e.value;
+                ...orderedLevels.map((lv) {
+                  final tot = levelMap[lv]!;
                   final lea = learnedLevelMap[lv] ?? 0;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -334,6 +345,11 @@ class ProfileScreen extends ConsumerWidget {
                   }).toList(),
                 ),
                 const SizedBox(height: 32),
+
+                _buildSectionTitle('RANK HİYERARŞİSİ'),
+                const SizedBox(height: 16),
+                _RankHierarchySection(rankState: rankState),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -407,9 +423,14 @@ class ProfileScreen extends ConsumerWidget {
 
 
 class _ProgressRing extends StatelessWidget {
-  const _ProgressRing({required this.progress, required this.learned});
+  const _ProgressRing({
+    required this.progress,
+    required this.learned,
+    required this.total,
+  });
   final double progress;
   final int learned;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
@@ -448,7 +469,7 @@ class _ProgressRing extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '$learned / 2000',
+                '$learned / $total',
                 style: GoogleFonts.orbitron(
                   color: AppColors.textSecondary,
                   fontSize: 10,
@@ -919,6 +940,264 @@ class _RankInfoCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+
+class _RankHierarchySection extends StatelessWidget {
+  const _RankHierarchySection({required this.rankState});
+  final RankState rankState;
+
+  static const Map<int, IconData> _rankIcons = {
+    1: Icons.bolt_rounded,
+    2: Icons.search_rounded,
+    3: Icons.analytics_rounded,
+    4: Icons.memory_rounded,
+    5: Icons.auto_awesome_rounded,
+    6: Icons.workspace_premium_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveId = rankState.effectiveRankId;
+
+    return Column(
+      children: List.generate(kRanks.length, (index) {
+        final rank = kRanks[index];
+        final isAchieved = effectiveId > rank.id;
+        final isCurrent = effectiveId == rank.id;
+        final isLocked = effectiveId < rank.id;
+        final isLast = index == kRanks.length - 1;
+        final levelColor = AppColors.forLevel(rank.requiredLevel);
+
+        Color nodeColor;
+        if (isCurrent) {
+          nodeColor = levelColor;
+        } else if (isAchieved) {
+          nodeColor = AppColors.neonGreen;
+        } else {
+          nodeColor = AppColors.textMuted;
+        }
+
+        return Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: nodeColor.withValues(alpha: isCurrent ? 0.18 : 0.1),
+                        border: Border.all(
+                          color: nodeColor.withValues(alpha: isCurrent ? 1.0 : 0.4),
+                          width: isCurrent ? 2 : 1,
+                        ),
+                        boxShadow: isCurrent
+                            ? [
+                                BoxShadow(
+                                  color: nodeColor.withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        isAchieved
+                            ? Icons.check_rounded
+                            : (_rankIcons[rank.id] ?? Icons.star_rounded),
+                        color: nodeColor,
+                        size: 18,
+                      ),
+                    ),
+                    if (!isLast)
+                      Container(
+                        width: 2,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              nodeColor.withValues(alpha: isAchieved ? 0.6 : 0.2),
+                              isLocked
+                                  ? AppColors.textMuted.withValues(alpha: 0.1)
+                                  : nodeColor.withValues(alpha: 0.2),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isCurrent
+                          ? levelColor.withValues(alpha: 0.08)
+                          : AppColors.surfaceMedium.withValues(
+                              alpha: isLocked ? 0.5 : 1.0,
+                            ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isCurrent
+                            ? levelColor.withValues(alpha: 0.5)
+                            : isAchieved
+                                ? AppColors.neonGreen.withValues(alpha: 0.25)
+                                : AppColors.cardBorder.withValues(alpha: 0.4),
+                        width: isCurrent ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    rank.title.toUpperCase(),
+                                    style: GoogleFonts.orbitron(
+                                      color: isLocked
+                                          ? AppColors.textMuted
+                                          : isCurrent
+                                              ? levelColor
+                                              : AppColors.textPrimary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    rank.titleTr,
+                                    style: GoogleFonts.rajdhani(
+                                      color: isLocked
+                                          ? AppColors.textMuted
+                                          : nodeColor.withValues(alpha: 0.8),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isCurrent)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: levelColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: levelColor.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Text(
+                                  'AKTİF',
+                                  style: GoogleFonts.orbitron(
+                                    color: levelColor,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              )
+                            else if (isAchieved)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.neonGreen.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.neonGreen.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  'KİLİT AÇIK',
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.neonGreen,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: levelColor.withValues(
+                                  alpha: isLocked ? 0.05 : 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                rank.requiredLevel,
+                                style: GoogleFonts.orbitron(
+                                  color: isLocked ? AppColors.textMuted : levelColor,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '%${(rank.requiredMastery * 100).toInt()} ustalık gerekli',
+                              style: GoogleFonts.rajdhani(
+                                color: isLocked
+                                    ? AppColors.textMuted
+                                    : AppColors.textSecondary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (isCurrent || isAchieved) ...[
+                              const Spacer(),
+                              Text(
+                                '%${((rankState.levelMastery[rank.requiredLevel] ?? 0.0) * 100).toInt()}',
+                                style: GoogleFonts.orbitron(
+                                  color: isCurrent ? levelColor : AppColors.neonGreen,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      }),
     );
   }
 }

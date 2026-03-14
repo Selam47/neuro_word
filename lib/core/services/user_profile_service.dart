@@ -7,6 +7,7 @@ class UserProfileService {
   static const String _keyXp = 'profile_xp';
   static const String _keyLevelScore = 'profile_level_score';
   static const String _keyRankId = 'profile_rank_id';
+  static const String _keyProficiencyLevel = 'profile_proficiency_level';
 
   static final UserProfileService _instance = UserProfileService._internal();
   factory UserProfileService() => _instance;
@@ -105,6 +106,24 @@ class UserProfileService {
 
   Future<void> saveRankId(int id) async {
     await _prefs?.setInt(_keyRankId, id);
+  }
+
+  static const Map<String, int> _preLearnedCountByLevel = {
+    'A1': 0,
+    'A2': 300,
+    'B1': 700,
+    'B2': 1300,
+    'C1': 2000,
+  };
+
+  String get proficiencyLevel =>
+      _prefs?.getString(_keyProficiencyLevel) ?? 'A1';
+
+  int get preLearnedCount =>
+      _preLearnedCountByLevel[proficiencyLevel] ?? 0;
+
+  Future<void> setProficiencyLevel(String level) async {
+    await _prefs?.setString(_keyProficiencyLevel, level);
   }
 
   Future<void> migrateFromLegacy(

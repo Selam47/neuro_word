@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
+import 'package:neuro_word/core/services/firebase_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
@@ -16,11 +17,22 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with SingleTickerProviderStateMixin {
-  final _controller = TextEditingController();
+  final _nameController = TextEditingController();
   final _focusNode = FocusNode();
   bool _isLoading = false;
+  String _selectedLevel = 'A1';
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+
+  static const List<String> _levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+  static const Map<String, String> _levelDescriptions = {
+    'A1': 'Başlangıç',
+    'A2': 'Temel',
+    'B1': 'Orta',
+    'B2': 'Üst Orta',
+    'C1': 'İleri',
+  };
 
   @override
   void initState() {
@@ -38,14 +50,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _nameController.dispose();
     _focusNode.dispose();
     _animController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    final name = _controller.text.trim();
+    final name = _nameController.text.trim();
     if (name.isEmpty) {
       _focusNode.requestFocus();
       HapticFeedback.heavyImpact();
@@ -53,7 +65,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
     setState(() => _isLoading = true);
     HapticFeedback.lightImpact();
-    await UserProfileService().setUsername(name);
+    final profile = UserProfileService();
+    await profile.setUsername(name);
+    await profile.setProficiencyLevel(_selectedLevel);
+    try {
+      await FirebaseService().saveUserProfile(name, _selectedLevel);
+    } catch (_) {}
+    if (mounted) context.go('/dashboard');
+  }
+
+  Future<void> _skip() async {
+    await UserProfileService().setUsername('Kaşif');
+    await UserProfileService().setProficiencyLevel('A1');
     if (mounted) context.go('/dashboard');
   }
 
@@ -69,20 +92,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                  // Logo / animation
                   ConstrainedBox(
                     constraints: const BoxConstraints(
-                      maxWidth: 180,
-                      maxHeight: 140,
+                      maxWidth: 160,
+                      maxHeight: 120,
                     ),
                     child: Lottie.asset(
                       'assets/animations/logo_animation.json',
                       fit: BoxFit.contain,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
                   Text(
                     'NEURO WORD',
@@ -93,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       letterSpacing: 4,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     'İngilizce öğrenmenin geleceği',
                     style: GoogleFonts.rajdhani(
@@ -103,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
 
                   Align(
                     alignment: Alignment.centerLeft,
@@ -129,7 +151,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       color: AppColors.surfaceMedium,
                     ),
                     child: TextField(
-                      controller: _controller,
+                      controller: _nameController,
                       focusNode: _focusNode,
                       style: GoogleFonts.rajdhani(
                         color: AppColors.textPrimary,
@@ -159,6 +181,133 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                   ),
                   const SizedBox(height: 32),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'SEVİYENİ SEÇ',
+                      style: GoogleFonts.orbitron(
+                        color: AppColors.electricBlue,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: _levels.map((level) {
+                      final isSelected = _selectedLevel == level;
+                      final color = AppColors.forLevel(level);
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _selectedLevel = level);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              height: 62,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? color.withOpacity(0.18)
+                                    : AppColors.surfaceMedium,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? color
+                                      : AppColors.cardBorder,
+                                  width: isSelected ? 1.8 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: color.withOpacity(0.25),
+                                          blurRadius: 10,
+                                          spreadRadius: 1,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    level,
+                                    style: GoogleFonts.orbitron(
+                                      color: isSelected
+                                          ? color
+                                          : AppColors.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _levelDescriptions[level]!,
+                                    style: GoogleFonts.rajdhani(
+                                      color: isSelected
+                                          ? color.withOpacity(0.8)
+                                          : AppColors.textMuted,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentOrange.withOpacity(0.07),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.accentOrange.withOpacity(0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppColors.accentOrange,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Warning: Level selection determines the word density in your neuro-network.',
+                            style: GoogleFonts.rajdhani(
+                              color: AppColors.accentOrange.withOpacity(0.9),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
 
                   SizedBox(
                     width: double.infinity,
@@ -192,15 +341,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () async {
-                            await UserProfileService().setUsername('Kaşif');
-                            if (mounted) context.go('/dashboard');
-                          },
+                    onPressed: _isLoading ? null : _skip,
                     child: Text(
                       'Şimdi değil, atla',
                       style: GoogleFonts.rajdhani(
@@ -210,7 +354,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),

@@ -71,6 +71,14 @@ class WordNotifier extends Notifier<WordState> {
 
   static const _wordCacheKey = 'cached_words_json';
 
+  static const List<String> _levelHierarchy = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+  static List<String> _levelsFromMinimum(String minLevel) {
+    final idx = _levelHierarchy.indexOf(minLevel);
+    if (idx < 0) return List<String>.from(_levelHierarchy);
+    return _levelHierarchy.sublist(idx);
+  }
+
   @override
   WordState build() {
     ref.listen<Set<int>>(savedWordsProvider, (_, __) {
@@ -86,7 +94,9 @@ class WordNotifier extends Notifier<WordState> {
       List<WordModel> words;
 
       try {
-        words = await _service.fetchWords();
+        final minLevel = _profile.proficiencyLevel;
+        final levelsToFetch = _levelsFromMinimum(minLevel);
+        words = await _service.fetchWords(levels: levelsToFetch);
         await _saveWordsToCache(words);
       } catch (e) {
         debugPrint('[WordProvider] Firestore failed, trying cache: $e');

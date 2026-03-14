@@ -7,12 +7,25 @@ import 'package:neuro_word/features/learning/providers/word_sets_providers.dart'
 class RankNotifier extends Notifier<RankState> {
   final _profile = UserProfileService();
 
+  static const Map<String, int> _startingRankByLevel = {
+    'A1': 1,
+    'A2': 2,
+    'B1': 3,
+    'B2': 4,
+    'C1': 5,
+  };
+
   @override
   RankState build() {
     final ws = ref.watch(wordProvider);
     final learnedIds = ref.watch(learnedWordsProvider);
 
-    if (ws.allWords.isEmpty) return const RankState();
+    final profLevel = _profile.proficiencyLevel;
+    final startRankId = _startingRankByLevel[profLevel] ?? 1;
+
+    if (ws.allWords.isEmpty) {
+      return RankState(startingRankId: startRankId);
+    }
 
     final levelTotals = <String, int>{};
     final levelLearned = <String, int>{};
@@ -38,8 +51,8 @@ class RankNotifier extends Notifier<RankState> {
       mastery[level] = total > 0 ? learned / total : 0.0;
     }
 
-    int achievedRank = 0;
-    for (final rank in kRanks) {
+    int achievedRank = startRankId - 1;
+    for (final rank in kRanks.where((r) => r.id >= startRankId)) {
       if (rank.id != achievedRank + 1) break;
       final m = mastery[rank.requiredLevel] ?? 0.0;
       if (m >= rank.requiredMastery) {
@@ -55,6 +68,7 @@ class RankNotifier extends Notifier<RankState> {
     return RankState(
       levelScore: score,
       currentRankId: achievedRank,
+      startingRankId: startRankId,
       levelMastery: mastery,
     );
   }
