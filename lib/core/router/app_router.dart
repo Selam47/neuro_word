@@ -11,6 +11,7 @@ import 'package:neuro_word/features/supporters/presentation/supporters_screen.da
 import 'package:neuro_word/features/games/flashcard/presentation/flashcard_screen.dart';
 import 'package:neuro_word/features/games/cyber_match/presentation/cyber_match_screen.dart';
 import 'package:neuro_word/features/games/neon_pulse/presentation/neon_pulse_screen.dart';
+import 'package:neuro_word/features/games/neural_hack/presentation/neural_hack_screen.dart';
 import 'package:neuro_word/features/games/session_summary/presentation/session_summary_screen.dart';
 
 class AppRouter {
@@ -109,6 +110,18 @@ class AppRouter {
             context,
             state,
             NeonPulseScreen(level: level),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/neural-hack',
+        name: 'neural-hack',
+        pageBuilder: (context, state) {
+          final level = state.uri.queryParameters['level'];
+          return _buildPageWithTransition(
+            context,
+            state,
+            NeuralHackScreen(level: level),
           );
         },
       ),

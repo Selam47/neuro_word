@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
@@ -275,34 +274,22 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                 ),
                 const SizedBox(height: 32),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/dashboard'),
-                        child: Text(
-                          AppStrings.dashboard,
-                          style: GoogleFonts.rajdhani(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    icon: const Icon(Icons.home_rounded, size: 20),
+                    label: Text(
+                      AppStrings.backToDashboard,
+                      style: GoogleFonts.rajdhani(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => context.pop(),
-                        child: Text(
-                          AppStrings.backToDashboard,
-                          style: GoogleFonts.rajdhani(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],

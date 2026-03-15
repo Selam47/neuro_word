@@ -17,7 +17,7 @@ Future<bool> _initializeFirebase() async {
     );
     return true;
   } on FirebaseException catch (e) {
-    debugPrint('Firebase init failed [${e.code}]: ${e.message}');
+    debugPrint('Firebase init failed — plugin: ${e.plugin} | code: ${e.code} | message: ${e.message}');
     return false;
   } catch (e, stack) {
     debugPrint('Firebase init unexpected error: $e\n$stack');

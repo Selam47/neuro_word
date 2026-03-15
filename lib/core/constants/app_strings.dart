@@ -12,13 +12,8 @@ class AppStrings {
   static const cyberMatchDesc = 'İngilizce-Türkçe eşleştirme';
   static const neonPulse = 'Neon Pulse';
   static const neonPulseDesc = 'Hızlı 10 saniyelik zamanlı quiz';
-  static const grammar = 'Gramer';
-  static const grammarDesc = 'Etkileşimli gramer kuralları ve pratik';
-  static const listening = 'Dinleme';
-  static const listeningDesc = 'Anlama için sesli alıştırmalar';
-  static const progress = 'İlerleme';
-  static const progressDesc = 'Gelişimini takip et ve analiz yap';
-  static const soon = 'YAKINDA';
+  static const neuralHack = 'Neural Hack';
+  static const neuralHackDesc = 'Düşen kelimeleri yakala, firewall\'u koru';
 
   static const neuralDataStream = 'Kelime Veritabanı';
   static const dataStreamSubtitle = 'Firebase veritabanından yüklenen veri.';

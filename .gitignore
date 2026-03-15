@@ -9,6 +9,7 @@ ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 .env
 claude.json
+android/app/google-services.json
 
 /build/
 /.dart_tool/

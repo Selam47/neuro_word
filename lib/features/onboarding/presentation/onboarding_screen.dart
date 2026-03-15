@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
-import 'package:neuro_word/core/services/firebase_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
@@ -68,9 +67,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final profile = UserProfileService();
     await profile.setUsername(name);
     await profile.setProficiencyLevel(_selectedLevel);
-    try {
-      await FirebaseService().saveUserProfile(name, _selectedLevel);
-    } catch (_) {}
     if (mounted) context.go('/dashboard');
   }
 

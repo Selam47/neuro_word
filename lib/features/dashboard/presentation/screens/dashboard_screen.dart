@@ -727,7 +727,7 @@ class _StatCard extends StatelessWidget {
 class _FeatureCardsGrid extends ConsumerWidget {
   const _FeatureCardsGrid();
 
-  static const _gameRoutes = {'/flashcards', '/cyber-match', '/neon-pulse'};
+  static const _gameRoutes = {'/flashcards', '/cyber-match', '/neon-pulse', '/neural-hack'};
 
   static const _features = [
     _FeatureItem(
@@ -752,25 +752,11 @@ class _FeatureCardsGrid extends ConsumerWidget {
       '/neon-pulse',
     ),
     _FeatureItem(
-      Icons.menu_book_rounded,
-      AppStrings.grammar,
-      AppStrings.grammarDesc,
+      Icons.terminal_rounded,
+      AppStrings.neuralHack,
+      AppStrings.neuralHackDesc,
       AppColors.accentOrange,
-      null,
-    ),
-    _FeatureItem(
-      Icons.hearing_rounded,
-      AppStrings.listening,
-      AppStrings.listeningDesc,
-      AppColors.electricBlue,
-      null,
-    ),
-    _FeatureItem(
-      Icons.insights_rounded,
-      AppStrings.progress,
-      AppStrings.progressDesc,
-      AppColors.cyberPurple,
-      null,
+      '/neural-hack',
     ),
   ];
 
@@ -812,27 +798,6 @@ class _FeatureCardsGrid extends ConsumerWidget {
               Row(
                 children: [
                   NeonIconBox(icon: f.icon, color: f.color),
-                  if (f.route == null) ...[
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceMedium,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        AppStrings.soon,
-                        style: GoogleFonts.orbitron(
-                          color: AppColors.textMuted,
-                          fontSize: 8,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
               const SizedBox(height: 14),
