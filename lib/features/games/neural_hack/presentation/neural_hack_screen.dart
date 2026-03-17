@@ -33,7 +33,6 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   final List<int> _learnedIds = [];
 
   late AnimationController _fallController;
-  late Animation<Offset> _fallAnimation;
 
   List<String> _currentOptions = [];
   int _correctOptionIndex = 0;
@@ -59,11 +58,6 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
       vsync: this,
       duration: const Duration(seconds: 5),
     );
-
-    _fallAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.2),
-      end: const Offset(0, 1.2),
-    ).animate(CurvedAnimation(parent: _fallController, curve: Curves.linear));
 
     _fallController.addStatusListener(_handleFallStatus);
   }
@@ -323,20 +317,33 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   }
 
   Widget _buildGameArea(WordModel word) {
+    const kCardH = 110.0;
     return Column(
       children: [
         Expanded(
-          child: ClipRect(
-            child: SlideTransition(
-              position: _fallAnimation,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _WordCard(word: word),
-                ),
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final areaH = constraints.maxHeight;
+              return AnimatedBuilder(
+                animation: _fallController,
+                builder: (context, child) {
+                  final y =
+                      -kCardH + _fallController.value * (areaH + 2 * kCardH);
+                  return Stack(
+                    clipBehavior: Clip.hardEdge,
+                    children: [
+                      Positioned(
+                        top: y,
+                        left: 16,
+                        right: 16,
+                        child: child!,
+                      ),
+                    ],
+                  );
+                },
+                child: _WordCard(word: word),
+              );
+            },
           ),
         ),
         const _FirewallBar(),

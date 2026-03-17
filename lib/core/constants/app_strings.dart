@@ -16,7 +16,7 @@ class AppStrings {
   static const neuralHackDesc = 'Düşen kelimeleri yakala, firewall\'u koru';
 
   static const neuralDataStream = 'Kelime Veritabanı';
-  static const dataStreamSubtitle = 'Firebase veritabanından yüklenen veri.';
+  static const dataStreamSubtitle = 'Supabase veritabanından yüklenen veri.';
   static const loadMore = 'DAHA FAZLA YÜKLE';
   static const remaining = 'kalan';
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:neuro_word/core/services/firebase_service.dart';
+import 'package:neuro_word/core/services/supabase_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
@@ -65,7 +65,7 @@ class WordState {
 }
 
 class WordNotifier extends Notifier<WordState> {
-  final _service = FirebaseService();
+  final _service = SupabaseService();
   final _profile = UserProfileService();
   final _random = Random();
 
@@ -99,7 +99,7 @@ class WordNotifier extends Notifier<WordState> {
         words = await _service.fetchWords(levels: levelsToFetch);
         await _saveWordsToCache(words);
       } catch (e) {
-        debugPrint('[WordProvider] Firestore failed, trying cache: $e');
+        debugPrint('[WordProvider] Supabase failed, trying cache: $e');
         words = await _loadWordsFromCache();
         if (words.isEmpty) rethrow;
       }

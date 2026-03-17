@@ -17,7 +17,6 @@ if (keystorePropertiesFile.exists()) {
 
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -31,8 +30,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "17" 
     }
 
     defaultConfig {

@@ -7,33 +7,18 @@ import 'package:neuro_word/core/theme/app_theme.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/storage_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:neuro_word/firebase_options.dart';
-
-Future<bool> _initializeFirebase() async {
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    return true;
-  } on FirebaseException catch (e) {
-    debugPrint('Firebase init failed — plugin: ${e.plugin} | code: ${e.code} | message: ${e.message}');
-    return false;
-  } catch (e, stack) {
-    debugPrint('Firebase init unexpected error: $e\n$stack');
-    return false;
-  }
-}
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   runZonedGuarded<void>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      final firebaseReady = await _initializeFirebase();
-      if (!firebaseReady) {
-        debugPrint('CRITICAL: Firebase failed. Check google-services.json SHA-1 fingerprints.');
-      }
+      await Supabase.initialize(
+        url: 'https://zwqooayqbfwsopjhkdhz.supabase.co',
+        anonKey:
+            'sb_publishable_FK-4WR8xm07stRzr9g7muQ_RIbEyPqA',
+      );
 
       final profileService = UserProfileService();
       await profileService.init();

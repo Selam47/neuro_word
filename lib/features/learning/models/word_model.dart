@@ -23,6 +23,14 @@ class WordModel {
   final bool isLearned;
   final bool isFavorite;
 
+  static const Map<String, int> _levelWeightMap = {
+    'A1': 1,
+    'A2': 2,
+    'B1': 3,
+    'B2': 4,
+    'C1': 5,
+  };
+
   factory WordModel.fromJson(Map<String, dynamic> json) {
     final level = json['level'] as String? ?? 'A1';
     final source = json['wordSource'] as String? ?? 'oxford_3000';
@@ -41,11 +49,8 @@ class WordModel {
     );
   }
 
-  factory WordModel.fromFirestore(Map<String, dynamic> data, {String? docId}) {
-    final rawId = (data['id'] as num?)?.toInt() ??
-        int.tryParse(docId ?? '') ??
-        docId?.hashCode.abs() ??
-        Object().hashCode.abs();
+  factory WordModel.fromSupabase(Map<String, dynamic> data) {
+    final rawId = (data['id'] as num?)?.toInt() ?? Object().hashCode.abs();
 
     final level =
         data['level'] as String? ?? data['cefr'] as String? ?? 'A1';
@@ -53,6 +58,18 @@ class WordModel {
     final source = data['source'] as String? ??
         data['wordSource'] as String? ??
         'oxford_3000';
+
+    final rawWeight = (data['difficulty_weight'] as num?)?.toInt() ??
+        (data['difficultyWeight'] as num?)?.toInt();
+
+    int resolvedWeight;
+    if (rawWeight != null && rawWeight != 3) {
+      resolvedWeight = rawWeight;
+    } else if (rawWeight == 3 && _levelWeightMap.containsKey(level)) {
+      resolvedWeight = _levelWeightMap[level]!;
+    } else {
+      resolvedWeight = _defaultWeight(level, source);
+    }
 
     return WordModel(
       id: rawId,
@@ -67,8 +84,7 @@ class WordModel {
       level: level,
       category: data['category'] as String? ?? 'General',
       wordSource: source,
-      difficultyWeight: (data['difficultyWeight'] as num?)?.toInt() ??
-          _defaultWeight(level, source),
+      difficultyWeight: resolvedWeight,
       cefr: data['cefr'] as String? ?? level,
       isLearned: false,
       isFavorite: false,
