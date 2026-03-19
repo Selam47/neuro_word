@@ -32,35 +32,47 @@ class WordModel {
   };
 
   factory WordModel.fromJson(Map<String, dynamic> json) {
-    final level = json['level'] as String? ?? 'A1';
-    final source = json['wordSource'] as String? ?? 'oxford_3000';
+    // Güvenli String dönüşümleri
+    final String level = json['level']?.toString() ?? 'A1';
+    final String source = json['wordSource']?.toString() ?? 'oxford_3000';
+
+    // Güvenli Sayı dönüşümü (Hata riskini sıfıra indirir)
+    final int id = int.tryParse(json['id']?.toString() ?? '0') ?? 0;
+    final int weight =
+        int.tryParse(json['difficultyWeight']?.toString() ?? '') ??
+        _defaultWeight(level, source);
+
     return WordModel(
-      id: json['id'] as int,
-      english: json['english'] as String,
-      turkish: json['turkish'] as String,
+      id: id,
+      english: json['english']?.toString() ?? '',
+      turkish: json['turkish']?.toString() ?? '',
       level: level,
-      category: json['category'] as String,
+      category: json['category']?.toString() ?? 'General',
       wordSource: source,
-      difficultyWeight:
-          json['difficultyWeight'] as int? ?? _defaultWeight(level, source),
-      cefr: json['cefr'] as String?,
-      isLearned: json['isLearned'] as bool? ?? false,
-      isFavorite: json['isFavorite'] as bool? ?? false,
+      difficultyWeight: weight,
+      cefr: json['cefr']?.toString(),
+      isLearned: json['isLearned'] == true,
+      isFavorite: json['isFavorite'] == true,
     );
   }
 
   factory WordModel.fromSupabase(Map<String, dynamic> data) {
-    final rawId = (data['id'] as num?)?.toInt() ?? Object().hashCode.abs();
+    // ID için güvenli parse
+    final int rawId =
+        int.tryParse(data['id']?.toString() ?? '') ??
+        DateTime.now().millisecondsSinceEpoch.abs();
 
-    final level =
-        data['level'] as String? ?? data['cefr'] as String? ?? 'A1';
-
-    final source = data['source'] as String? ??
-        data['wordSource'] as String? ??
+    final String level =
+        data['level']?.toString() ?? data['cefr']?.toString() ?? 'A1';
+    final String source =
+        data['source']?.toString() ??
+        data['wordSource']?.toString() ??
         'oxford_3000';
 
-    final rawWeight = (data['difficulty_weight'] as num?)?.toInt() ??
-        (data['difficultyWeight'] as num?)?.toInt();
+    // Difficulty Weight için güvenli parse (Senin yeni SQL düzenlemeni destekler)
+    final int? rawWeight =
+        int.tryParse(data['difficulty_weight']?.toString() ?? '') ??
+        int.tryParse(data['difficultyWeight']?.toString() ?? '');
 
     int resolvedWeight;
     if (rawWeight != null && rawWeight != 3) {
@@ -73,19 +85,21 @@ class WordModel {
 
     return WordModel(
       id: rawId,
-      english: data['en'] as String? ??
-          data['english'] as String? ??
-          data['word'] as String? ??
+      english:
+          data['en']?.toString() ??
+          data['english']?.toString() ??
+          data['word']?.toString() ??
           '',
-      turkish: data['tr'] as String? ??
-          data['turkish'] as String? ??
-          data['meaning'] as String? ??
+      turkish:
+          data['tr']?.toString() ??
+          data['turkish']?.toString() ??
+          data['meaning']?.toString() ??
           '',
       level: level,
-      category: data['category'] as String? ?? 'General',
+      category: data['category']?.toString() ?? 'General',
       wordSource: source,
       difficultyWeight: resolvedWeight,
-      cefr: data['cefr'] as String? ?? level,
+      cefr: data['cefr']?.toString() ?? level,
       isLearned: false,
       isFavorite: false,
     );
@@ -95,30 +109,48 @@ class WordModel {
     switch (source) {
       case 'awl':
         switch (level) {
-          case 'A1': return 3;
-          case 'A2': return 4;
-          case 'B1': return 6;
-          case 'B2': return 8;
-          case 'C1': return 10;
-          default: return 4;
+          case 'A1':
+            return 3;
+          case 'A2':
+            return 4;
+          case 'B1':
+            return 6;
+          case 'B2':
+            return 8;
+          case 'C1':
+            return 10;
+          default:
+            return 4;
         }
       case 'oxford_5000':
         switch (level) {
-          case 'A1': return 2;
-          case 'A2': return 3;
-          case 'B1': return 5;
-          case 'B2': return 7;
-          case 'C1': return 8;
-          default: return 3;
+          case 'A1':
+            return 2;
+          case 'A2':
+            return 3;
+          case 'B1':
+            return 5;
+          case 'B2':
+            return 7;
+          case 'C1':
+            return 8;
+          default:
+            return 3;
         }
       default:
         switch (level) {
-          case 'A1': return 1;
-          case 'A2': return 2;
-          case 'B1': return 3;
-          case 'B2': return 5;
-          case 'C1': return 6;
-          default: return 1;
+          case 'A1':
+            return 1;
+          case 'A2':
+            return 2;
+          case 'B1':
+            return 3;
+          case 'B2':
+            return 4; // Senin SQL güncellemenle uyumlu
+          case 'C1':
+            return 5;
+          default:
+            return 1;
         }
     }
   }
@@ -167,9 +199,7 @@ class WordModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is WordModel &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
+      other is WordModel && runtimeType == other.runtimeType && id == other.id;
 
   @override
   int get hashCode => id.hashCode;

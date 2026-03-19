@@ -74,7 +74,7 @@ Sorularınız ve iş birliği teklifleriniz için bana ulaşın:
 
 📩 **E-posta:** [abdulselam4763@gmail.com](mailto:abdulselam4763@gmail.com)    
 
-<div align="center">
+<div align ="center">
 <br />
 <b>Neuro Word © 2026 - Dil Öğrenmenin Geleceği</b>
 </div>

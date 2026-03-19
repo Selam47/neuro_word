@@ -198,7 +198,9 @@ class WordNotifier extends Notifier<WordState> {
     }
 
     if (state.onlySaved) {
-      result = result.where((w) => ref.read(savedWordsProvider).contains(w.id)).toList();
+      result = result
+          .where((w) => ref.read(savedWordsProvider).contains(w.id))
+          .toList();
     }
 
     if (state.searchQuery.isNotEmpty) {
@@ -221,9 +223,7 @@ class WordNotifier extends Notifier<WordState> {
     var list = pool.toList()..shuffle(_random);
 
     if (list.length < count) {
-      var extra = state.allWords
-          .where((w) => learned.contains(w.id))
-          .toList()
+      var extra = state.allWords.where((w) => learned.contains(w.id)).toList()
         ..shuffle(_random);
       if (level != null && level.isNotEmpty) {
         extra = extra.where((w) => w.level == level).toList();

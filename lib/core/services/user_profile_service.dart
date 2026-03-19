@@ -25,16 +25,15 @@ class UserProfileService {
 
   Future<void> setUsername(String name) async {
     await _prefs?.setString(
-        _keyUsername, name.trim().isEmpty ? 'Kaşif' : name.trim());
+      _keyUsername,
+      name.trim().isEmpty ? 'Kaşif' : name.trim(),
+    );
   }
 
   List<int> getLearnedWords() {
     final list = _prefs?.getStringList(_keyLearnedWords);
     if (list == null) return [];
-    return list
-        .map((e) => int.tryParse(e) ?? -1)
-        .where((e) => e >= 0)
-        .toList();
+    return list.map((e) => int.tryParse(e) ?? -1).where((e) => e >= 0).toList();
   }
 
   Future<void> saveLearnedWord(int id) async {
@@ -42,7 +41,9 @@ class UserProfileService {
     if (!list.contains(id)) {
       list.add(id);
       await _prefs?.setStringList(
-          _keyLearnedWords, list.map((e) => e.toString()).toList());
+        _keyLearnedWords,
+        list.map((e) => e.toString()).toList(),
+      );
     }
   }
 
@@ -50,7 +51,9 @@ class UserProfileService {
     final list = getLearnedWords();
     list.remove(id);
     await _prefs?.setStringList(
-        _keyLearnedWords, list.map((e) => e.toString()).toList());
+      _keyLearnedWords,
+      list.map((e) => e.toString()).toList(),
+    );
   }
 
   Future<void> saveLearnedWordsBatch(List<int> ids) async {
@@ -64,17 +67,16 @@ class UserProfileService {
     }
     if (changed) {
       await _prefs?.setStringList(
-          _keyLearnedWords, list.map((e) => e.toString()).toList());
+        _keyLearnedWords,
+        list.map((e) => e.toString()).toList(),
+      );
     }
   }
 
   List<int> getFavoriteWords() {
     final list = _prefs?.getStringList(_keyFavoriteWords);
     if (list == null) return [];
-    return list
-        .map((e) => int.tryParse(e) ?? -1)
-        .where((e) => e >= 0)
-        .toList();
+    return list.map((e) => int.tryParse(e) ?? -1).where((e) => e >= 0).toList();
   }
 
   Future<void> toggleFavoriteWord(int id) async {
@@ -85,7 +87,9 @@ class UserProfileService {
       list.add(id);
     }
     await _prefs?.setStringList(
-        _keyFavoriteWords, list.map((e) => e.toString()).toList());
+      _keyFavoriteWords,
+      list.map((e) => e.toString()).toList(),
+    );
   }
 
   bool isFavorite(int id) => getFavoriteWords().contains(id);
@@ -119,8 +123,7 @@ class UserProfileService {
   String get proficiencyLevel =>
       _prefs?.getString(_keyProficiencyLevel) ?? 'A1';
 
-  int get preLearnedCount =>
-      _preLearnedCountByLevel[proficiencyLevel] ?? 0;
+  int get preLearnedCount => _preLearnedCountByLevel[proficiencyLevel] ?? 0;
 
   Future<void> setProficiencyLevel(String level) async {
     await _prefs?.setString(_keyProficiencyLevel, level);
@@ -133,11 +136,15 @@ class UserProfileService {
   ) async {
     if (getLearnedWords().isEmpty && learnedIds.isNotEmpty) {
       await _prefs?.setStringList(
-          _keyLearnedWords, learnedIds.map((e) => e.toString()).toList());
+        _keyLearnedWords,
+        learnedIds.map((e) => e.toString()).toList(),
+      );
     }
     if (getFavoriteWords().isEmpty && favoriteIds.isNotEmpty) {
       await _prefs?.setStringList(
-          _keyFavoriteWords, favoriteIds.map((e) => e.toString()).toList());
+        _keyFavoriteWords,
+        favoriteIds.map((e) => e.toString()).toList(),
+      );
     }
     if (getXp() == 0 && xp > 0) {
       await _prefs?.setInt(_keyXp, xp);
