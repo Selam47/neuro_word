@@ -17,7 +17,7 @@ class SessionSummaryScreen extends ConsumerStatefulWidget {
     required this.mode,
   });
 
-  final List<int> learnedIds;
+  final List<String> learnedIds;
   final int totalWords;
   final String mode;
 
@@ -58,7 +58,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
   Future<void> _persistData() async {
     try {
       if (widget.learnedIds.isNotEmpty) {
-        ref.read(learnedWordsProvider.notifier).addAll(widget.learnedIds);
+        ref.read(userProgressProvider.notifier).addAllLearned(widget.learnedIds);
       }
 
       if (widget.learnedIds.isNotEmpty) {
@@ -110,7 +110,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
   @override
   Widget build(BuildContext context) {
     final wordState = ref.watch(wordProvider);
-    final totalLearned = ref.watch(learnedWordsProvider).length;
+    final totalLearned = ref.watch(userProgressProvider.select((s) => s.learnedIds.length));
     final totalWords = wordState.allWords.length;
     final overallProgress = totalWords > 0 ? totalLearned / totalWords : 0.0;
     final missedCount = widget.totalWords - widget.learnedIds.length;

@@ -23,7 +23,7 @@ class FlashcardScreen extends ConsumerStatefulWidget {
 class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   late List<WordModel> _words;
   int _currentIndex = 0;
-  final List<int> _learnedIds = [];
+  final List<String> _learnedIds = [];
   bool _initialized = false;
 
   @override
@@ -276,13 +276,13 @@ class _FavoriteButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isFav = ref.watch(
-      savedWordsProvider.select((s) => s.contains(word.id)),
+      userProgressProvider.select((s) => s.favoriteIds.contains(word.id)),
     );
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        ref.read(savedWordsProvider.notifier).toggle(word.id);
+        ref.read(userProgressProvider.notifier).toggleFavorite(word.id);
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -405,7 +405,7 @@ class _FlipCardState extends State<_FlipCard>
                 border: Border.all(color: accent.withOpacity(0.3)),
               ),
               child: Text(
-                '${widget.word.level} · ${widget.word.category}',
+                widget.word.level,
                 style: GoogleFonts.rajdhani(
                   color: accent,
                   fontSize: 12,

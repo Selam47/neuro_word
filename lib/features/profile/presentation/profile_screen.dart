@@ -19,8 +19,9 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ws = ref.watch(wordProvider);
-    final learnedIds = ref.watch(learnedWordsProvider);
-    final savedIds = ref.watch(savedWordsProvider);
+    final progress_ = ref.watch(userProgressProvider);
+    final learnedIds = progress_.learnedIds;
+    final savedIds = progress_.favoriteIds;
     final rankState = ref.watch(rankProvider);
     final profile = UserProfileService();
     final learnedInPool = learnedIds.length;
@@ -32,13 +33,6 @@ class ProfileScreen extends ConsumerWidget {
         ? (effectiveLearned / effectiveTotal).clamp(0.0, 1.0)
         : 0.0;
     final username = profile.username.toUpperCase();
-
-    final catMap = <String, int>{};
-    for (final w in ws.allWords) {
-      catMap[w.category] = (catMap[w.category] ?? 0) + 1;
-    }
-    final categories = catMap.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
 
     const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1'];
     final levelMap = <String, int>{};
@@ -186,8 +180,8 @@ class ProfileScreen extends ConsumerWidget {
                                   GestureDetector(
                                     onTap: () {
                                       ref
-                                          .read(savedWordsProvider.notifier)
-                                          .toggle(word.id);
+                                          .read(userProgressProvider.notifier)
+                                          .toggleFavorite(word.id);
                                     },
                                     child: const Icon(
                                       Icons.close_rounded,
@@ -289,8 +283,8 @@ class ProfileScreen extends ConsumerWidget {
                                   GestureDetector(
                                     onTap: () {
                                       ref
-                                          .read(learnedWordsProvider.notifier)
-                                          .toggle(word.id);
+                                          .read(userProgressProvider.notifier)
+                                          .toggleLearned(word.id);
                                     },
                                     child: const Icon(
                                       Icons.close_rounded,
@@ -334,17 +328,6 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                 const SizedBox(height: 28),
-
-                _buildSectionTitle(AppStrings.categoryDistribution),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: categories.take(12).map((e) {
-                    return _CategoryChip(name: e.key, count: e.value);
-                  }).toList(),
-                ),
-                const SizedBox(height: 32),
 
                 _buildSectionTitle('RANK HİYERARŞİSİ'),
                 const SizedBox(height: 16),
@@ -649,54 +632,6 @@ class _LevelProgressBar extends StatelessWidget {
               backgroundColor: AppColors.surfaceMedium,
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.name, required this.count});
-  final String name;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMedium,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            name,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.textPrimary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-            decoration: BoxDecoration(
-              color: AppColors.electricBlue.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '$count',
-              style: GoogleFonts.orbitron(
-                color: AppColors.electricBlue,
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-              ),
             ),
           ),
         ],

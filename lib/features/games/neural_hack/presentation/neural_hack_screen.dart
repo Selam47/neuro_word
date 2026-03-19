@@ -30,7 +30,7 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   int _questionsAnswered = 0;
   int _score = 0;
   int _lives = 3;
-  final List<int> _learnedIds = [];
+  final List<String> _learnedIds = [];
 
   late AnimationController _fallController;
 
@@ -178,7 +178,7 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
       _score++;
       final wordId = _words[_questionsAnswered].id;
       _learnedIds.add(wordId);
-      ref.read(learnedWordsProvider.notifier).addAll([wordId]);
+      ref.read(userProgressProvider.notifier).addAllLearned([wordId]);
       _showFlash(_kGreen);
     } else {
       HapticFeedback.heavyImpact();

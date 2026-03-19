@@ -134,7 +134,7 @@ class AppRouter {
             context,
             state,
             SessionSummaryScreen(
-              learnedIds: List<int>.from(extra['learnedIds'] as List? ?? []),
+              learnedIds: List<String>.from(extra['learnedIds'] as List? ?? []),
               totalWords: extra['totalWords'] as int? ?? 0,
               mode: extra['mode'] as String? ?? 'Game Over',
             ),

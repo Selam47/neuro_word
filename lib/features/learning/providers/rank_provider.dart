@@ -18,7 +18,7 @@ class RankNotifier extends Notifier<RankState> {
   @override
   RankState build() {
     final ws = ref.watch(wordProvider);
-    final learnedIds = ref.watch(learnedWordsProvider);
+    final learnedIds = ref.watch(userProgressProvider.select((s) => s.learnedIds));
 
     final profLevel = _profile.proficiencyLevel;
     final startRankId = _startingRankByLevel[profLevel] ?? 1;

@@ -24,7 +24,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   late List<WordModel> _words;
   int _currentIndex = 0;
   int _score = 0;
-  final List<int> _learnedIds = [];
+  final List<String> _learnedIds = [];
   bool _initialized = false;
 
   late AnimationController _timerController;

@@ -27,7 +27,7 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
   final Set<int> _matchedIndices = {};
   int _roundNumber = 1;
   int _totalCorrect = 0;
-  final List<int> _learnedIds = [];
+  final List<String> _learnedIds = [];
   bool _initialized = false;
 
   static const _wordsPerRound = 5;

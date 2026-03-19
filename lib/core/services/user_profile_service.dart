@@ -30,69 +30,54 @@ class UserProfileService {
     );
   }
 
-  List<int> getLearnedWords() {
+  Set<String> getLearnedWordIds() {
     final list = _prefs?.getStringList(_keyLearnedWords);
-    if (list == null) return [];
-    return list.map((e) => int.tryParse(e) ?? -1).where((e) => e >= 0).toList();
+    if (list == null) return {};
+    return list.where((e) => e.isNotEmpty).toSet();
   }
 
-  Future<void> saveLearnedWord(int id) async {
-    final list = getLearnedWords();
-    if (!list.contains(id)) {
-      list.add(id);
-      await _prefs?.setStringList(
-        _keyLearnedWords,
-        list.map((e) => e.toString()).toList(),
-      );
+  Future<void> saveLearnedWordId(String id) async {
+    final set = getLearnedWordIds();
+    if (set.add(id)) {
+      await _prefs?.setStringList(_keyLearnedWords, set.toList());
     }
   }
 
-  Future<void> removeLearnedWord(int id) async {
-    final list = getLearnedWords();
-    list.remove(id);
-    await _prefs?.setStringList(
-      _keyLearnedWords,
-      list.map((e) => e.toString()).toList(),
-    );
+  Future<void> removeLearnedWordId(String id) async {
+    final set = getLearnedWordIds();
+    if (set.remove(id)) {
+      await _prefs?.setStringList(_keyLearnedWords, set.toList());
+    }
   }
 
-  Future<void> saveLearnedWordsBatch(List<int> ids) async {
-    final list = getLearnedWords();
+  Future<void> saveLearnedWordIdsBatch(List<String> ids) async {
+    final set = getLearnedWordIds();
     bool changed = false;
     for (final id in ids) {
-      if (!list.contains(id)) {
-        list.add(id);
-        changed = true;
-      }
+      if (set.add(id)) changed = true;
     }
     if (changed) {
-      await _prefs?.setStringList(
-        _keyLearnedWords,
-        list.map((e) => e.toString()).toList(),
-      );
+      await _prefs?.setStringList(_keyLearnedWords, set.toList());
     }
   }
 
-  List<int> getFavoriteWords() {
+  Set<String> getFavoriteWordIds() {
     final list = _prefs?.getStringList(_keyFavoriteWords);
-    if (list == null) return [];
-    return list.map((e) => int.tryParse(e) ?? -1).where((e) => e >= 0).toList();
+    if (list == null) return {};
+    return list.where((e) => e.isNotEmpty).toSet();
   }
 
-  Future<void> toggleFavoriteWord(int id) async {
-    final list = getFavoriteWords();
-    if (list.contains(id)) {
-      list.remove(id);
+  Future<void> toggleFavoriteWordId(String id) async {
+    final set = getFavoriteWordIds();
+    if (set.contains(id)) {
+      set.remove(id);
     } else {
-      list.add(id);
+      set.add(id);
     }
-    await _prefs?.setStringList(
-      _keyFavoriteWords,
-      list.map((e) => e.toString()).toList(),
-    );
+    await _prefs?.setStringList(_keyFavoriteWords, set.toList());
   }
 
-  bool isFavorite(int id) => getFavoriteWords().contains(id);
+  bool isFavorite(String id) => getFavoriteWordIds().contains(id);
 
   int getXp() => _prefs?.getInt(_keyXp) ?? 0;
 
@@ -130,21 +115,15 @@ class UserProfileService {
   }
 
   Future<void> migrateFromLegacy(
-    List<int> learnedIds,
-    List<int> favoriteIds,
+    List<String> learnedIds,
+    List<String> favoriteIds,
     int xp,
   ) async {
-    if (getLearnedWords().isEmpty && learnedIds.isNotEmpty) {
-      await _prefs?.setStringList(
-        _keyLearnedWords,
-        learnedIds.map((e) => e.toString()).toList(),
-      );
+    if (getLearnedWordIds().isEmpty && learnedIds.isNotEmpty) {
+      await _prefs?.setStringList(_keyLearnedWords, learnedIds);
     }
-    if (getFavoriteWords().isEmpty && favoriteIds.isNotEmpty) {
-      await _prefs?.setStringList(
-        _keyFavoriteWords,
-        favoriteIds.map((e) => e.toString()).toList(),
-      );
+    if (getFavoriteWordIds().isEmpty && favoriteIds.isNotEmpty) {
+      await _prefs?.setStringList(_keyFavoriteWords, favoriteIds);
     }
     if (getXp() == 0 && xp > 0) {
       await _prefs?.setInt(_keyXp, xp);

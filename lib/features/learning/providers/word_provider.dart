@@ -13,7 +13,6 @@ class WordState {
     this.allWords = const [],
     this.filteredWords = const [],
     this.activeLevel,
-    this.activeCategory,
     this.searchQuery = '',
     this.onlySaved = false,
     this.isLoading = false,
@@ -24,7 +23,6 @@ class WordState {
   final List<WordModel> allWords;
   final List<WordModel> filteredWords;
   final String? activeLevel;
-  final String? activeCategory;
   final String searchQuery;
   final bool onlySaved;
   final bool isLoading;
@@ -35,23 +33,18 @@ class WordState {
     List<WordModel>? allWords,
     List<WordModel>? filteredWords,
     String? activeLevel,
-    String? activeCategory,
     String? searchQuery,
     bool? onlySaved,
     bool? isLoading,
     String? error,
     int? userXp,
     bool clearLevel = false,
-    bool clearCategory = false,
     bool clearError = false,
   }) {
     return WordState(
       allWords: allWords ?? this.allWords,
       filteredWords: filteredWords ?? this.filteredWords,
       activeLevel: clearLevel ? null : (activeLevel ?? this.activeLevel),
-      activeCategory: clearCategory
-          ? null
-          : (activeCategory ?? this.activeCategory),
       searchQuery: searchQuery ?? this.searchQuery,
       onlySaved: onlySaved ?? this.onlySaved,
       isLoading: isLoading ?? this.isLoading,
@@ -81,8 +74,11 @@ class WordNotifier extends Notifier<WordState> {
 
   @override
   WordState build() {
-    ref.listen<Set<int>>(savedWordsProvider, (_, __) {
-      if (state.onlySaved && state.allWords.isNotEmpty) _applyFilters();
+    ref.listen<UserProgressState>(userProgressProvider, (prev, next) {
+      if (state.onlySaved && state.allWords.isNotEmpty) {
+        final prevFavs = prev?.favoriteIds ?? const {};
+        if (prevFavs != next.favoriteIds) _applyFilters();
+      }
     });
     Future.microtask(_loadWords);
     return const WordState(isLoading: true);
@@ -104,23 +100,22 @@ class WordNotifier extends Notifier<WordState> {
         if (words.isEmpty) rethrow;
       }
 
-      final learnedIds = _profile.getLearnedWords().toSet();
-      final favoriteIds = _profile.getFavoriteWords().toSet();
       final xp = _profile.getXp();
 
-      ref.read(learnedWordsProvider.notifier).init(learnedIds);
-      ref.read(savedWordsProvider.notifier).init(favoriteIds);
-
-      final mergedWords = words.map((w) {
-        return w.copyWith(
-          isLearned: learnedIds.contains(w.id),
-          isFavorite: favoriteIds.contains(w.id),
+      if (_service.currentUserId != null) {
+        ref.read(userProgressProvider.notifier).loadFromSupabase();
+      } else {
+        final learnedIds = _profile.getLearnedWordIds();
+        final favoriteIds = _profile.getFavoriteWordIds();
+        ref.read(userProgressProvider.notifier).init(
+          learnedIds: learnedIds,
+          favoriteIds: favoriteIds,
         );
-      }).toList();
+      }
 
       state = state.copyWith(
-        allWords: mergedWords,
-        filteredWords: mergedWords,
+        allWords: words,
+        filteredWords: words,
         isLoading: false,
         userXp: xp,
       );
@@ -172,15 +167,6 @@ class WordNotifier extends Notifier<WordState> {
     _applyFilters();
   }
 
-  void filterByCategory(String? category) {
-    if (category == null || category.isEmpty) {
-      state = state.copyWith(clearCategory: true);
-    } else {
-      state = state.copyWith(activeCategory: category);
-    }
-    _applyFilters();
-  }
-
   void toggleSaved(bool enabled) {
     state = state.copyWith(onlySaved: enabled);
     _applyFilters();
@@ -193,14 +179,9 @@ class WordNotifier extends Notifier<WordState> {
       result = result.where((w) => w.level == state.activeLevel).toList();
     }
 
-    if (state.activeCategory != null) {
-      result = result.where((w) => w.category == state.activeCategory).toList();
-    }
-
     if (state.onlySaved) {
-      result = result
-          .where((w) => ref.read(savedWordsProvider).contains(w.id))
-          .toList();
+      final favIds = ref.read(userProgressProvider).favoriteIds;
+      result = result.where((w) => favIds.contains(w.id)).toList();
     }
 
     if (state.searchQuery.isNotEmpty) {
@@ -215,15 +196,17 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   List<WordModel> getRandomWords(int count, {String? level}) {
-    final learned = ref.read(learnedWordsProvider);
-    var pool = state.allWords.where((w) => !learned.contains(w.id));
+    final progress = ref.read(userProgressProvider);
+    var pool = state.allWords.where((w) => !progress.learnedIds.contains(w.id));
     if (level != null && level.isNotEmpty) {
       pool = pool.where((w) => w.level == level);
     }
     var list = pool.toList()..shuffle(_random);
 
     if (list.length < count) {
-      var extra = state.allWords.where((w) => learned.contains(w.id)).toList()
+      var extra = state.allWords
+          .where((w) => progress.learnedIds.contains(w.id))
+          .toList()
         ..shuffle(_random);
       if (level != null && level.isNotEmpty) {
         extra = extra.where((w) => w.level == level).toList();
@@ -234,7 +217,7 @@ class WordNotifier extends Notifier<WordState> {
     return list.take(count).toList();
   }
 
-  List<WordModel> getDistractors(int count, {required Set<int> excludeIds}) {
+  List<WordModel> getDistractors(int count, {required Set<String> excludeIds}) {
     final pool =
         state.allWords.where((w) => !excludeIds.contains(w.id)).toList()
           ..shuffle(_random);

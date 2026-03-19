@@ -10,6 +10,7 @@ import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/rank_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
+
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 import 'package:neuro_word/shared/widgets/neon_icon_box.dart';
@@ -108,7 +109,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                       const _NeonGlitch3500(),
                       Text(
-                        ' akademik kelime ile profesyonel bir deneyim.',
+                        ' kelime ile profesyonel bir deneyim.',
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary.withValues(alpha: 0.7),
                           fontSize: 15,
@@ -176,8 +177,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     isFiltered:
                         wordState.activeLevel != null ||
                         wordState.searchQuery.isNotEmpty ||
-                        wordState.onlySaved ||
-                        wordState.activeCategory != null,
+                        wordState.onlySaved,
                   ),
 
                 const SizedBox(height: 24),
@@ -247,13 +247,11 @@ class _AdvancedFilterBar extends ConsumerWidget {
             label: 'Tümü',
             isSelected:
                 wordState.activeLevel == null &&
-                !wordState.onlySaved &&
-                wordState.activeCategory == null,
+                !wordState.onlySaved,
             color: AppColors.electricBlue,
             onTap: () {
               notifier.filterByLevel(null);
               notifier.toggleSaved(false);
-              notifier.filterByCategory(null);
             },
           ),
           const SizedBox(width: 8),
@@ -264,20 +262,6 @@ class _AdvancedFilterBar extends ConsumerWidget {
             color: AppColors.neonPink,
             onTap: () => notifier.toggleSaved(!wordState.onlySaved),
             icon: Icons.bookmark_rounded,
-          ),
-          const SizedBox(width: 8),
-
-          _buildChip(
-            label: 'Akademik',
-            isSelected: wordState.activeCategory == 'Academic',
-            color: AppColors.electricBlue,
-            onTap: () {
-              final newCat = wordState.activeCategory == 'Academic'
-                  ? null
-                  : 'Academic';
-              notifier.filterByCategory(newCat);
-            },
-            icon: Icons.school_rounded,
           ),
           const SizedBox(width: 8),
 
@@ -647,14 +631,16 @@ class _QuickStatsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final learnedCount = ref.watch(learnedWordsProvider).length;
-    final favoriteCount = ref.watch(savedWordsProvider).length;
+    final totalCount = wordState.allWords.length;
+    final learnedCount = ref.watch(learnedCountProvider);
+    final favoriteCount = ref.watch(favoriteCountProvider);
+
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             label: 'Toplam',
-            value: wordState.allWords.length.toString(),
+            value: totalCount.toString(),
             icon: Icons.data_usage_rounded,
             color: AppColors.textPrimary,
           ),

@@ -11,7 +11,7 @@ class StorageService {
   static const String _keyFavoriteWords = 'favorite_words';
   static const String _keyXp = 'user_xp';
   static const String _keyMigrationV1 = 'migration_v1_done';
-  static const String _keyMigrationV2 = 'migration_v2_academic';
+  static const String _keyMigrationV2 = 'migration_v2_cloud_sync';
 
   SharedPreferences? _prefs;
   bool _initialized = false;

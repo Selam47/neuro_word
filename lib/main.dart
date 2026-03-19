@@ -28,8 +28,8 @@ void main() {
         await storage.init();
 
         if (profileService.isFirstLaunch) {
-          final learnedIds = storage.getLearnedWords();
-          final favoriteIds = storage.getFavoriteWords();
+          final learnedIds = storage.getLearnedWords().map((e) => e.toString()).toList();
+          final favoriteIds = storage.getFavoriteWords().map((e) => e.toString()).toList();
           final xp = storage.getXp();
           if (learnedIds.isNotEmpty || favoriteIds.isNotEmpty || xp > 0) {
             await profileService.migrateFromLegacy(learnedIds, favoriteIds, xp);

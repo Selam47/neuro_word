@@ -1,7 +1,7 @@
 class AppStrings {
   AppStrings._();
 
-  static const appTitle = 'Neuro Word: Academic English';
+  static const appTitle = 'Neuro Word';
 
   static const learningModules = 'Öğrenme Modülleri';
   static const learningModulesSubtitle =
