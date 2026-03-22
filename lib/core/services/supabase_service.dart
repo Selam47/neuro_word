@@ -16,7 +16,8 @@ class SupabaseService {
       if (levels != null && levels.isNotEmpty) {
         query = query.inFilter('level', levels);
       }
-      final List<dynamic> response = await query;
+      final List<dynamic> response =
+          await query.timeout(const Duration(seconds: 10));
       return response
           .map((row) => WordModel.fromSupabase(row as Map<String, dynamic>))
           .toList();

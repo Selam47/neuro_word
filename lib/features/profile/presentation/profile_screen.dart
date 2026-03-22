@@ -19,32 +19,22 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ws = ref.watch(wordProvider);
+    final stats = ref.watch(wordStatisticsProvider);
     final progress_ = ref.watch(userProgressProvider);
-    final learnedIds = progress_.learnedIds;
     final savedIds = progress_.favoriteIds;
-    final rankState = ref.watch(rankProvider);
+    final learnedIds = progress_.learnedIds;
     final profile = UserProfileService();
-    final learnedInPool = learnedIds.length;
     final preLearnedCount = profile.preLearnedCount;
-    final effectiveLearned = learnedInPool + preLearnedCount;
-    final poolTotal = ws.allWords.length;
-    final effectiveTotal = poolTotal + preLearnedCount;
+    final effectiveLearned = stats.totalLearned + preLearnedCount;
+    final effectiveTotal = stats.totalWords + preLearnedCount;
     final progress = effectiveTotal > 0
         ? (effectiveLearned / effectiveTotal).clamp(0.0, 1.0)
         : 0.0;
     final username = profile.username.toUpperCase();
 
     const levelOrder = ['A1', 'A2', 'B1', 'B2', 'C1'];
-    final levelMap = <String, int>{};
-    final learnedLevelMap = <String, int>{};
-    for (final w in ws.allWords) {
-      levelMap[w.level] = (levelMap[w.level] ?? 0) + 1;
-      if (learnedIds.contains(w.id)) {
-        learnedLevelMap[w.level] = (learnedLevelMap[w.level] ?? 0) + 1;
-      }
-    }
     final orderedLevels = levelOrder
-        .where((lv) => levelMap.containsKey(lv))
+        .where((lv) => stats.levelBreakdown.containsKey(lv))
         .toList();
     final savedWords = ws.allWords.where((w) => savedIds.contains(w.id)).toList();
     final learnedWords = ws.allWords.where((w) => learnedIds.contains(w.id)).toList();
@@ -76,8 +66,6 @@ class ProfileScreen extends ConsumerWidget {
                     letterSpacing: 3,
                   ),
                 ),
-                const SizedBox(height: 4),
-                _RankBadge(rankState: rankState),
                 const SizedBox(height: 28),
 
                 Row(
@@ -103,20 +91,16 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
-                const _RankInfoCard(),
-                const SizedBox(height: 28),
-
                 _buildSectionTitle(AppStrings.levelBreakdown),
                 const SizedBox(height: 12),
                 ...orderedLevels.map((lv) {
-                  final tot = levelMap[lv]!;
-                  final lea = learnedLevelMap[lv] ?? 0;
+                  final stat = stats.levelBreakdown[lv]!;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: _LevelProgressBar(
                       level: lv,
-                      learned: lea,
-                      total: tot,
+                      learned: stat.learned,
+                      total: stat.total,
                       color: AppColors.forLevel(lv),
                     ),
                   );
@@ -641,245 +625,6 @@ class _LevelProgressBar extends StatelessWidget {
 }
 
 
-class _RankBadge extends StatelessWidget {
-  const _RankBadge({required this.rankState});
-  final RankState rankState;
-
-  @override
-  Widget build(BuildContext context) {
-    final isPremium = rankState.isPremiumRank;
-    final color = isPremium ? AppColors.accentOrange : AppColors.electricBlue;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withValues(alpha: 0.2),
-            color.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-        boxShadow: isPremium
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
-      ),
-      child: Text(
-        rankState.currentTitle.toUpperCase(),
-        style: GoogleFonts.orbitron(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 2,
-        ),
-      ),
-    );
-  }
-}
-
-
-class _RankInfoCard extends ConsumerWidget {
-  const _RankInfoCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rankState = ref.watch(rankProvider);
-    final isPremium = rankState.isPremiumRank;
-    final accentColor =
-        isPremium ? AppColors.accentOrange : AppColors.electricBlue;
-    final nextRank = rankState.nextRank;
-
-    return GlassCard(
-      accentColor: accentColor,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  if (isPremium)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Icon(
-                        Icons.auto_awesome,
-                        color: accentColor,
-                        size: 18,
-                      ),
-                    ),
-                  Text(
-                    'ÜNVAN',
-                    style: GoogleFonts.orbitron(
-                      color: AppColors.textSecondary,
-                      fontSize: 10,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: isPremium
-                      ? [
-                          BoxShadow(
-                            color: accentColor.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  'DİL PUANI: ${rankState.levelScore}',
-                  style: GoogleFonts.orbitron(
-                    color: accentColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            rankState.currentTitle,
-            style: GoogleFonts.orbitron(
-              color: accentColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1,
-              shadows: isPremium
-                  ? [
-                      Shadow(
-                        color: accentColor.withValues(alpha: 0.6),
-                        blurRadius: 12,
-                      ),
-                    ]
-                  : null,
-            ),
-          ),
-          if (nextRank != null) ...[
-            const SizedBox(height: 10),
-            Builder(builder: (context) {
-              final currentMastery =
-                  rankState.levelMastery[nextRank.requiredLevel] ?? 0.0;
-              final target = nextRank.requiredMastery;
-              final masteryProgress =
-                  target > 0 ? (currentMastery / target).clamp(0.0, 1.0) : 0.0;
-              final nextColor =
-                  AppColors.forLevel(nextRank.requiredLevel);
-
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMedium,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.cardBorder.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: nextColor,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Sonraki Ünvan: ${nextRank.title}',
-                            style: GoogleFonts.rajdhani(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Text(
-                          '${nextRank.requiredLevel} %${(currentMastery * 100).toInt()}',
-                          style: GoogleFonts.orbitron(
-                            color: nextColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '%${(target * 100).toInt()} gerekli',
-                          style: GoogleFonts.rajdhani(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: LinearProgressIndicator(
-                        value: masteryProgress,
-                        backgroundColor:
-                            AppColors.cardBorder.withValues(alpha: 0.5),
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(nextColor),
-                        minHeight: 5,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ] else
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    color: AppColors.neonGreen,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'En yüksek ünvana ulaştınız!',
-                    style: GoogleFonts.rajdhani(
-                      color: AppColors.neonGreen,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-
 class _RankHierarchySection extends ConsumerWidget {
   const _RankHierarchySection();
 
@@ -1111,18 +856,48 @@ class _RankHierarchySection extends ConsumerWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            if (isCurrent || isAchieved) ...[
-                              const Spacer(),
-                              Text(
-                                '%${((rankState.levelMastery[rank.requiredLevel] ?? 0.0) * 100).toInt()}',
-                                style: GoogleFonts.orbitron(
-                                  color: isCurrent ? levelColor : AppColors.neonGreen,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            const Spacer(),
+                            Text(
+                              '%${((rankState.levelMastery[rank.requiredLevel] ?? 0.0) * 100).toInt()}',
+                              style: GoogleFonts.orbitron(
+                                color: isAchieved
+                                    ? AppColors.neonGreen
+                                    : isCurrent
+                                        ? levelColor
+                                        : AppColors.textMuted,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
                               ),
-                            ],
+                            ),
                           ],
+                        ),
+                        const SizedBox(height: 6),
+                        Builder(
+                          builder: (_) {
+                            final mastery =
+                                rankState.levelMastery[rank.requiredLevel] ??
+                                    0.0;
+                            final barValue = rank.requiredMastery > 0
+                                ? (mastery / rank.requiredMastery)
+                                    .clamp(0.0, 1.0)
+                                : 0.0;
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: LinearProgressIndicator(
+                                value: barValue,
+                                backgroundColor: AppColors.surfaceMedium,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isAchieved
+                                      ? AppColors.neonGreen
+                                      : isCurrent
+                                          ? levelColor
+                                          : AppColors.textMuted
+                                              .withValues(alpha: 0.35),
+                                ),
+                                minHeight: 4,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

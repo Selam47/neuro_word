@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
+import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -59,11 +60,23 @@ class _SplashScreenState extends State<SplashScreen>
 
     _mainController.forward();
 
-    Future.delayed(const Duration(milliseconds: 3500), () {
-      if (mounted) {
+    _navigateAfterSplash();
+  }
+
+  Future<void> _navigateAfterSplash() async {
+    await Future.delayed(const Duration(milliseconds: 3500));
+    if (!mounted) return;
+
+    try {
+      final profile = UserProfileService();
+      if (profile.isFirstLaunch) {
+        context.go('/onboarding');
+      } else {
         context.go('/dashboard');
       }
-    });
+    } catch (_) {
+      if (mounted) context.go('/dashboard');
+    }
   }
 
   @override
@@ -90,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: FadeTransition(
                     opacity: _robotFadeAnimation,
                     child: Container(
-                      width: size.width * 0.7, // Massively increased size
+                      width: size.width * 0.7,
                       height: size.width * 0.7,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -110,6 +123,13 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Lottie.asset(
                         'assets/animations/splash_animation.json',
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.psychology_rounded,
+                            size: size.width * 0.3,
+                            color: AppColors.electricBlue,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -127,7 +147,8 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Column(
                           children: [
                             ShaderMask(
-                              shaderCallback: (bounds) => const LinearGradient(
+                              shaderCallback: (bounds) =>
+                                  const LinearGradient(
                                 colors: [
                                   Colors.white,
                                   AppColors.electricBlue,
@@ -139,7 +160,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 'NEURO WORD',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.orbitron(
-                                  fontSize: 42, // Much larger
+                                  fontSize: 42,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 2.0,
                                   color: Colors.white,
@@ -163,11 +184,12 @@ class _SplashScreenState extends State<SplashScreen>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.electricBlue.withOpacity(0.1),
+                                color:
+                                    AppColors.electricBlue.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color:
-                                      AppColors.electricBlue.withOpacity(0.3),
+                                  color: AppColors.electricBlue
+                                      .withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
@@ -177,7 +199,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   color: AppColors.textPrimary,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  letterSpacing: 4.0, // Futuristic spacing
+                                  letterSpacing: 4.0,
                                 ),
                               ),
                             ),
@@ -211,7 +233,8 @@ class _SplashScreenState extends State<SplashScreen>
                         Text(
                           'SYSTEM INITIALIZING...',
                           style: GoogleFonts.shareTechMono(
-                            color: AppColors.textSecondary.withOpacity(0.5),
+                            color:
+                                AppColors.textSecondary.withOpacity(0.5),
                             fontSize: 10,
                             letterSpacing: 1.5,
                           ),
@@ -229,4 +252,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

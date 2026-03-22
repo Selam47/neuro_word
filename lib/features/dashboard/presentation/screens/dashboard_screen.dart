@@ -1245,7 +1245,7 @@ class _NeonGlitch3500State extends State<_NeonGlitch3500>
               end: Alignment.bottomRight,
             ).createShader(bounds),
             child: Text(
-              '3500+',
+              '3000+',
               style: GoogleFonts.orbitron(
                 color: Colors.white,
                 fontSize: 15,

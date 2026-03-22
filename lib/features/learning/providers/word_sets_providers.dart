@@ -114,6 +114,12 @@ class UserProgressNotifier extends Notifier<UserProgressState> {
     unawaited(_syncLearned(wordId, newValue));
   }
 
+  Future<void> markLearned(String wordId) async {
+    if (state.learnedIds.contains(wordId)) return;
+    _updateLocalProgress(wordId, isLearned: true);
+    unawaited(_syncLearned(wordId, true));
+  }
+
   Future<void> _syncLearned(String wordId, bool isLearned) async {
     try {
       if (isLearned) {

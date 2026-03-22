@@ -22,9 +22,13 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/dashboard',
+    initialLocation: '/',
     redirect: (context, state) {
+      final isSplash = state.matchedLocation == '/';
       final isOnboarding = state.matchedLocation == '/onboarding';
+
+      if (isSplash) return null;
+
       if (UserProfileService().isFirstLaunch && !isOnboarding) {
         return '/onboarding';
       }
@@ -134,7 +138,8 @@ class AppRouter {
             context,
             state,
             SessionSummaryScreen(
-              learnedIds: List<String>.from(extra['learnedIds'] as List? ?? []),
+              learnedIds:
+                  List<String>.from(extra['learnedIds'] as List? ?? []),
               totalWords: extra['totalWords'] as int? ?? 0,
               mode: extra['mode'] as String? ?? 'Game Over',
             ),

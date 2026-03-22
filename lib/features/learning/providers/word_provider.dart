@@ -77,7 +77,7 @@ class WordNotifier extends Notifier<WordState> {
     ref.listen<UserProgressState>(userProgressProvider, (prev, next) {
       if (state.onlySaved && state.allWords.isNotEmpty) {
         final prevFavs = prev?.favoriteIds ?? const {};
-        if (prevFavs != next.favoriteIds) _applyFilters();
+        if (prevFavs != next.favoriteIds) Future.microtask(_applyFilters);
       }
     });
     Future.microtask(_loadWords);
@@ -233,3 +233,70 @@ class WordNotifier extends Notifier<WordState> {
 final wordProvider = NotifierProvider<WordNotifier, WordState>(
   WordNotifier.new,
 );
+
+class LevelStat {
+  const LevelStat({
+    required this.learned,
+    required this.total,
+    required this.pct,
+  });
+  final int learned;
+  final int total;
+  final double pct;
+  int get pctInt => (pct * 100).toInt();
+}
+
+class WordStatistics {
+  const WordStatistics({
+    this.overallProgress = 0.0,
+    this.totalLearned = 0,
+    this.totalWords = 0,
+    this.levelBreakdown = const {},
+  });
+  final double overallProgress;
+  final int totalLearned;
+  final int totalWords;
+  final Map<String, LevelStat> levelBreakdown;
+}
+
+final wordStatisticsProvider = Provider<WordStatistics>((ref) {
+  final ws = ref.watch(wordProvider);
+  final learnedIds = ref.watch(
+    userProgressProvider.select((s) => s.learnedIds),
+  );
+
+  if (ws.allWords.isEmpty) return const WordStatistics();
+
+  final levelTotals = <String, int>{};
+  final levelLearned = <String, int>{};
+
+  for (final w in ws.allWords) {
+    levelTotals[w.level] = (levelTotals[w.level] ?? 0) + 1;
+    if (learnedIds.contains(w.id)) {
+      levelLearned[w.level] = (levelLearned[w.level] ?? 0) + 1;
+    }
+  }
+
+  final totalWords = ws.allWords.length;
+  final totalLearned = levelLearned.values.fold(0, (a, b) => a + b);
+  final overallProgress =
+      totalWords > 0 ? (totalLearned / totalWords).clamp(0.0, 1.0) : 0.0;
+
+  final breakdown = <String, LevelStat>{};
+  for (final level in levelTotals.keys) {
+    final total = levelTotals[level]!;
+    final learned = levelLearned[level] ?? 0;
+    breakdown[level] = LevelStat(
+      learned: learned,
+      total: total,
+      pct: total > 0 ? learned / total : 0.0,
+    );
+  }
+
+  return WordStatistics(
+    overallProgress: overallProgress,
+    totalLearned: totalLearned,
+    totalWords: totalWords,
+    levelBreakdown: breakdown,
+  );
+});

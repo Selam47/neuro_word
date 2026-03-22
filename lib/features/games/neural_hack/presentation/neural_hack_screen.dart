@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,7 @@ class NeuralHackScreen extends ConsumerStatefulWidget {
 }
 
 class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   static const int _totalQuestions = 10;
 
   late List<WordModel> _words;
@@ -33,6 +34,8 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   final List<String> _learnedIds = [];
 
   late AnimationController _fallController;
+  late CurvedAnimation _linearFall;
+  bool _wasFallingBeforePause = false;
 
   List<String> _currentOptions = [];
   int _correctOptionIndex = 0;
@@ -53,13 +56,33 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _fallController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 10),
+    );
+
+    _linearFall = CurvedAnimation(
+      parent: _fallController,
+      curve: Curves.linear,
     );
 
     _fallController.addStatusListener(_handleFallStatus);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _wasFallingBeforePause = _fallController.isAnimating;
+      _fallController.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasFallingBeforePause && _waitingForTap && !_sessionEnded) {
+        _fallController.forward();
+      }
+      _wasFallingBeforePause = false;
+    }
   }
 
   void _handleFallStatus(AnimationStatus status) {
@@ -87,8 +110,10 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _fallController.removeStatusListener(_handleFallStatus);
     _fallController.stop();
+    _linearFall.dispose();
     _fallController.dispose();
     super.dispose();
   }
@@ -324,20 +349,18 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
           child: LayoutBuilder(
             builder: (context, constraints) {
               final areaH = constraints.maxHeight;
+              final fallTween = Tween<double>(
+                begin: -kCardH,
+                end: areaH + kCardH,
+              );
               return AnimatedBuilder(
-                animation: _fallController,
+                animation: _linearFall,
                 builder: (context, child) {
-                  final y =
-                      -kCardH + _fallController.value * (areaH + 2 * kCardH);
+                  final y = fallTween.evaluate(_linearFall);
                   return Stack(
                     clipBehavior: Clip.hardEdge,
                     children: [
-                      Positioned(
-                        top: y,
-                        left: 16,
-                        right: 16,
-                        child: child!,
-                      ),
+                      Positioned(top: y, left: 16, right: 16, child: child!),
                     ],
                   );
                 },
@@ -482,41 +505,57 @@ class _NeuralHackScreenState extends ConsumerState<NeuralHackScreen>
   }
 
   Widget _buildTimeBar() {
+    const int totalSeconds = 10;
     return AnimatedBuilder(
       animation: _fallController,
       builder: (context, _) {
         final progress = _fallController.value.clamp(0.0, 1.0);
         final isDanger = progress > 0.72;
-        return SizedBox(
-          width: 72,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: const Color(0xFF0A1A0A),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isDanger ? _kRed : _kGreen,
+        final remaining = ((1.0 - progress) * totalSeconds).ceil().clamp(0, totalSeconds);
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${remaining}s',
+              style: GoogleFonts.sourceCodePro(
+                color: isDanger ? _kRed : _kGreen,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 72,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: const Color(0xFF0A1A0A),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDanger ? _kRed : _kGreen,
+                      ),
+                      minHeight: 6,
+                    ),
                   ),
-                  minHeight: 6,
-                ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isDanger ? 'DANGER' : 'TIME',
+                    style: GoogleFonts.sourceCodePro(
+                      color: isDanger
+                          ? _kRed.withOpacity(0.6)
+                          : _kGreen.withOpacity(0.3),
+                      fontSize: 7,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                isDanger ? 'DANGER' : 'TIME',
-                style: GoogleFonts.sourceCodePro(
-                  color: isDanger
-                      ? _kRed.withOpacity(0.6)
-                      : _kGreen.withOpacity(0.3),
-                  fontSize: 7,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -640,26 +679,37 @@ class _WordCard extends StatelessWidget {
   const _WordCard({required this.word});
   final WordModel word;
 
-  static const _kGreen = Color(0xFF00FF41);
-  static const _kSurfaceDark = Color(0xFF030D03);
+  static const _kNeonCyan = Color(0xFF00FFFF);
+  static const _kNeonGreen = Color(0xFF00FF41);
+  static const _kSurfaceDark = Color(0xFF020A0F);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
-        color: _kSurfaceDark.withOpacity(0.97),
+        color: _kSurfaceDark.withOpacity(0.95),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kGreen.withOpacity(0.55), width: 1.5),
+        border: Border.all(color: _kNeonCyan.withOpacity(0.7), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withOpacity(0.16),
-            blurRadius: 28,
+            color: _kNeonCyan.withOpacity(0.35),
+            blurRadius: 32,
             spreadRadius: 2,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.85),
-            blurRadius: 8,
+            color: _kNeonGreen.withOpacity(0.18),
+            blurRadius: 48,
+            spreadRadius: 6,
+          ),
+          BoxShadow(
+            color: _kNeonCyan.withOpacity(0.12),
+            blurRadius: 80,
+            spreadRadius: 12,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.9),
+            blurRadius: 6,
             spreadRadius: 0,
           ),
         ],
@@ -673,7 +723,7 @@ class _WordCard extends StatelessWidget {
               Text(
                 '> ',
                 style: GoogleFonts.sourceCodePro(
-                  color: _kGreen.withOpacity(0.35),
+                  color: _kNeonCyan.withOpacity(0.4),
                   fontSize: 22,
                   fontWeight: FontWeight.w400,
                 ),
@@ -682,10 +732,20 @@ class _WordCard extends StatelessWidget {
                 child: Text(
                   word.english,
                   style: GoogleFonts.sourceCodePro(
-                    color: _kGreen,
+                    color: _kNeonCyan,
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        color: _kNeonCyan.withOpacity(0.7),
+                        blurRadius: 12,
+                      ),
+                      Shadow(
+                        color: _kNeonGreen.withOpacity(0.4),
+                        blurRadius: 24,
+                      ),
+                    ],
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -696,14 +756,14 @@ class _WordCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: _kGreen.withOpacity(0.06),
+              color: _kNeonCyan.withOpacity(0.06),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: _kGreen.withOpacity(0.14)),
+              border: Border.all(color: _kNeonCyan.withOpacity(0.2)),
             ),
             child: Text(
               word.level,
               style: GoogleFonts.sourceCodePro(
-                color: _kGreen.withOpacity(0.42),
+                color: _kNeonCyan.withOpacity(0.5),
                 fontSize: 11,
                 letterSpacing: 2,
                 fontWeight: FontWeight.w600,
@@ -776,13 +836,14 @@ class _MatrixRainWidget extends StatefulWidget {
 }
 
 class _MatrixRainWidgetState extends State<_MatrixRainWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _rainController;
-  int _lastRainUs = 0;
+  Duration? _lastFrameStamp;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _rainController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -790,28 +851,38 @@ class _MatrixRainWidgetState extends State<_MatrixRainWidget>
     _rainController.addListener(_tickRain);
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _lastFrameStamp = null;
+    }
+  }
+
   void _tickRain() {
-    final nowUs = DateTime.now().microsecondsSinceEpoch;
-    if (_lastRainUs == 0) {
-      _lastRainUs = nowUs;
+    final now = SchedulerBinding.instance.currentFrameTimeStamp;
+    if (_lastFrameStamp == null) {
+      _lastFrameStamp = now;
       return;
     }
-    final dtMs = (nowUs - _lastRainUs) / 1000.0;
-    _lastRainUs = nowUs;
+    final dtSeconds =
+        ((now - _lastFrameStamp!).inMicroseconds / 1000000.0).clamp(0.0, 0.1);
+    _lastFrameStamp = now;
     for (final col in widget.columns) {
-      col.offset += col.speed * dtMs * 0.1;
+      col.offset += col.speed * dtSeconds * 100;
       if (col.offset > 920) {
         col.offset = -(col.chars.length * 18.0);
         col.chars = List.generate(
           widget.rng.nextInt(8) + 3,
           (_) => String.fromCharCode(widget.rng.nextInt(94) + 33),
         );
+        col.invalidate();
       }
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _rainController.removeListener(_tickRain);
     _rainController.stop();
     _rainController.dispose();
@@ -834,6 +905,7 @@ class _MatrixColumn {
   List<String> chars;
   double speed;
   double offset;
+  List<TextPainter>? _cachedPainters;
 
   _MatrixColumn({
     required this.x,
@@ -841,6 +913,28 @@ class _MatrixColumn {
     required this.speed,
     required this.offset,
   });
+
+  List<TextPainter> get painters {
+    if (_cachedPainters != null) return _cachedPainters!;
+    _cachedPainters = List.generate(chars.length, (i) {
+      final opacity =
+          i == 0 ? 0.55 : max(0.03, 0.5 * (1.0 - i / chars.length));
+      return TextPainter(
+        text: TextSpan(
+          text: chars[i],
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 13,
+            color: Color.fromRGBO(0, 255, 65, opacity),
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+    });
+    return _cachedPainters!;
+  }
+
+  void invalidate() => _cachedPainters = null;
 }
 
 class _MatrixRainPainter extends CustomPainter {
@@ -852,24 +946,11 @@ class _MatrixRainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final col in columns) {
-      for (int i = 0; i < col.chars.length; i++) {
+      final painters = col.painters;
+      for (int i = 0; i < painters.length; i++) {
         final y = col.offset + i * 18.0;
         if (y < -18 || y > size.height + 18) continue;
-        final opacity = i == 0
-            ? 0.55
-            : max(0.03, 0.5 * (1.0 - i / col.chars.length));
-        final tp = TextPainter(
-          text: TextSpan(
-            text: col.chars[i],
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-              color: Color.fromRGBO(0, 255, 65, opacity),
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        tp.paint(canvas, Offset(col.x, y));
+        painters[i].paint(canvas, Offset(col.x, y));
       }
     }
   }

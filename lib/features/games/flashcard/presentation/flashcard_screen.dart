@@ -47,7 +47,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
 
   void _onSwipeRight() {
     HapticFeedback.lightImpact();
-    _learnedIds.add(_words[_currentIndex].id);
+    final wordId = _words[_currentIndex].id;
+    _learnedIds.add(wordId);
+    ref.read(userProgressProvider.notifier).markLearned(wordId);
     if (_currentIndex < _words.length - 1) {
       setState(() => _currentIndex++);
     } else {

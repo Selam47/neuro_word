@@ -9,6 +9,7 @@ import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
+import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
 class NeonPulseScreen extends ConsumerStatefulWidget {
@@ -20,16 +21,16 @@ class NeonPulseScreen extends ConsumerStatefulWidget {
 }
 
 class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
-    with SingleTickerProviderStateMixin {
+    with WidgetsBindingObserver {
   late List<WordModel> _words;
   int _currentIndex = 0;
   int _score = 0;
   final List<String> _learnedIds = [];
   bool _initialized = false;
 
-  late AnimationController _timerController;
   Timer? _countdownTimer;
-  int _secondsLeft = 10;
+  int _remainingTime = 10;
+  bool _wasRunningBeforePause = false;
 
   int? _selectedOptionIndex;
   late List<String> _currentOptions;
@@ -40,10 +41,21 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   @override
   void initState() {
     super.initState();
-    _timerController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    );
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _wasRunningBeforePause = _countdownTimer?.isActive ?? false;
+      _countdownTimer?.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasRunningBeforePause && _selectedOptionIndex == null) {
+        _startTimer();
+      }
+      _wasRunningBeforePause = false;
+    }
   }
 
   @override
@@ -59,9 +71,26 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
 
   @override
   void dispose() {
-    _timerController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _remainingTime--;
+      });
+      if (_remainingTime <= 0) {
+        timer.cancel();
+        _onTimeout();
+      }
+    });
   }
 
   void _setupQuestion() {
@@ -81,26 +110,14 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
       _currentOptions = options;
       _correctOptionIndex = options.indexOf(word.turkish);
       _selectedOptionIndex = null;
-      _secondsLeft = 10;
+      _remainingTime = 10;
     });
 
-    _timerController.reset();
-    _timerController.forward();
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      setState(() => _secondsLeft--);
-      if (_secondsLeft <= 0) {
-        timer.cancel();
-        _onTimeout();
-      }
-    });
+    _startTimer();
   }
 
   void _onTimeout() {
+    if (_selectedOptionIndex != null) return;
     HapticFeedback.heavyImpact();
     setState(() {
       _selectedOptionIndex = -1;
@@ -112,13 +129,14 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
     if (_selectedOptionIndex != null) return;
 
     _countdownTimer?.cancel();
-    _timerController.stop();
 
     final correct = index == _correctOptionIndex;
     if (correct) {
       HapticFeedback.lightImpact();
       _score++;
-      _learnedIds.add(_words[_currentIndex].id);
+      final wordId = _words[_currentIndex].id;
+      _learnedIds.add(wordId);
+      ref.read(userProgressProvider.notifier).markLearned(wordId);
     } else {
       HapticFeedback.heavyImpact();
     }
@@ -143,6 +161,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   }
 
   void _finishSession() {
+    _countdownTimer?.cancel();
     context.push(
       '/session-summary',
       extra: {
@@ -184,72 +203,46 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
             children: [
               _buildTopBar(context),
               const SizedBox(height: 8),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Text(
+                      '${AppStrings.roundOf} ${_currentIndex + 1} / ${_words.length}',
+                      style: GoogleFonts.orbitron(
+                        color: AppColors.electricBlue,
+                        fontSize: 12,
+                      ),
+                    ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${AppStrings.roundOf} ${_currentIndex + 1} / ${_words.length}',
-                          style: GoogleFonts.orbitron(
-                            color: AppColors.electricBlue,
-                            fontSize: 12,
-                          ),
+                        Icon(
+                          Icons.timer_rounded,
+                          color: _remainingTime <= 3
+                              ? AppColors.warningRed
+                              : AppColors.electricBlue,
+                          size: 16,
                         ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.timer_rounded,
-                              color: _secondsLeft <= 3
-                                  ? AppColors.warningRed
-                                  : AppColors.electricBlue,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_secondsLeft}s',
-                              style: GoogleFonts.orbitron(
-                                color: _secondsLeft <= 3
-                                    ? AppColors.warningRed
-                                    : AppColors.electricBlue,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_remainingTime}s',
+                          style: GoogleFonts.orbitron(
+                            color: _remainingTime <= 3
+                                ? AppColors.warningRed
+                                : AppColors.electricBlue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    AnimatedBuilder(
-                      animation: _timerController,
-                      builder: (context, child) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: 1.0 - _timerController.value,
-                            backgroundColor: AppColors.surfaceMedium,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _secondsLeft <= 3
-                                  ? AppColors.warningRed
-                                  : AppColors.electricBlue,
-                            ),
-                            minHeight: 4,
-                          ),
-                        );
-                      },
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
-
               _buildQuestionCircle(word),
               const SizedBox(height: 32),
-
               Text(
                 '${AppStrings.score}: $_score / $_totalQuestions',
                 style: GoogleFonts.rajdhani(
@@ -259,7 +252,6 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
                 ),
               ),
               const SizedBox(height: 24),
-
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -491,4 +483,3 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
     );
   }
 }
-

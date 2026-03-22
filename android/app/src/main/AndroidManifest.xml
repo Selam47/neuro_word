@@ -10,6 +10,10 @@
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
         android:fullBackupContent="false">
+
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         
         <activity
             android:name=".MainActivity"
@@ -35,8 +39,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-            
-        
 
     </application>
 
