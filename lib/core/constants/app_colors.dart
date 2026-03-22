@@ -27,6 +27,7 @@ class AppColors {
 
   static const Color neonPink = Color(0xFFFF00FF);
   static const Color surfaceLight = Color(0xFF202A3C);
+  static const Color masteredGold = Color(0xFFFFD700);
 
   static Color? get error => null;
 

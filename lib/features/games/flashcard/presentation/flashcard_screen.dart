@@ -1,194 +1,342 @@
-﻿import 'dart:math';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
-import 'package:neuro_word/core/constants/app_colors.dart';
 import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
-import 'package:neuro_word/shared/widgets/futuristic_background.dart';
-import 'package:neuro_word/shared/widgets/glass_card.dart';
 
-class FlashcardScreen extends ConsumerStatefulWidget {
-  const FlashcardScreen({super.key, this.level});
+class FlashMemoryScreen extends ConsumerStatefulWidget {
+  const FlashMemoryScreen({super.key, this.level});
   final String? level;
 
   @override
-  ConsumerState<FlashcardScreen> createState() => _FlashcardScreenState();
+  ConsumerState<FlashMemoryScreen> createState() => _FlashMemoryScreenState();
 }
 
-class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
+class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  // ── Constants ────────────────────────────────────────────────────────────────
+  static const int _totalWords = 5;
+  static const int _typingSeconds = 10;
+  static const Duration _flashDuration = Duration(milliseconds: 1500);
+
+  static const _kCyan = Color(0xFF00FFFF);
+  static const _kGreen = Color(0xFF00FF41);
+  static const _kRed = Color(0xFFFF0040);
+  static const _kBg = Color(0xFF050A0E);
+  static const _kSurface = Color(0xFF07120A);
+
+  // ── State ─────────────────────────────────────────────────────────────────
   late List<WordModel> _words;
-  int _currentIndex = 0;
-  final List<String> _learnedIds = [];
   bool _initialized = false;
+
+  int _currentIndex = 0;
+  int _score = 0;
+  bool _gameOver = false;
+
+  /// True while the word card is being shown (flash phase).
+  bool _flashPhase = false;
+
+  /// True after flash phase ends and user may type.
+  bool _wordVisible = false;
+  bool _inputEnabled = false;
+
+  /// Guards against multiple simultaneous advance calls.
+  bool _isAdvancing = false;
+
+  Color _feedbackColor = Colors.transparent;
+  bool _feedbackActive = false;
+  bool _lastAnswerCorrect = false;
+
+  // ── Timer (counts up 0→1 over _typingSeconds) ────────────────────────────
+  late AnimationController _timerController;
+
+  /// Remembers whether the timer was running before the app went to background.
+  bool _wasTimerRunning = false;
+
+  // ── UI helpers ───────────────────────────────────────────────────────────
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _inputFocusNode = FocusNode();
+
+  // ── Lifecycle ────────────────────────────────────────────────────────────
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _timerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: _typingSeconds),
+    )..addStatusListener(_onTimerStatus);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _wasTimerRunning = _timerController.isAnimating;
+      _timerController.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasTimerRunning && !_gameOver && !_flashPhase) {
+        _timerController.forward();
+      }
+      _wasTimerRunning = false;
+    }
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final notifier = ref.read(wordProvider.notifier);
-      _words = notifier.getRandomWords(20, level: widget.level);
       _initialized = true;
+      final notifier = ref.read(wordProvider.notifier);
+      _words = notifier.getRandomWords(_totalWords, level: widget.level);
+      if (_words.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _startRound();
+        });
+      }
     }
-  }
-
-  void _onSwipeLeft() {
-    HapticFeedback.mediumImpact();
-    if (_currentIndex < _words.length - 1) {
-      setState(() => _currentIndex++);
-    } else {
-      _finishSession();
-    }
-  }
-
-  void _onSwipeRight() {
-    HapticFeedback.lightImpact();
-    final wordId = _words[_currentIndex].id;
-    _learnedIds.add(wordId);
-    ref.read(userProgressProvider.notifier).markLearned(wordId);
-    if (_currentIndex < _words.length - 1) {
-      setState(() => _currentIndex++);
-    } else {
-      _finishSession();
-    }
-  }
-
-  void _finishSession() {
-    context.push(
-      '/session-summary',
-      extra: {
-        'learnedIds': _learnedIds,
-        'totalWords': _words.length,
-        'mode': AppStrings.flashcards,
-      },
-    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_words.isEmpty) {
-      return Scaffold(
-        body: FuturisticBackground(
-          child: Center(
-            child: Text(
-              'No words available at this level.',
-              style: GoogleFonts.rajdhani(
-                color: AppColors.textSecondary,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-      );
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timerController
+      ..removeStatusListener(_onTimerStatus)
+      ..stop()
+      ..dispose();
+    _textController.dispose();
+    _inputFocusNode.dispose();
+    super.dispose();
+  }
+
+  // ── Timer callback ────────────────────────────────────────────────────────
+  /// Called only when the 10-second TYPING timer completes naturally.
+  void _onTimerStatus(AnimationStatus status) {
+    if (!mounted || _gameOver || _isAdvancing || _flashPhase) return;
+    if (status == AnimationStatus.completed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_gameOver && !_isAdvancing) _onTimeUp();
+      });
+    }
+  }
+
+  // ── Round logic ───────────────────────────────────────────────────────────
+
+  /// Begins a new round:
+  ///   1. Shows the word for [_flashDuration].
+  ///   2. Hides the word and starts the 10-second typing timer.
+  void _startRound() {
+    if (_gameOver || _isAdvancing) return;
+
+    // Reset timer but do NOT start it yet – it starts after the flash phase.
+    _timerController.reset();
+
+    setState(() {
+      _wordVisible = true;
+      _flashPhase = true;
+      _inputEnabled = false;
+      _isAdvancing = false;
+      _feedbackColor = Colors.transparent;
+      _feedbackActive = false;
+    });
+    _textController.clear();
+
+    // After the flash window, hide the word and START the typing countdown.
+    Future.delayed(_flashDuration, () {
+      if (!mounted || _gameOver) return;
+      setState(() {
+        _wordVisible = false;
+        _flashPhase = false;
+        _inputEnabled = true;
+      });
+      _inputFocusNode.requestFocus();
+      // Start the 10-second typing timer ONLY after the flash phase ends.
+      _timerController.forward(from: 0.0);
+    });
+  }
+
+  void _onTimeUp() {
+    if (_gameOver || _isAdvancing) return;
+    HapticFeedback.heavyImpact();
+    _timerController.stop();
+    setState(() {
+      _inputEnabled = false;
+      _lastAnswerCorrect = false;
+      _feedbackColor = _kRed;
+      _feedbackActive = true;
+    });
+    _scheduleAdvance();
+  }
+
+  void _onSubmitted(String value) {
+    if (!_inputEnabled || _gameOver || _isAdvancing) return;
+    final trimmed = value.trim().toLowerCase();
+    if (trimmed.isEmpty) return;
+
+    _timerController.stop();
+    setState(() => _inputEnabled = false);
+
+    final expected = _words[_currentIndex].english.trim().toLowerCase();
+    final correct = trimmed == expected;
+
+    if (correct) {
+      HapticFeedback.lightImpact();
+      _score++;
+      ref.read(userProgressProvider.notifier).addAllLearned([
+        _words[_currentIndex].id,
+      ]);
+    } else {
+      HapticFeedback.heavyImpact();
     }
 
-    final word = _words[_currentIndex];
-    final progress = (_currentIndex + 1) / _words.length;
+    setState(() {
+      _lastAnswerCorrect = correct;
+      _feedbackColor = correct ? _kGreen : _kRed;
+      _feedbackActive = true;
+    });
 
-    return Scaffold(
-      body: FuturisticBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildTopBar(context),
-              const SizedBox(height: 8),
+    _scheduleAdvance();
+  }
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${_currentIndex + 1} / ${_words.length}',
-                          style: GoogleFonts.orbitron(
-                            color: AppColors.electricBlue,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          '${_learnedIds.length} learned',
-                          style: GoogleFonts.rajdhani(
-                            color: AppColors.neonGreen,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: AppColors.surfaceMedium,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.electricBlue,
-                        ),
-                        minHeight: 4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+  void _scheduleAdvance() {
+    if (_isAdvancing) return;
+    _isAdvancing = true;
+    _timerController.reset();
 
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onHorizontalDragEnd: (details) {
-                          if (details.primaryVelocity != null) {
-                            if (details.primaryVelocity! < -200) {
-                              _onSwipeLeft();
-                            } else if (details.primaryVelocity! > 200) {
-                              _onSwipeRight();
-                            }
-                          }
-                        },
-                        child: _FlipCard(word: word),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: _FavoriteButton(word: word),
-                      ),
-                    ],
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      setState(() {
+        _feedbackActive = false;
+        _feedbackColor = Colors.transparent;
+      });
+      _currentIndex++;
+      _isAdvancing = false;
+
+      if (_currentIndex >= _totalWords) {
+        setState(() => _gameOver = true);
+      } else {
+        _startRound();
+      }
+    });
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized || _words.isEmpty) return _buildEmptyState();
+    if (_gameOver) return _buildResultsScreen();
+
+    final word = _words[_currentIndex.clamp(0, _words.length - 1)];
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _timerController.stop();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: _kBg,
+        resizeToAvoidBottomInset: true,
+        body: Stack(
+          children: [
+            if (_feedbackActive)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    color: _feedbackColor.withOpacity(0.10),
                   ),
                 ),
               ),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 16,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
                   children: [
-                    _buildHint(
-                      Icons.arrow_back_rounded,
-                      'Skip',
-                      AppColors.warningRed,
-                      _onSwipeLeft,
-                    ),
-                    _buildHint(
-                      Icons.arrow_forward_rounded,
-                      'Learned',
-                      AppColors.neonGreen,
-                      _onSwipeRight,
-                    ),
+                    _buildTopBar(context),
+                    const SizedBox(height: 8),
+                    _buildProgressDots(),
+                    const SizedBox(height: 12),
+                    _buildTimerBar(),
+                    const SizedBox(height: 8),
+                    Expanded(child: _buildWordArea(word)),
+                    _buildInputArea(word),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Sub-widgets ───────────────────────────────────────────────────────────
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: _kBg,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.memory_rounded,
+              color: _kCyan.withOpacity(0.4),
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Kelime bulunamadı.',
+              style: GoogleFonts.sourceCodePro(
+                color: const Color(0xFF607060),
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: _NeonButton(label: 'GERİ DÖN', color: _kCyan),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultsScreen() {
+    final perfect = _score == _totalWords;
+    final headerColor = perfect ? _kGreen : _kCyan;
+
+    return Scaffold(
+      backgroundColor: _kBg,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              _buildResultBadge(perfect, headerColor),
+              const SizedBox(height: 32),
+              _buildScoreDisplay(headerColor),
+              const SizedBox(height: 48),
+              _buildScoreBreakdown(),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: _NeonButton(
+                  label: 'ANA MENÜYE DÖN',
+                  color: _kCyan,
+                  fullWidth: true,
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -196,39 +344,169 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     );
   }
 
+  Widget _buildResultBadge(bool perfect, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        perfect ? 'MÜKEMMEL!' : 'SONUÇ',
+        style: GoogleFonts.sourceCodePro(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 4,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScoreDisplay(Color color) {
+    return Column(
+      children: [
+        Text(
+          '$_score',
+          style: GoogleFonts.sourceCodePro(
+            color: color,
+            fontSize: 88,
+            fontWeight: FontWeight.w700,
+            height: 1,
+            shadows: [
+              Shadow(color: color.withOpacity(0.6), blurRadius: 30),
+              Shadow(color: color.withOpacity(0.3), blurRadius: 60),
+            ],
+          ),
+        ),
+        Text(
+          '/ $_totalWords',
+          style: GoogleFonts.sourceCodePro(
+            color: color.withOpacity(0.35),
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          AppStrings.flashMemory,
+          style: GoogleFonts.sourceCodePro(
+            color: const Color(0xFF304530),
+            fontSize: 11,
+            letterSpacing: 3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScoreBreakdown() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF070F07),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kCyan.withOpacity(0.12)),
+      ),
+      child: Column(
+        children: List.generate(_totalWords, (i) {
+          final word = _words[i];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              children: [
+                Text(
+                  '${i + 1}',
+                  style: GoogleFonts.sourceCodePro(
+                    color: _kCyan.withOpacity(0.25),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    word.english,
+                    style: GoogleFonts.sourceCodePro(
+                      color: const Color(0xFF9AAAA0),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  word.turkish,
+                  style: GoogleFonts.sourceCodePro(
+                    color: _kCyan.withOpacity(0.35),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   Widget _buildTopBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () {
+              _timerController.stop();
+              Navigator.of(context).pop();
+            },
             child: Container(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.surfaceMedium,
+                color: const Color(0xFF0A1A0A),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: _kCyan.withOpacity(0.25)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_rounded,
-                color: AppColors.textSecondary,
+                color: _kCyan.withOpacity(0.7),
                 size: 20,
               ),
             ),
           ),
           const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              AppStrings.flashcards.toUpperCase(),
-              style: GoogleFonts.orbitron(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-              ),
-              overflow: TextOverflow.ellipsis,
+          Text(
+            'FLASH MEMORY',
+            style: GoogleFonts.sourceCodePro(
+              color: _kCyan,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 3,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: _kCyan.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _kCyan.withOpacity(0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bolt_rounded, color: _kCyan, size: 14),
+                const SizedBox(width: 4),
+                Text(
+                  '$_score',
+                  style: GoogleFonts.sourceCodePro(
+                    color: _kCyan,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -236,220 +514,389 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     );
   }
 
-  Widget _buildHint(
-    IconData icon,
-    String label,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.4)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.rajdhani(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+  Widget _buildProgressDots() {
+    return Row(
+      children: List.generate(_totalWords, (i) {
+        final done = i < _currentIndex;
+        final active = i == _currentIndex;
+        final Color dotColor;
+        if (done) {
+          dotColor = _kGreen;
+        } else if (active) {
+          dotColor = _kCyan;
+        } else {
+          dotColor = _kCyan.withOpacity(0.12);
+        }
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 4,
+              decoration: BoxDecoration(
+                color: dotColor,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: active
+                    ? [BoxShadow(color: _kCyan.withOpacity(0.5), blurRadius: 6)]
+                    : null,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FavoriteButton extends ConsumerWidget {
-  const _FavoriteButton({required this.word});
-  final WordModel word;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isFav = ref.watch(
-      userProgressProvider.select((s) => s.favoriteIds.contains(word.id)),
-    );
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        ref.read(userProgressProvider.notifier).toggleFavorite(word.id);
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundDark.withOpacity(0.8),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isFav ? AppColors.neonPink : AppColors.textMuted,
           ),
-        ),
-        child: Icon(
-          isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          color: isFav ? AppColors.neonPink : AppColors.textMuted,
-          size: 24,
-        ),
-      ),
-    );
-  }
-}
-
-class _FlipCard extends StatefulWidget {
-  const _FlipCard({required this.word});
-  final WordModel word;
-
-  @override
-  State<_FlipCard> createState() => _FlipCardState();
-}
-
-class _FlipCardState extends State<_FlipCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _showBack = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
+        );
+      }),
     );
   }
 
-  @override
-  void didUpdateWidget(_FlipCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.word.id != widget.word.id) {
-      _controller.reset();
-      _showBack = false;
+  Widget _buildTimerBar() {
+    // ── Flash phase: static "MEMORIZE" indicator ──────────────────────────
+    if (_flashPhase) {
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'MEMORIZE',
+                style: GoogleFonts.sourceCodePro(
+                  color: _kGreen.withOpacity(0.7),
+                  fontSize: 9,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '1.5s',
+                style: GoogleFonts.sourceCodePro(
+                  color: _kGreen,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: const LinearProgressIndicator(
+              value: 0.0,
+              backgroundColor: Color(0xFF0A1A0A),
+              valueColor: AlwaysStoppedAnimation<Color>(_kGreen),
+              minHeight: 6,
+            ),
+          ),
+        ],
+      );
     }
-  }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _toggleFlip() {
-    if (_showBack) {
-      _controller.reverse();
-    } else {
-      _controller.forward();
-    }
-    setState(() => _showBack = !_showBack);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggleFlip,
+    // ── Typing phase: animated 10-second countdown ────────────────────────
+    return RepaintBoundary(
       child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final angle = _animation.value * pi;
-          final isBack = _animation.value >= 0.5;
-
-          return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(angle),
-            child: isBack
-                ? Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()..rotateY(pi),
-                    child: _buildCardFace(
-                      widget.word.turkish,
-                      'TURKISH',
-                      AppColors.cyberPurple,
+        animation: _timerController,
+        builder: (context, _) {
+          final progress = _timerController.value.clamp(0.0, 1.0);
+          final isDanger = progress > 0.70;
+          final remaining = ((1.0 - progress) * _typingSeconds).ceil().clamp(
+            0,
+            _typingSeconds,
+          );
+          return Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isDanger ? 'MEMORY FADING...' : 'RECALL TIME',
+                    style: GoogleFonts.sourceCodePro(
+                      color: isDanger
+                          ? _kRed.withOpacity(0.7)
+                          : _kCyan.withOpacity(0.4),
+                      fontSize: 9,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w600,
                     ),
-                  )
-                : _buildCardFace(
-                    widget.word.english,
-                    'ENGLISH',
-                    AppColors.electricBlue,
                   ),
+                  Text(
+                    '${remaining}s',
+                    style: GoogleFonts.sourceCodePro(
+                      color: isDanger ? _kRed : _kCyan,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: const Color(0xFF0A1A0A),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDanger ? _kRed : _kCyan,
+                  ),
+                  minHeight: 6,
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildCardFace(String text, String language, Color accent) {
-    return GlassCard(
-      padding: const EdgeInsets.all(32),
-      accentColor: accent,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: accent.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: accent.withOpacity(0.3)),
-              ),
-              child: Text(
-                widget.word.level,
-                style: GoogleFonts.rajdhani(
-                  color: accent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
+  Widget _buildWordArea(WordModel word) {
+    return Center(
+      child: RepaintBoundary(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          child: _wordVisible
+              ? _FlashWordCard(key: const ValueKey('visible'), word: word)
+              : _HiddenWordCard(key: const ValueKey('hidden')),
+        ),
+      ),
+    );
+  }
 
-            Text(
-              language,
-              style: GoogleFonts.orbitron(
-                color: accent.withOpacity(0.6),
+  Widget _buildInputArea(WordModel word) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_feedbackActive && !_wordVisible)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _lastAnswerCorrect
+                      ? Icons.check_circle_rounded
+                      : Icons.cancel_rounded,
+                  color: _feedbackColor,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _lastAnswerCorrect ? 'CORRECT' : 'WRONG: ${word.english}',
+                  style: GoogleFonts.sourceCodePro(
+                    color: _feedbackColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          const SizedBox(height: 40),
+        Container(
+          decoration: BoxDecoration(
+            color: _kSurface.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _inputEnabled
+                  ? _kCyan.withOpacity(0.5)
+                  : _kCyan.withOpacity(0.1),
+              width: 1.5,
+            ),
+            boxShadow: _inputEnabled
+                ? [
+                    BoxShadow(
+                      color: _kCyan.withOpacity(0.12),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : [],
+          ),
+          child: TextField(
+            controller: _textController,
+            focusNode: _inputFocusNode,
+            enabled: _inputEnabled,
+            onSubmitted: _onSubmitted,
+            textInputAction: TextInputAction.done,
+            autocorrect: false,
+            style: GoogleFonts.sourceCodePro(
+              color: _kCyan,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: _kCyan,
+            decoration: InputDecoration(
+              hintText: _inputEnabled ? 'Kelimeyi yaz...' : '',
+              hintStyle: GoogleFonts.sourceCodePro(
+                color: _kCyan.withOpacity(0.2),
+                fontSize: 16,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: InputBorder.none,
+              suffixIcon: _inputEnabled
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.send_rounded,
+                        color: _kCyan.withOpacity(0.6),
+                      ),
+                      onPressed: () => _onSubmitted(_textController.text),
+                    )
+                  : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Reusable card widgets ───────────────────────────────────────────────────
+
+class _FlashWordCard extends StatelessWidget {
+  const _FlashWordCard({super.key, required this.word});
+  final WordModel word;
+
+  static const _kCyan = Color(0xFF00FFFF);
+  static const _kGreen = Color(0xFF00FF41);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF020A0F).withOpacity(0.95),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _kCyan.withOpacity(0.7), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: _kCyan.withOpacity(0.4),
+            blurRadius: 36,
+            spreadRadius: 4,
+          ),
+          BoxShadow(
+            color: _kGreen.withOpacity(0.15),
+            blurRadius: 60,
+            spreadRadius: 8,
+          ),
+          BoxShadow(color: Colors.black.withOpacity(0.9), blurRadius: 6),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            word.english,
+            style: GoogleFonts.sourceCodePro(
+              color: _kCyan,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+              shadows: [
+                Shadow(color: _kCyan.withOpacity(0.8), blurRadius: 16),
+                Shadow(color: _kGreen.withOpacity(0.4), blurRadius: 32),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: _kCyan.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: _kCyan.withOpacity(0.2)),
+            ),
+            child: Text(
+              word.level,
+              style: GoogleFonts.sourceCodePro(
+                color: _kCyan.withOpacity(0.5),
                 fontSize: 11,
-                letterSpacing: 4,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.orbitron(
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            Text(
-              'TAP TO FLIP',
-              style: GoogleFonts.rajdhani(
-                color: AppColors.textMuted,
-                fontSize: 12,
                 letterSpacing: 2,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HiddenWordCard extends StatelessWidget {
+  const _HiddenWordCard({super.key});
+
+  static const _kCyan = Color(0xFF00FFFF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF050A0E).withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _kCyan.withOpacity(0.1), width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.visibility_off_rounded,
+            color: _kCyan.withOpacity(0.15),
+            size: 40,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'RECALL THE WORD',
+            style: GoogleFonts.sourceCodePro(
+              color: _kCyan.withOpacity(0.2),
+              fontSize: 12,
+              letterSpacing: 3,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NeonButton extends StatelessWidget {
+  const _NeonButton({
+    required this.label,
+    required this.color,
+    this.fullWidth = false,
+  });
+
+  final String label;
+  final Color color;
+  final bool fullWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: fullWidth ? double.infinity : null,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 20,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.sourceCodePro(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 2,
         ),
       ),
     );

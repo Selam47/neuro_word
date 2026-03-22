@@ -12,8 +12,8 @@ class AppStrings {
   static const cyberMatchDesc = 'İngilizce-Türkçe eşleştirme';
   static const neonPulse = 'Neon Pulse';
   static const neonPulseDesc = 'Hızlı 10 saniyelik zamanlı quiz';
-  static const neuralHack = 'Neural Hack';
-  static const neuralHackDesc = 'Düşen kelimeleri yakala, firewall\'u koru';
+  static const flashMemory = 'Flash Memory';
+  static const flashMemoryDesc = 'Kelimeyi hafızana kazı, zamanla yarış';
 
   static const neuralDataStream = 'Kelime Veritabanı';
   static const dataStreamSubtitle = 'Supabase veritabanından yüklenen veri.';

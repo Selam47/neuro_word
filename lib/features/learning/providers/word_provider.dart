@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuro_word/core/services/supabase_service.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
+import 'package:neuro_word/features/learning/models/rank_model.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,7 @@ class WordState {
   const WordState({
     this.allWords = const [],
     this.filteredWords = const [],
+    this.allLevelCounts = const {},
     this.activeLevel,
     this.searchQuery = '',
     this.onlySaved = false,
@@ -22,6 +24,7 @@ class WordState {
 
   final List<WordModel> allWords;
   final List<WordModel> filteredWords;
+  final Map<String, int> allLevelCounts;
   final String? activeLevel;
   final String searchQuery;
   final bool onlySaved;
@@ -29,9 +32,12 @@ class WordState {
   final String? error;
   final int userXp;
 
+  int get dbTotalWordCount => allLevelCounts.values.fold(0, (a, b) => a + b);
+
   WordState copyWith({
     List<WordModel>? allWords,
     List<WordModel>? filteredWords,
+    Map<String, int>? allLevelCounts,
     String? activeLevel,
     String? searchQuery,
     bool? onlySaved,
@@ -44,6 +50,7 @@ class WordState {
     return WordState(
       allWords: allWords ?? this.allWords,
       filteredWords: filteredWords ?? this.filteredWords,
+      allLevelCounts: allLevelCounts ?? this.allLevelCounts,
       activeLevel: clearLevel ? null : (activeLevel ?? this.activeLevel),
       searchQuery: searchQuery ?? this.searchQuery,
       onlySaved: onlySaved ?? this.onlySaved,
@@ -63,6 +70,7 @@ class WordNotifier extends Notifier<WordState> {
   final _random = Random();
 
   static const _wordCacheKey = 'cached_words_json';
+  static const _levelCountsCacheKey = 'cached_level_counts_json';
 
   static const List<String> _levelHierarchy = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
@@ -88,17 +96,36 @@ class WordNotifier extends Notifier<WordState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       List<WordModel> words;
+      Map<String, int> levelCounts;
+
+      final minLevel = _profile.proficiencyLevel;
 
       try {
-        final minLevel = _profile.proficiencyLevel;
         final levelsToFetch = _levelsFromMinimum(minLevel);
-        words = await _service.fetchWords(levels: levelsToFetch);
+        final results = await Future.wait([
+          _service.fetchWords(levels: levelsToFetch),
+          _service.fetchAllLevelCounts(),
+        ]);
+        words = results[0] as List<WordModel>;
+        levelCounts = results[1] as Map<String, int>;
         await _saveWordsToCache(words);
+        await _saveLevelCountsToCache(levelCounts);
       } catch (e) {
         debugPrint('[WordProvider] Supabase failed, trying cache: $e');
         words = await _loadWordsFromCache();
+        levelCounts = await _loadLevelCountsFromCache();
         if (words.isEmpty) rethrow;
       }
+
+      final minIdx = _levelHierarchy.indexOf(minLevel);
+      int preLearnedOffset = 0;
+      for (var i = 0; i < minIdx; i++) {
+        final lvl = _levelHierarchy[i];
+        preLearnedOffset += levelCounts[lvl]
+            ?? UserProfileService.estimatedWordsPerLevel[lvl]
+            ?? 300;
+      }
+      await _profile.setPreLearnedOffset(preLearnedOffset);
 
       final xp = _profile.getXp();
 
@@ -116,6 +143,7 @@ class WordNotifier extends Notifier<WordState> {
       state = state.copyWith(
         allWords: words,
         filteredWords: words,
+        allLevelCounts: levelCounts,
         isLoading: false,
         userXp: xp,
       );
@@ -148,6 +176,29 @@ class WordNotifier extends Notifier<WordState> {
     } catch (e) {
       debugPrint('[WordProvider] cache load failed: $e');
       return [];
+    }
+  }
+
+  Future<void> _saveLevelCountsToCache(Map<String, int> counts) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = jsonEncode(counts);
+      await prefs.setString(_levelCountsCacheKey, json);
+    } catch (e) {
+      debugPrint('[WordProvider] level counts cache save failed: $e');
+    }
+  }
+
+  Future<Map<String, int>> _loadLevelCountsFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_levelCountsCacheKey);
+      if (json == null) return {};
+      final decoded = jsonDecode(json) as Map<String, dynamic>;
+      return decoded.map((k, v) => MapEntry(k, v as int));
+    } catch (e) {
+      debugPrint('[WordProvider] level counts cache load failed: $e');
+      return {};
     }
   }
 
@@ -239,10 +290,12 @@ class LevelStat {
     required this.learned,
     required this.total,
     required this.pct,
+    this.mastered = false,
   });
   final int learned;
   final int total;
   final double pct;
+  final bool mastered;
   int get pctInt => (pct * 100).toInt();
 }
 
@@ -252,11 +305,13 @@ class WordStatistics {
     this.totalLearned = 0,
     this.totalWords = 0,
     this.levelBreakdown = const {},
+    this.autoMasteredCount = 0,
   });
   final double overallProgress;
   final int totalLearned;
   final int totalWords;
   final Map<String, LevelStat> levelBreakdown;
+  final int autoMasteredCount;
 }
 
 final wordStatisticsProvider = Provider<WordStatistics>((ref) {
@@ -266,6 +321,10 @@ final wordStatisticsProvider = Provider<WordStatistics>((ref) {
   );
 
   if (ws.allWords.isEmpty) return const WordStatistics();
+
+  final profile = UserProfileService();
+  final userLevel = profile.proficiencyLevel;
+  final userLevelIdx = levelIndex(userLevel);
 
   final levelTotals = <String, int>{};
   final levelLearned = <String, int>{};
@@ -277,26 +336,49 @@ final wordStatisticsProvider = Provider<WordStatistics>((ref) {
     }
   }
 
-  final totalWords = ws.allWords.length;
-  final totalLearned = levelLearned.values.fold(0, (a, b) => a + b);
+  final breakdown = <String, LevelStat>{};
+  int totalWords = 0;
+  int totalLearned = 0;
+  int autoMasteredCount = 0;
+
+  for (final level in kLevelHierarchy) {
+    final idx = levelIndex(level);
+
+    if (idx < userLevelIdx) {
+      final realCount = ws.allLevelCounts[level]
+          ?? UserProfileService.estimatedWordsPerLevel[level]
+          ?? 300;
+      breakdown[level] = LevelStat(
+        learned: realCount,
+        total: realCount,
+        pct: 1.0,
+        mastered: true,
+      );
+      totalWords += realCount;
+      totalLearned += realCount;
+      autoMasteredCount += realCount;
+    } else if (levelTotals.containsKey(level)) {
+      final total = levelTotals[level]!;
+      final learned = levelLearned[level] ?? 0;
+      breakdown[level] = LevelStat(
+        learned: learned,
+        total: total,
+        pct: total > 0 ? learned / total : 0.0,
+        mastered: false,
+      );
+      totalWords += total;
+      totalLearned += learned;
+    }
+  }
+
   final overallProgress =
       totalWords > 0 ? (totalLearned / totalWords).clamp(0.0, 1.0) : 0.0;
-
-  final breakdown = <String, LevelStat>{};
-  for (final level in levelTotals.keys) {
-    final total = levelTotals[level]!;
-    final learned = levelLearned[level] ?? 0;
-    breakdown[level] = LevelStat(
-      learned: learned,
-      total: total,
-      pct: total > 0 ? learned / total : 0.0,
-    );
-  }
 
   return WordStatistics(
     overallProgress: overallProgress,
     totalLearned: totalLearned,
     totalWords: totalWords,
     levelBreakdown: breakdown,
+    autoMasteredCount: autoMasteredCount,
   );
 });

@@ -82,6 +82,24 @@ class SupabaseService {
     }
   }
 
+  Future<Map<String, int>> fetchAllLevelCounts() async {
+    try {
+      final List<dynamic> response = await _client
+          .from(_wordsTable)
+          .select('level')
+          .timeout(const Duration(seconds: 10));
+      final counts = <String, int>{};
+      for (final row in response) {
+        final level = (row as Map<String, dynamic>)['level'] as String? ?? '';
+        if (level.isNotEmpty) counts[level] = (counts[level] ?? 0) + 1;
+      }
+      return counts;
+    } catch (e) {
+      debugPrint('[SupabaseService] fetchAllLevelCounts failed: $e');
+      return {};
+    }
+  }
+
   Future<void> upsertLearnedBatch(List<String> wordIds) async {
     final uid = currentUserId;
     if (uid == null || wordIds.isEmpty) return;

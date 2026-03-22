@@ -159,17 +159,19 @@ class _FloatingParticlesState extends State<_FloatingParticles>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return CustomPaint(
-          size: Size.infinite,
-          painter: _ParticlePainter(
-            particles: _particles,
-            progress: _controller.value,
-          ),
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return CustomPaint(
+            size: Size.infinite,
+            painter: _ParticlePainter(
+              particles: _particles,
+              progress: _controller.value,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -196,18 +198,18 @@ class _ParticlePainter extends CustomPainter {
   final List<_Particle> particles;
   final double progress;
 
+  final _paint = Paint()..style = PaintingStyle.fill;
+
   @override
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final dy = (p.y + progress * p.speed) % 1.0;
       final dx = p.x + sin(progress * pi * 2 * p.speed) * 0.02;
-
+      _paint.color = AppColors.electricBlue.withOpacity(p.opacity);
       canvas.drawCircle(
         Offset(dx * size.width, dy * size.height),
         p.size,
-        Paint()
-          ..color = AppColors.electricBlue.withOpacity(p.opacity)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+        _paint,
       );
     }
   }

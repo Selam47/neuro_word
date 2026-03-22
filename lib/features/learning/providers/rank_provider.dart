@@ -44,15 +44,21 @@ class RankNotifier extends Notifier<RankState> {
       }
     }
 
+    final userLevelIdx = levelIndex(profLevel);
+
     final mastery = <String, double>{};
-    for (final level in levelTotals.keys) {
-      final total = levelTotals[level]!;
-      final learned = levelLearned[level] ?? 0;
-      mastery[level] = total > 0 ? learned / total : 0.0;
+    for (final level in kLevelHierarchy) {
+      if (levelIndex(level) < userLevelIdx) {
+        mastery[level] = 1.0;
+      } else {
+        final total = levelTotals[level] ?? 0;
+        final learned = levelLearned[level] ?? 0;
+        mastery[level] = total > 0 ? learned / total : 0.0;
+      }
     }
 
-    int achievedRank = startRankId - 1;
-    for (final rank in kRanks.where((r) => r.id >= startRankId)) {
+    int achievedRank = 0;
+    for (final rank in kRanks) {
       if (rank.id != achievedRank + 1) break;
       final m = mastery[rank.requiredLevel] ?? 0.0;
       if (m >= rank.requiredMastery) {

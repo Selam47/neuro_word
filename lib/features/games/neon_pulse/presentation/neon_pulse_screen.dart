@@ -29,7 +29,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   bool _initialized = false;
 
   Timer? _countdownTimer;
-  int _remainingTime = 10;
+  late final ValueNotifier<int> _timerNotifier;
   bool _wasRunningBeforePause = false;
 
   int? _selectedOptionIndex;
@@ -41,6 +41,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   @override
   void initState() {
     super.initState();
+    _timerNotifier = ValueNotifier<int>(10);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -73,6 +74,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
+    _timerNotifier.dispose();
     super.dispose();
   }
 
@@ -83,10 +85,8 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
         timer.cancel();
         return;
       }
-      setState(() {
-        _remainingTime--;
-      });
-      if (_remainingTime <= 0) {
+      _timerNotifier.value--;
+      if (_timerNotifier.value <= 0) {
         timer.cancel();
         _onTimeout();
       }
@@ -106,11 +106,11 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
     final options = [word.turkish, ...distractors.map((d) => d.turkish)]
       ..shuffle(Random());
 
+    _timerNotifier.value = 10;
     setState(() {
       _currentOptions = options;
       _correctOptionIndex = options.indexOf(word.turkish);
       _selectedOptionIndex = null;
-      _remainingTime = 10;
     });
 
     _startTimer();
@@ -119,6 +119,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
   void _onTimeout() {
     if (_selectedOptionIndex != null) return;
     HapticFeedback.heavyImpact();
+    _timerNotifier.value = 0;
     setState(() {
       _selectedOptionIndex = -1;
     });
@@ -215,33 +216,39 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
                         fontSize: 12,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.timer_rounded,
-                          color: _remainingTime <= 3
-                              ? AppColors.warningRed
-                              : AppColors.electricBlue,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${_remainingTime}s',
-                          style: GoogleFonts.orbitron(
-                            color: _remainingTime <= 3
-                                ? AppColors.warningRed
-                                : AppColors.electricBlue,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                    ValueListenableBuilder<int>(
+                      valueListenable: _timerNotifier,
+                      builder: (_, val, __) {
+                        final danger = val <= 3;
+                        return Row(
+                          children: [
+                            Icon(
+                              Icons.timer_rounded,
+                              color: danger
+                                  ? AppColors.warningRed
+                                  : AppColors.electricBlue,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${val}s',
+                              style: GoogleFonts.orbitron(
+                                color: danger
+                                    ? AppColors.warningRed
+                                    : AppColors.electricBlue,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
-              _buildQuestionCircle(word),
+              RepaintBoundary(child: _buildQuestionCircle(word)),
               const SizedBox(height: 32),
               Text(
                 '${AppStrings.score}: $_score / $_totalQuestions',
@@ -261,7 +268,7 @@ class _NeonPulseScreenState extends ConsumerState<NeonPulseScreen>
                       if (i >= _currentOptions.length) {
                         return const SizedBox();
                       }
-                      return _buildOption(i);
+                      return RepaintBoundary(child: _buildOption(i));
                     }),
                   ),
                 ),

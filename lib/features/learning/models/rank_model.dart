@@ -67,6 +67,21 @@ const kWeights = <String, int>{
   'C1': 6,
 };
 
+const kLevelHierarchy = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+int levelIndex(String level) {
+  final idx = kLevelHierarchy.indexOf(level);
+  return idx < 0 ? 0 : idx;
+}
+
+bool isLevelBelow(String target, String userLevel) {
+  return levelIndex(target) < levelIndex(userLevel);
+}
+
+bool isLevelAbove(String target, String userLevel) {
+  return levelIndex(target) > levelIndex(userLevel);
+}
+
 class RankState {
   const RankState({
     this.levelScore = 0,

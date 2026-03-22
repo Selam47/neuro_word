@@ -13,6 +13,16 @@ import 'package:neuro_word/features/learning/providers/word_sets_providers.dart'
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 import 'package:neuro_word/shared/widgets/glass_card.dart';
 
+String _fmt(int n) {
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+    buf.write(s[i]);
+  }
+  return buf.toString();
+}
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -24,9 +34,8 @@ class ProfileScreen extends ConsumerWidget {
     final savedIds = progress_.favoriteIds;
     final learnedIds = progress_.learnedIds;
     final profile = UserProfileService();
-    final preLearnedCount = profile.preLearnedCount;
-    final effectiveLearned = stats.totalLearned + preLearnedCount;
-    final effectiveTotal = stats.totalWords + preLearnedCount;
+    final effectiveLearned = stats.totalLearned;
+    final effectiveTotal = stats.totalWords;
     final progress = effectiveTotal > 0
         ? (effectiveLearned / effectiveTotal).clamp(0.0, 1.0)
         : 0.0;
@@ -71,13 +80,13 @@ class ProfileScreen extends ConsumerWidget {
                 Row(
                   children: [
                     _StatCard(
-                      value: '$effectiveLearned',
+                      value: _fmt(effectiveLearned),
                       label: AppStrings.learned,
                       color: AppColors.neonGreen,
                     ),
                     const SizedBox(width: 12),
                     _StatCard(
-                      value: '$effectiveTotal',
+                      value: _fmt(effectiveTotal),
                       label: AppStrings.totalWordsLabel,
                       color: AppColors.electricBlue,
                     ),
@@ -91,6 +100,13 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 28),
 
+                if (stats.autoMasteredCount > 0) ...[
+                  _AutoMasteredBanner(
+                    level: profile.proficiencyLevel,
+                    count: stats.autoMasteredCount,
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 _buildSectionTitle(AppStrings.levelBreakdown),
                 const SizedBox(height: 12),
                 ...orderedLevels.map((lv) {
@@ -101,7 +117,10 @@ class ProfileScreen extends ConsumerWidget {
                       level: lv,
                       learned: stat.learned,
                       total: stat.total,
-                      color: AppColors.forLevel(lv),
+                      color: stat.mastered
+                          ? AppColors.masteredGold
+                          : AppColors.forLevel(lv),
+                      mastered: stat.mastered,
                     ),
                   );
                 }),
@@ -436,7 +455,7 @@ class _ProgressRing extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '$learned / $total',
+                '${_fmt(learned)} / ${_fmt(total)}',
                 style: GoogleFonts.orbitron(
                   color: AppColors.textSecondary,
                   fontSize: 10,
@@ -550,11 +569,13 @@ class _LevelProgressBar extends StatelessWidget {
     required this.learned,
     required this.total,
     required this.color,
+    this.mastered = false,
   });
   final String level;
   final int learned;
   final int total;
   final Color color;
+  final bool mastered;
 
   @override
   Widget build(BuildContext context) {
@@ -562,6 +583,7 @@ class _LevelProgressBar extends StatelessWidget {
     final pctInt = (pct * 100).toInt();
     return GlassCard(
       padding: const EdgeInsets.all(14),
+      accentColor: mastered ? AppColors.masteredGold : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -579,40 +601,76 @@ class _LevelProgressBar extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '%$pctInt',
-                      style: GoogleFonts.orbitron(
-                        color: color,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                  if (mastered)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.masteredGold.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.masteredGold.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: AppColors.masteredGold,
+                            size: 10,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'MASTERED',
+                            style: GoogleFonts.orbitron(
+                              color: AppColors.masteredGold,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '%$pctInt',
+                        style: GoogleFonts.orbitron(
+                          color: color,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
-              Text(
-                '$learned / $total',
-                style: GoogleFonts.rajdhani(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
+              if (!mastered)
+                Text(
+                  '${_fmt(learned)} / ${_fmt(total)}',
+                  style: GoogleFonts.rajdhani(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: pct,
+              value: mastered ? 1.0 : pct,
               backgroundColor: AppColors.surfaceMedium,
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
@@ -624,6 +682,84 @@ class _LevelProgressBar extends StatelessWidget {
   }
 }
 
+
+class _AutoMasteredBanner extends StatelessWidget {
+  const _AutoMasteredBanner({
+    required this.level,
+    required this.count,
+  });
+  final String level;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.masteredGold.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.masteredGold.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.auto_awesome_rounded,
+            color: AppColors.masteredGold,
+            size: 15,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.rajdhani(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+                children: [
+                  const TextSpan(text: 'Mevcut seviyenizden ('),
+                  TextSpan(
+                    text: level,
+                    style: GoogleFonts.orbitron(
+                      color: AppColors.masteredGold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: ') dolayı, önceki seviyelere ait ',
+                  ),
+                  TextSpan(
+                    text: _fmt(count),
+                    style: GoogleFonts.orbitron(
+                      color: AppColors.masteredGold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ' kelime otomatik olarak '),
+                  TextSpan(
+                    text: '"Öğrenildi"',
+                    style: TextStyle(
+                      color: AppColors.neonGreen,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ' statüsüne alınmıştır.'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _RankHierarchySection extends ConsumerWidget {
   const _RankHierarchySection();
@@ -641,6 +777,8 @@ class _RankHierarchySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rankState = ref.watch(rankProvider);
     final effectiveId = rankState.effectiveRankId;
+    final profile = UserProfileService();
+    final userLevel = profile.proficiencyLevel;
 
     return Column(
       children: List.generate(kRanks.length, (index) {
@@ -650,10 +788,13 @@ class _RankHierarchySection extends ConsumerWidget {
         final isLocked = effectiveId < rank.id;
         final isLast = index == kRanks.length - 1;
         final levelColor = AppColors.forLevel(rank.requiredLevel);
+        final isAutoMastered = isAchieved && isLevelBelow(rank.requiredLevel, userLevel);
 
         Color nodeColor;
         if (isCurrent) {
           nodeColor = levelColor;
+        } else if (isAutoMastered) {
+          nodeColor = AppColors.masteredGold;
         } else if (isAchieved) {
           nodeColor = AppColors.neonGreen;
         } else {
@@ -797,6 +938,29 @@ class _RankHierarchySection extends ConsumerWidget {
                                   ),
                                 ),
                               )
+                            else if (isAutoMastered)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.masteredGold.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: AppColors.masteredGold.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: Text(
+                                  'MASTERED',
+                                  style: GoogleFonts.orbitron(
+                                    color: AppColors.masteredGold,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              )
                             else if (isAchieved)
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -860,11 +1024,13 @@ class _RankHierarchySection extends ConsumerWidget {
                             Text(
                               '%${((rankState.levelMastery[rank.requiredLevel] ?? 0.0) * 100).toInt()}',
                               style: GoogleFonts.orbitron(
-                                color: isAchieved
-                                    ? AppColors.neonGreen
-                                    : isCurrent
-                                        ? levelColor
-                                        : AppColors.textMuted,
+                                color: isAutoMastered
+                                    ? AppColors.masteredGold
+                                    : isAchieved
+                                        ? AppColors.neonGreen
+                                        : isCurrent
+                                            ? levelColor
+                                            : AppColors.textMuted,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -884,15 +1050,17 @@ class _RankHierarchySection extends ConsumerWidget {
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(3),
                               child: LinearProgressIndicator(
-                                value: barValue,
+                                value: isAutoMastered ? 1.0 : barValue,
                                 backgroundColor: AppColors.surfaceMedium,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  isAchieved
-                                      ? AppColors.neonGreen
-                                      : isCurrent
-                                          ? levelColor
-                                          : AppColors.textMuted
-                                              .withValues(alpha: 0.35),
+                                  isAutoMastered
+                                      ? AppColors.masteredGold
+                                      : isAchieved
+                                          ? AppColors.neonGreen
+                                          : isCurrent
+                                              ? levelColor
+                                              : AppColors.textMuted
+                                                  .withValues(alpha: 0.35),
                                 ),
                                 minHeight: 4,
                               ),

@@ -629,18 +629,32 @@ class _QuickStatsRow extends ConsumerWidget {
 
   final WordState wordState;
 
+  static String _fmt(int n) {
+    final s = n.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final totalCount = wordState.allWords.length;
-    final learnedCount = ref.watch(learnedCountProvider);
+    final stats = ref.watch(wordStatisticsProvider);
     final favoriteCount = ref.watch(favoriteCountProvider);
+
+    final totalCount = stats.totalWords > 0
+        ? stats.totalWords
+        : wordState.allWords.length;
+    final learnedCount = stats.totalLearned;
 
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             label: 'Toplam',
-            value: totalCount.toString(),
+            value: _fmt(totalCount),
             icon: Icons.data_usage_rounded,
             color: AppColors.textPrimary,
           ),
@@ -649,7 +663,7 @@ class _QuickStatsRow extends ConsumerWidget {
         Expanded(
           child: _StatCard(
             label: 'Öğrenilen',
-            value: learnedCount.toString(),
+            value: _fmt(learnedCount),
             icon: Icons.check_circle_outline_rounded,
             color: AppColors.neonGreen,
           ),
@@ -658,7 +672,7 @@ class _QuickStatsRow extends ConsumerWidget {
         Expanded(
           child: _StatCard(
             label: 'Favori',
-            value: favoriteCount.toString(),
+            value: _fmt(favoriteCount),
             icon: Icons.bookmark_border_rounded,
             color: AppColors.neonPink,
           ),
@@ -713,7 +727,7 @@ class _StatCard extends StatelessWidget {
 class _FeatureCardsGrid extends ConsumerWidget {
   const _FeatureCardsGrid();
 
-  static const _gameRoutes = {'/flashcards', '/cyber-match', '/neon-pulse', '/neural-hack'};
+  static const _gameRoutes = {'/flashcards', '/cyber-match', '/neon-pulse', '/flash-memory'};
 
   static const _features = [
     _FeatureItem(
@@ -738,11 +752,11 @@ class _FeatureCardsGrid extends ConsumerWidget {
       '/neon-pulse',
     ),
     _FeatureItem(
-      Icons.terminal_rounded,
-      AppStrings.neuralHack,
-      AppStrings.neuralHackDesc,
+      Icons.memory_rounded,
+      AppStrings.flashMemory,
+      AppStrings.flashMemoryDesc,
       AppColors.accentOrange,
-      '/neural-hack',
+      '/flash-memory',
     ),
   ];
 
@@ -843,9 +857,14 @@ class _LevelSelectorSheet extends ConsumerWidget {
     final b2Mastery = rankState.levelMastery['B2'] ?? 0.0;
     final c1Unlocked = b2Mastery >= 0.60;
 
-    final levelCounts = <String, int>{};
-    for (final w in wordState.allWords) {
-      levelCounts[w.level] = (levelCounts[w.level] ?? 0) + 1;
+    Map<String, int> levelCounts;
+    if (wordState.allLevelCounts.isNotEmpty) {
+      levelCounts = wordState.allLevelCounts;
+    } else {
+      levelCounts = <String, int>{};
+      for (final w in wordState.allWords) {
+        levelCounts[w.level] = (levelCounts[w.level] ?? 0) + 1;
+      }
     }
 
     return Container(
@@ -905,7 +924,7 @@ class _LevelSelectorSheet extends ConsumerWidget {
 
           _LevelTile(
             label: 'Tüm Seviyeler',
-            sublabel: '${wordState.allWords.length} kelime',
+            sublabel: '${wordState.dbTotalWordCount > 0 ? wordState.dbTotalWordCount : wordState.allWords.length} kelime',
             color: AppColors.electricBlue,
             isLocked: false,
             onTap: () {

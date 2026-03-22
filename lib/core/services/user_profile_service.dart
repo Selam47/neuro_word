@@ -8,6 +8,7 @@ class UserProfileService {
   static const String _keyLevelScore = 'profile_level_score';
   static const String _keyRankId = 'profile_rank_id';
   static const String _keyProficiencyLevel = 'profile_proficiency_level';
+  static const String _keyPreLearnedOffset = 'profile_pre_learned_offset';
 
   static final UserProfileService _instance = UserProfileService._internal();
   factory UserProfileService() => _instance;
@@ -105,6 +106,14 @@ class UserProfileService {
     'C1': 2000,
   };
 
+  static const Map<String, int> estimatedWordsPerLevel = {
+    'A1': 300,
+    'A2': 400,
+    'B1': 600,
+    'B2': 700,
+    'C1': 500,
+  };
+
   String get proficiencyLevel =>
       _prefs?.getString(_keyProficiencyLevel) ?? 'A1';
 
@@ -112,6 +121,12 @@ class UserProfileService {
 
   Future<void> setProficiencyLevel(String level) async {
     await _prefs?.setString(_keyProficiencyLevel, level);
+  }
+
+  int getPreLearnedOffset() => _prefs?.getInt(_keyPreLearnedOffset) ?? 0;
+
+  Future<void> setPreLearnedOffset(int count) async {
+    await _prefs?.setInt(_keyPreLearnedOffset, count);
   }
 
   Future<void> migrateFromLegacy(

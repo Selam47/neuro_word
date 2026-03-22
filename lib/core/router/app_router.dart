@@ -11,7 +11,7 @@ import 'package:neuro_word/features/supporters/presentation/supporters_screen.da
 import 'package:neuro_word/features/games/flashcard/presentation/flashcard_screen.dart';
 import 'package:neuro_word/features/games/cyber_match/presentation/cyber_match_screen.dart';
 import 'package:neuro_word/features/games/neon_pulse/presentation/neon_pulse_screen.dart';
-import 'package:neuro_word/features/games/neural_hack/presentation/neural_hack_screen.dart';
+
 import 'package:neuro_word/features/games/session_summary/presentation/session_summary_screen.dart';
 
 class AppRouter {
@@ -48,38 +48,26 @@ class AppRouter {
       GoRoute(
         path: '/dashboard',
         name: 'dashboard',
-        pageBuilder: (context, state) => _buildPageWithTransition(
-          context,
-          state,
-          const DashboardScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageWithTransition(context, state, const DashboardScreen()),
       ),
       GoRoute(
         path: '/profile',
         name: 'profile',
-        pageBuilder: (context, state) => _buildPageWithTransition(
-          context,
-          state,
-          const ProfileScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageWithTransition(context, state, const ProfileScreen()),
       ),
       GoRoute(
         path: '/contact',
         name: 'contact',
-        pageBuilder: (context, state) => _buildPageWithTransition(
-          context,
-          state,
-          const ContactScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageWithTransition(context, state, const ContactScreen()),
       ),
       GoRoute(
         path: '/supporters',
         name: 'supporters',
-        pageBuilder: (context, state) => _buildPageWithTransition(
-          context,
-          state,
-          const SupportersScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageWithTransition(context, state, const SupportersScreen()),
       ),
       GoRoute(
         path: '/flashcards',
@@ -89,7 +77,7 @@ class AppRouter {
           return _buildPageWithTransition(
             context,
             state,
-            FlashcardScreen(level: level),
+            FlashMemoryScreen(level: level),
           );
         },
       ),
@@ -118,14 +106,14 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/neural-hack',
-        name: 'neural-hack',
+        path: '/flash-memory',
+        name: 'flash-memory',
         pageBuilder: (context, state) {
           final level = state.uri.queryParameters['level'];
           return _buildPageWithTransition(
             context,
             state,
-            NeuralHackScreen(level: level),
+            FlashMemoryScreen(level: level),
           );
         },
       ),
@@ -138,8 +126,7 @@ class AppRouter {
             context,
             state,
             SessionSummaryScreen(
-              learnedIds:
-                  List<String>.from(extra['learnedIds'] as List? ?? []),
+              learnedIds: List<String>.from(extra['learnedIds'] as List? ?? []),
               totalWords: extra['totalWords'] as int? ?? 0,
               mode: extra['mode'] as String? ?? 'Game Over',
             ),
@@ -150,7 +137,10 @@ class AppRouter {
   );
 
   static CustomTransitionPage _buildPageWithTransition(
-      BuildContext context, GoRouterState state, Widget child) {
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+  ) {
     return CustomTransitionPage(
       key: state.pageKey,
       child: child,
