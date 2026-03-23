@@ -109,9 +109,8 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
 
   @override
   Widget build(BuildContext context) {
-    final wordState = ref.watch(wordProvider);
+    final totalWords = ref.watch(wordProvider.select((s) => s.allWords.length));
     final totalLearned = ref.watch(userProgressProvider.select((s) => s.learnedIds.length));
-    final totalWords = wordState.allWords.length;
     final overallProgress = totalWords > 0 ? totalLearned / totalWords : 0.0;
     final missedCount = widget.totalWords - widget.learnedIds.length;
 

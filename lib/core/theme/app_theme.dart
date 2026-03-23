@@ -5,6 +5,9 @@ import 'package:neuro_word/core/constants/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static late final TextTheme _textTheme = _buildTextTheme();
+  static late final ThemeData _darkTheme = _buildDarkTheme();
+
   static TextTheme _buildTextTheme() {
     final orbitron = GoogleFonts.orbitronTextTheme();
     final rajdhani = GoogleFonts.rajdhaniTextTheme();
@@ -84,8 +87,10 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
-    final textTheme = _buildTextTheme();
+  static ThemeData get darkTheme => _darkTheme;
+
+  static ThemeData _buildDarkTheme() {
+    final textTheme = _textTheme;
 
     return ThemeData(
       useMaterial3: true,

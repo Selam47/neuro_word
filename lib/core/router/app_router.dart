@@ -8,6 +8,7 @@ import 'package:neuro_word/features/dashboard/presentation/screens/dashboard_scr
 import 'package:neuro_word/features/profile/presentation/profile_screen.dart';
 import 'package:neuro_word/features/contact/presentation/contact_screen.dart';
 import 'package:neuro_word/features/supporters/presentation/supporters_screen.dart';
+import 'package:neuro_word/features/games/game_cards/presentation/game_cards_screen.dart';
 import 'package:neuro_word/features/games/flashcard/presentation/flashcard_screen.dart';
 import 'package:neuro_word/features/games/cyber_match/presentation/cyber_match_screen.dart';
 import 'package:neuro_word/features/games/neon_pulse/presentation/neon_pulse_screen.dart';
@@ -77,7 +78,7 @@ class AppRouter {
           return _buildPageWithTransition(
             context,
             state,
-            FlashMemoryScreen(level: level),
+            GameCardsScreen(level: level),
           );
         },
       ),

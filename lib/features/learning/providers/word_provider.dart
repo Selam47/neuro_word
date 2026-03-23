@@ -9,6 +9,17 @@ import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+String _encodeWordsIsolate(List<Map<String, dynamic>> jsonList) {
+  return jsonEncode(jsonList);
+}
+
+List<WordModel> _decodeWordsIsolate(String jsonStr) {
+  final List<dynamic> decoded = jsonDecode(jsonStr);
+  return decoded
+      .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
 class WordState {
   const WordState({
     this.allWords = const [],
@@ -157,7 +168,8 @@ class WordNotifier extends Notifier<WordState> {
   Future<void> _saveWordsToCache(List<WordModel> words) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final json = jsonEncode(words.map((w) => w.toJson()).toList());
+      final jsonList = words.map((w) => w.toJson()).toList();
+      final json = await compute(_encodeWordsIsolate, jsonList);
       await prefs.setString(_wordCacheKey, json);
     } catch (e) {
       debugPrint('[WordProvider] cache save failed: $e');
@@ -169,10 +181,7 @@ class WordNotifier extends Notifier<WordState> {
       final prefs = await SharedPreferences.getInstance();
       final json = prefs.getString(_wordCacheKey);
       if (json == null) return [];
-      final List<dynamic> decoded = jsonDecode(json);
-      return decoded
-          .map((e) => WordModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return await compute(_decodeWordsIsolate, json);
     } catch (e) {
       debugPrint('[WordProvider] cache load failed: $e');
       return [];
@@ -224,23 +233,30 @@ class WordNotifier extends Notifier<WordState> {
   }
 
   void _applyFilters() {
-    var result = state.allWords;
+    final activeLevel = state.activeLevel;
+    final onlySaved = state.onlySaved;
+    final query = state.searchQuery;
+    final hasLevel = activeLevel != null;
+    final hasQuery = query.isNotEmpty;
 
-    if (state.activeLevel != null) {
-      result = result.where((w) => w.level == state.activeLevel).toList();
+    if (!hasLevel && !onlySaved && !hasQuery) {
+      state = state.copyWith(filteredWords: state.allWords);
+      return;
     }
 
-    if (state.onlySaved) {
-      final favIds = ref.read(userProgressProvider).favoriteIds;
-      result = result.where((w) => favIds.contains(w.id)).toList();
-    }
+    final favIds = onlySaved ? ref.read(userProgressProvider).favoriteIds : null;
+    final q = hasQuery ? query.toLowerCase() : null;
 
-    if (state.searchQuery.isNotEmpty) {
-      final q = state.searchQuery.toLowerCase();
-      result = result.where((w) {
-        return w.english.toLowerCase().contains(q) ||
-            w.turkish.toLowerCase().contains(q);
-      }).toList();
+    final result = <WordModel>[];
+    for (final w in state.allWords) {
+      if (hasLevel && w.level != activeLevel) continue;
+      if (onlySaved && !favIds!.contains(w.id)) continue;
+      if (q != null &&
+          !w.english.toLowerCase().contains(q) &&
+          !w.turkish.toLowerCase().contains(q)) {
+        continue;
+      }
+      result.add(w);
     }
 
     state = state.copyWith(filteredWords: result);

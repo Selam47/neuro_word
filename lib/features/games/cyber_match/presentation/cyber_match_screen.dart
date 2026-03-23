@@ -18,10 +18,10 @@ class CyberMatchScreen extends ConsumerStatefulWidget {
   ConsumerState<CyberMatchScreen> createState() => _CyberMatchScreenState();
 }
 
-class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
-    with TickerProviderStateMixin {
+class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen> {
   late List<WordModel> _words;
   late List<WordModel> _shuffledRight;
+  late Map<String, int> _rightIdToLeftIndex;
   int? _selectedLeftIndex;
   int? _selectedRightIndex;
   final Set<int> _matchedIndices = {};
@@ -46,6 +46,9 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
     final notifier = ref.read(wordProvider.notifier);
     _words = notifier.getRandomWords(_wordsPerRound, level: widget.level);
     _shuffledRight = List<WordModel>.from(_words)..shuffle(Random());
+    _rightIdToLeftIndex = {
+      for (var i = 0; i < _words.length; i++) _words[i].id: i,
+    };
     _selectedLeftIndex = null;
     _selectedRightIndex = null;
     _matchedIndices.clear();
@@ -60,9 +63,8 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
   }
 
   void _onRightTap(int index) {
-    if (_matchedIndices.contains(
-      _words.indexWhere((w) => w.id == _shuffledRight[index].id),
-    )) {
+    final leftIdx = _rightIdToLeftIndex[_shuffledRight[index].id];
+    if (leftIdx != null && _matchedIndices.contains(leftIdx)) {
       return;
     }
     setState(() {
@@ -226,9 +228,7 @@ class _CyberMatchScreenState extends ConsumerState<CyberMatchScreen>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(_wordsPerRound, (i) {
-                            final actualIndex = _words.indexWhere(
-                              (w) => w.id == _shuffledRight[i].id,
-                            );
+                            final actualIndex = _rightIdToLeftIndex[_shuffledRight[i].id] ?? -1;
                             final isMatched = _matchedIndices.contains(
                               actualIndex,
                             );
