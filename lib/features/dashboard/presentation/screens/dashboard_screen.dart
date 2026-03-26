@@ -58,7 +58,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wordState = ref.watch(wordProvider);
+    final isLoading = ref.watch(wordProvider.select((s) => s.isLoading));
+    final error = ref.watch(wordProvider.select((s) => s.error));
+    final filteredWords = ref.watch(wordProvider.select((s) => s.filteredWords));
+    final activeLevel = ref.watch(wordProvider.select((s) => s.activeLevel));
+    final searchQuery = ref.watch(wordProvider.select((s) => s.searchQuery));
+    final onlySaved = ref.watch(wordProvider.select((s) => s.onlySaved));
 
     return Scaffold(
       body: FuturisticBackground(
@@ -107,7 +112,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           height: 1.4,
                         ),
                       ),
-                      const _NeonGlitch3500(),
+                      const RepaintBoundary(child: _NeonGlitch3500()),
                       Text(
                         ' kelime ile profesyonel bir deneyim.',
                         style: GoogleFonts.rajdhani(
@@ -125,7 +130,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 const SizedBox(height: 12),
 
-                _QuickStatsRow(wordState: wordState),
+                const _QuickStatsRow(),
                 const SizedBox(height: 32),
 
                 Container(
@@ -160,24 +165,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   onChanged: (query) {
                     ref.read(wordProvider.notifier).search(query);
                   },
-                  hintText: 'Ara (Kelime veya Anlam)...',
+                  hintText: AppStrings.searchHint,
                 ),
                 const SizedBox(height: 8),
 
-                _AdvancedFilterBar(wordState: wordState),
+                const _AdvancedFilterBar(),
                 const SizedBox(height: 16),
 
-                if (wordState.isLoading)
+                if (isLoading)
                   const _ShimmerWordList()
-                else if (wordState.error != null)
-                  _ErrorCard(error: wordState.error!)
+                else if (error != null)
+                  _ErrorCard(error: error)
                 else
                   _LiveWordList(
-                    words: wordState.filteredWords,
+                    words: filteredWords,
                     isFiltered:
-                        wordState.activeLevel != null ||
-                        wordState.searchQuery.isNotEmpty ||
-                        wordState.onlySaved,
+                        activeLevel != null ||
+                        searchQuery.isNotEmpty ||
+                        onlySaved,
                   ),
 
                 const SizedBox(height: 24),
@@ -229,12 +234,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 }
 
 class _AdvancedFilterBar extends ConsumerWidget {
-  const _AdvancedFilterBar({required this.wordState});
-  final WordState wordState;
+  const _AdvancedFilterBar();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final levels = wordState.availableLevels;
+    final activeLevel = ref.watch(wordProvider.select((s) => s.activeLevel));
+    final onlySaved = ref.watch(wordProvider.select((s) => s.onlySaved));
+    final levels = ref.watch(wordProvider.select((s) => s.availableLevels));
     final notifier = ref.read(wordProvider.notifier);
 
     return SizedBox(
@@ -245,9 +251,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
         children: [
           _buildChip(
             label: 'Tümü',
-            isSelected:
-                wordState.activeLevel == null &&
-                !wordState.onlySaved,
+            isSelected: activeLevel == null && !onlySaved,
             color: AppColors.electricBlue,
             onTap: () {
               notifier.filterByLevel(null);
@@ -258,9 +262,9 @@ class _AdvancedFilterBar extends ConsumerWidget {
 
           _buildChip(
             label: 'Kaydedilenler',
-            isSelected: wordState.onlySaved,
+            isSelected: onlySaved,
             color: AppColors.neonPink,
-            onTap: () => notifier.toggleSaved(!wordState.onlySaved),
+            onTap: () => notifier.toggleSaved(!onlySaved),
             icon: Icons.bookmark_rounded,
           ),
           const SizedBox(width: 8),
@@ -270,12 +274,10 @@ class _AdvancedFilterBar extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 8),
               child: _buildChip(
                 label: level,
-                isSelected: wordState.activeLevel == level,
+                isSelected: activeLevel == level,
                 color: AppColors.forLevel(level),
                 onTap: () {
-                  final newLevel = wordState.activeLevel == level
-                      ? null
-                      : level;
+                  final newLevel = activeLevel == level ? null : level;
                   notifier.filterByLevel(newLevel);
                 },
               ),
@@ -625,9 +627,7 @@ class _TopBar extends StatelessWidget {
 }
 
 class _QuickStatsRow extends ConsumerWidget {
-  const _QuickStatsRow({required this.wordState});
-
-  final WordState wordState;
+  const _QuickStatsRow();
 
   static String _fmt(int n) {
     final s = n.toString();
@@ -643,10 +643,11 @@ class _QuickStatsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(wordStatisticsProvider);
     final favoriteCount = ref.watch(favoriteCountProvider);
+    final allWordsCount = ref.watch(wordProvider.select((s) => s.allWords.length));
 
     final totalCount = stats.totalWords > 0
         ? stats.totalWords
-        : wordState.allWords.length;
+        : allWordsCount;
     final learnedCount = stats.totalLearned;
 
     return Row(
@@ -1251,13 +1252,13 @@ class _NeonGlitch3500State extends State<_NeonGlitch3500>
             shaderCallback: (bounds) => LinearGradient(
               colors: isGlitching
                   ? [
-                      const Color(0xFFFF2D55),
-                      const Color(0xFF00D2FF),
-                      const Color(0xFF7DF9FF),
+                      AppColors.glitchRed,
+                      AppColors.electricBlue,
+                      AppColors.neonCyan,
                     ]
                   : [
                       AppColors.electricBlue,
-                      const Color(0xFF7DF9FF),
+                      AppColors.neonCyan,
                       AppColors.electricBlue,
                     ],
               begin: Alignment.topLeft,
@@ -1274,7 +1275,7 @@ class _NeonGlitch3500State extends State<_NeonGlitch3500>
                 shadows: [
                   Shadow(
                     color: isGlitching
-                        ? const Color(0xFFFF2D55).withOpacity(0.9)
+                        ? AppColors.glitchRed.withOpacity(0.9)
                         : AppColors.electricBlue.withOpacity(
                             0.5 + 0.4 * _pulse.value,
                           ),
@@ -1283,7 +1284,7 @@ class _NeonGlitch3500State extends State<_NeonGlitch3500>
                   ),
                   if (isGlitching)
                     Shadow(
-                      color: const Color(0xFF00D2FF).withOpacity(0.8),
+                      color: AppColors.electricBlue.withOpacity(0.8),
                       blurRadius: 16,
                       offset: const Offset(2, 0),
                     ),

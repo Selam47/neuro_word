@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
+import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
@@ -113,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'İngilizce öğrenmenin geleceği',
+                    AppStrings.onboardingSubtitle,
                     style: GoogleFonts.rajdhani(
                       color: AppColors.textSecondary,
                       fontSize: 15,
@@ -126,7 +127,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'KULLANICI ADIN NE?',
+                      AppStrings.usernamePrompt,
                       style: GoogleFonts.orbitron(
                         color: AppColors.electricBlue,
                         fontSize: 12,
@@ -158,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       maxLength: 20,
                       onSubmitted: (_) => _submit(),
                       decoration: InputDecoration(
-                        hintText: 'Örn: Alex, Kaşif, Mira...',
+                        hintText: AppStrings.usernamePlaceholder,
                         hintStyle: GoogleFonts.rajdhani(
                           color: AppColors.textMuted,
                           fontSize: 16,
@@ -181,7 +182,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'SEVİYENİ SEÇ',
+                      AppStrings.selectLevel,
                       style: GoogleFonts.orbitron(
                         color: AppColors.electricBlue,
                         fontSize: 12,
@@ -290,7 +291,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Warning: Level selection determines the word density in your neuro-network.',
+                            AppStrings.levelWarning,
                             style: GoogleFonts.rajdhani(
                               color: AppColors.accentOrange.withOpacity(0.9),
                               fontSize: 12,
@@ -328,7 +329,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               ),
                             )
                           : Text(
-                              'BAŞLA',
+                              AppStrings.startButton,
                               style: GoogleFonts.orbitron(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
@@ -342,7 +343,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   TextButton(
                     onPressed: _isLoading ? null : _skip,
                     child: Text(
-                      'Şimdi değil, atla',
+                      AppStrings.skipButton,
                       style: GoogleFonts.rajdhani(
                         color: AppColors.textMuted,
                         fontSize: 14,

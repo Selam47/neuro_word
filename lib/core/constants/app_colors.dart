@@ -26,6 +26,8 @@ class AppColors {
   static const Color glassHighlight = Color(0x08FFFFFF);
 
   static const Color neonPink = Color(0xFFFF00FF);
+  static const Color neonCyan = Color(0xFF00FFFF);
+  static const Color glitchRed = Color(0xFFFF2D55);
   static const Color surfaceLight = Color(0xFF202A3C);
   static const Color masteredGold = Color(0xFFFFD700);
 

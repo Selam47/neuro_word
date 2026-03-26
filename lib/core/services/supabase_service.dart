@@ -7,23 +7,36 @@ class SupabaseService {
   final SupabaseClient _client = Supabase.instance.client;
   static const String _wordsTable = 'words';
   static const String _progressTable = 'user_progress';
+  static const int _maxRetries = 2;
+  static const Duration _retryDelay = Duration(seconds: 2);
 
   String? get currentUserId => _client.auth.currentUser?.id;
 
+  Future<T> _withRetry<T>(Future<T> Function() action, {int retries = _maxRetries}) async {
+    for (var attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await action();
+      } catch (e) {
+        if (attempt >= retries) rethrow;
+        debugPrint('[SupabaseService] retry ${attempt + 1}/$retries after: $e');
+        await Future<void>.delayed(_retryDelay);
+      }
+    }
+    throw StateError('Unreachable');
+  }
+
   Future<List<WordModel>> fetchWords({List<String>? levels}) async {
-    try {
+    return _withRetry(() async {
       PostgrestFilterBuilder query = _client.from(_wordsTable).select('*');
       if (levels != null && levels.isNotEmpty) {
         query = query.inFilter('level', levels);
       }
       final List<dynamic> response =
-          await query.timeout(const Duration(seconds: 10));
+          await query.timeout(const Duration(seconds: 15));
       return response
           .map((row) => WordModel.fromSupabase(row as Map<String, dynamic>))
           .toList();
-    } catch (e) {
-      throw Exception('Supabase fetchWords failed: $e');
-    }
+    });
   }
 
   Future<List<UserProgressModel>> fetchUserProgress() async {
@@ -83,21 +96,21 @@ class SupabaseService {
   }
 
   Future<Map<String, int>> fetchAllLevelCounts() async {
-    try {
+    return _withRetry(() async {
       final List<dynamic> response = await _client
           .from(_wordsTable)
           .select('level')
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
       final counts = <String, int>{};
       for (final row in response) {
         final level = (row as Map<String, dynamic>)['level'] as String? ?? '';
         if (level.isNotEmpty) counts[level] = (counts[level] ?? 0) + 1;
       }
       return counts;
-    } catch (e) {
+    }).catchError((Object e) {
       debugPrint('[SupabaseService] fetchAllLevelCounts failed: $e');
-      return {};
-    }
+      return <String, int>{};
+    });
   }
 
   Future<void> upsertLearnedBatch(List<String> wordIds) async {

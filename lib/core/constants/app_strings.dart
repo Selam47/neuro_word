@@ -29,6 +29,15 @@ class AppStrings {
   static const levelBreakdown = 'Seviye Dağılımı';
   static const categoryDistribution = 'Kategori Dağılımı';
 
+  static const savedCollection = 'HAFIZA BANKASI';
+  static const savedCollectionEmpty =
+      'Henüz kaydedilmiş bir veri bulunamadı.';
+  static const masteredCollection = 'USTALAŞILAN KELİMELER';
+  static const masteredCollectionEmpty =
+      'Henüz ustalaşılan kelime bulunmuyor.\nKelimelere tıklayarak öğrenildi olarak işaretle.';
+  static const mastered = 'USTALAŞILDI';
+  static const rankHierarchy = 'RANK HİYERARŞİSİ';
+
   static const correct = 'Doğru';
   static const wrong = 'Yanlış';
   static const score = 'Puan';
@@ -68,4 +77,18 @@ class AppStrings {
       'Bu uygulama, Oxford University Press tarafından yayınlanan '
       'halka açık kelime listelerinden esinlenerek hazırlanmış '
       'bağımsız bir araçtır.';
+
+  static const systemInitializing = 'SİSTEM BAŞLATILIYOR...';
+  static const levelWarning =
+      'Dikkat: Seviye seçiminize göre kişiselleştirilmiş kelime veri kümesi yükleniyor...';
+  static const onboardingSubtitle = 'İngilizce öğrenmenin geleceği';
+  static const usernamePrompt = 'KULLANICI ADIN NE?';
+  static const usernamePlaceholder = 'Örn: Alex, Kaşif, Mira...';
+  static const selectLevel = 'SEVİYENİ SEÇ';
+  static const startButton = 'BAŞLA';
+  static const skipButton = 'Şimdi değil, atla';
+  static const continueButton = 'DEVAM ET';
+  static const loginButton = 'GİRİŞ YAP';
+  static const searchHint = 'Ara (Kelime veya Anlam)...';
+  static const welcomeMessage = 'HOŞ GELDİNİZ';
 }

@@ -126,14 +126,14 @@ class ProfileScreen extends ConsumerWidget {
                 }),
                 const SizedBox(height: 20),
 
-                _buildSectionTitle('SAVED COLLECTION'),
+                _buildSectionTitle(AppStrings.savedCollection),
                 const SizedBox(height: 12),
                 if (savedWords.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        'No saved words yet.\nTap the bookmark icon on words to save.',
+                        AppStrings.savedCollectionEmpty,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary,
@@ -229,14 +229,14 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 const SizedBox(height: 28),
 
-                _buildSectionTitle('${AppStrings.learned.toUpperCase()} COLLECTION'),
+                _buildSectionTitle(AppStrings.masteredCollection),
                 const SizedBox(height: 12),
                 if (learnedWords.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        'Henüz öğrenilen kelime yok.\nKelimelere tıklayarak öğrenildi olarak işaretle.',
+                        AppStrings.masteredCollectionEmpty,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
                           color: AppColors.textSecondary,
@@ -332,7 +332,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 const SizedBox(height: 28),
 
-                _buildSectionTitle('RANK HİYERARŞİSİ'),
+                _buildSectionTitle(AppStrings.rankHierarchy),
                 const SizedBox(height: 16),
                 const _RankHierarchySection(),
                 const SizedBox(height: 32),
@@ -624,7 +624,7 @@ class _LevelProgressBar extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'MASTERED',
+                            AppStrings.mastered,
                             style: GoogleFonts.orbitron(
                               color: AppColors.masteredGold,
                               fontSize: 8,
@@ -952,7 +952,7 @@ class _RankHierarchySection extends ConsumerWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'MASTERED',
+                                  AppStrings.mastered,
                                   style: GoogleFonts.orbitron(
                                     color: AppColors.masteredGold,
                                     fontSize: 8,

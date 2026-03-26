@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:neuro_word/core/constants/app_colors.dart';
+import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/shared/widgets/futuristic_background.dart';
 
@@ -194,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                               ),
                               child: Text(
-                                "HOŞ GELDİNİZ",
+                                AppStrings.welcomeMessage,
                                 style: GoogleFonts.rajdhani(
                                   color: AppColors.textPrimary,
                                   fontSize: 16,
@@ -231,7 +232,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'SYSTEM INITIALIZING...',
+                          AppStrings.systemInitializing,
                           style: GoogleFonts.shareTechMono(
                             color:
                                 AppColors.textSecondary.withOpacity(0.5),

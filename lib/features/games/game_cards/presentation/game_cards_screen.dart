@@ -56,10 +56,9 @@ class _GameCardsScreenState extends ConsumerState<GameCardsScreen>
 
   void _loadWords() {
     final notifier = ref.read(wordProvider.notifier);
-    final effectiveLevel =
-        widget.level?.isNotEmpty == true
-            ? widget.level
-            : UserProfileService().proficiencyLevel;
+    final effectiveLevel = widget.level?.isNotEmpty == true
+        ? widget.level
+        : UserProfileService().proficiencyLevel;
     _words = notifier.getRandomWords(_poolSize, level: effectiveLevel);
   }
 
@@ -70,12 +69,6 @@ class _GameCardsScreenState extends ConsumerState<GameCardsScreen>
   }
 
   WordModel get _current => _words[_currentIndex];
-
-  bool get _isLearned =>
-      ref.read(userProgressProvider).isWordLearned(_current.id);
-
-  bool get _isFavorite =>
-      ref.read(userProgressProvider).isWordFavorite(_current.id);
 
   void _flipCard() {
     HapticFeedback.selectionClick();
@@ -93,13 +86,11 @@ class _GameCardsScreenState extends ConsumerState<GameCardsScreen>
     final id = _current.id;
     if (!_learnedIds.contains(id)) _learnedIds.add(id);
     ref.read(userProgressProvider.notifier).markLearned(id);
-    setState(() {});
   }
 
   void _toggleFavorite() {
     HapticFeedback.lightImpact();
     ref.read(userProgressProvider.notifier).toggleFavorite(_current.id);
-    setState(() {});
   }
 
   void _nextCard() {
@@ -408,7 +399,7 @@ class _GameCardsScreenState extends ConsumerState<GameCardsScreen>
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFF07120A),
+          color: AppColors.surfaceDark,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: AppColors.neonGreen.withOpacity(0.35),
@@ -474,36 +465,44 @@ class _GameCardsScreenState extends ConsumerState<GameCardsScreen>
   }
 
   Widget _buildActionRow() {
-    final learned = _isLearned;
-    final favorite = _isFavorite;
+    return Consumer(
+      builder: (context, ref, _) {
+        final progress = ref.watch(userProgressProvider);
+        final wordId = _current.id;
+        final learned = progress.isWordLearned(wordId);
+        final favorite = progress.isWordFavorite(wordId);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ActionButton(
-              icon: favorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              label: 'Favori',
-              color: favorite ? AppColors.warningRed : AppColors.textMuted,
-              isActive: favorite,
-              onTap: _toggleFavorite,
-            ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ActionButton(
+                  icon: favorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  label: 'Favori',
+                  color: favorite ? AppColors.warningRed : AppColors.textMuted,
+                  isActive: favorite,
+                  onTap: _toggleFavorite,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ActionButton(
+                  icon: learned
+                      ? Icons.check_circle_rounded
+                      : Icons.check_circle_outline_rounded,
+                  label: 'Öğrendim',
+                  color: learned ? AppColors.neonGreen : AppColors.textMuted,
+                  isActive: learned,
+                  onTap: _toggleLearned,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _ActionButton(
-              icon: learned
-                  ? Icons.check_circle_rounded
-                  : Icons.check_circle_outline_rounded,
-              label: 'Öğrendim',
-              color: learned ? AppColors.neonGreen : AppColors.textMuted,
-              isActive: learned,
-              onTap: _toggleLearned,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -632,12 +631,16 @@ class _NavButton extends StatelessWidget {
               : AppColors.surfaceMedium.withOpacity(0.4),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: enabled ? AppColors.cardBorder : AppColors.cardBorder.withOpacity(0.3),
+            color: enabled
+                ? AppColors.cardBorder
+                : AppColors.cardBorder.withOpacity(0.3),
           ),
         ),
         child: Icon(
           icon,
-          color: enabled ? AppColors.textSecondary : AppColors.textMuted.withOpacity(0.3),
+          color: enabled
+              ? AppColors.textSecondary
+              : AppColors.textMuted.withOpacity(0.3),
           size: 24,
         ),
       ),

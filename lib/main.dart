@@ -23,52 +23,90 @@ void main() {
         ),
       );
 
-      try {
-        await Supabase.initialize(
-          url: 'https://zwqooayqbfwsopjhkdhz.supabase.co',
-          anonKey: 'sb_publishable_FK-4WR8xm07stRzr9g7muQ_RIbEyPqA',
-        ).timeout(const Duration(seconds: 8));
-      } catch (e, stack) {
-        debugPrint('Supabase init failed or timed out: $e\n$stack');
-      }
-
-      final profileService = UserProfileService();
-      try {
-        await profileService.init().timeout(const Duration(seconds: 5));
-      } catch (e, stack) {
-        debugPrint('UserProfileService init failed: $e\n$stack');
-      }
-
-      try {
-        final storage = StorageService();
-        await storage.init().timeout(const Duration(seconds: 5));
-
-        if (profileService.isFirstLaunch) {
-          final learnedIds = storage
-              .getLearnedWords()
-              .map((e) => e.toString())
-              .toList();
-          final favoriteIds = storage
-              .getFavoriteWords()
-              .map((e) => e.toString())
-              .toList();
-          final xp = storage.getXp();
-          if (learnedIds.isNotEmpty || favoriteIds.isNotEmpty || xp > 0) {
-            await profileService.migrateFromLegacy(
-                learnedIds, favoriteIds, xp);
-          }
-        }
-      } catch (e, stack) {
-        debugPrint('StorageService init failed: $e\n$stack');
-      }
+      await _initializeServices();
 
       runApp(const ProviderScope(child: NeuroWordApp()));
     },
     (error, stack) {
-      debugPrint('runZonedGuarded Error: $error');
-      debugPrint('$stack');
+      debugPrint('runZonedGuarded Error: $error\n$stack');
     },
   );
+}
+
+Future<void> _initializeServices() async {
+  final profileService = UserProfileService();
+
+  final results = await Future.wait<bool>([
+    _initSupabase(),
+    _initProfileService(profileService),
+  ]);
+
+  final isSupabaseReady = results[0];
+  final isProfileReady = results[1];
+
+  if (!isProfileReady) return;
+
+  await _migrateLegacyDataIfNeeded(profileService, isSupabaseReady);
+}
+
+Future<bool> _initSupabase() async {
+  try {
+    await Supabase.initialize(
+      url: const String.fromEnvironment(
+        'SUPABASE_URL',
+        defaultValue: 'https://zwqooayqbfwsopjhkdhz.supabase.co',
+      ),
+      anonKey: const String.fromEnvironment(
+        'SUPABASE_ANON_KEY',
+        defaultValue: 'sb_publishable_FK-4WR8xm07stRzr9g7muQ_RIbEyPqA',
+      ),
+    ).timeout(const Duration(seconds: 8));
+    return true;
+  } catch (e, stack) {
+    debugPrint('Supabase init failed: $e\n$stack');
+    return false;
+  }
+}
+
+Future<bool> _initProfileService(UserProfileService service) async {
+  try {
+    await service.init().timeout(const Duration(seconds: 5));
+    return true;
+  } catch (e, stack) {
+    debugPrint('UserProfileService init failed: $e\n$stack');
+    return false;
+  }
+}
+
+Future<void> _migrateLegacyDataIfNeeded(
+  UserProfileService profileService,
+  bool isSupabaseReady,
+) async {
+  if (!profileService.isFirstLaunch) return;
+
+  try {
+    final storage = StorageService();
+    await storage.init().timeout(const Duration(seconds: 5));
+
+    final learnedIds = storage
+        .getLearnedWords()
+        .map((e) => e.toString())
+        .toList();
+    final favoriteIds = storage
+        .getFavoriteWords()
+        .map((e) => e.toString())
+        .toList();
+    final xp = storage.getXp();
+
+    final hasLegacyData =
+        learnedIds.isNotEmpty || favoriteIds.isNotEmpty || xp > 0;
+
+    if (hasLegacyData) {
+      await profileService.migrateFromLegacy(learnedIds, favoriteIds, xp);
+    }
+  } catch (e, stack) {
+    debugPrint('Legacy migration failed: $e\n$stack');
+  }
 }
 
 class NeuroWordApp extends ConsumerWidget {

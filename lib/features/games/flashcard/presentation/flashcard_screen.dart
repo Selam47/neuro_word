@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,8 @@ import 'package:neuro_word/core/constants/app_strings.dart';
 import 'package:neuro_word/features/learning/models/word_model.dart';
 import 'package:neuro_word/features/learning/providers/word_provider.dart';
 import 'package:neuro_word/features/learning/providers/word_sets_providers.dart';
+
+enum _Phase { idle, flash, typing, feedback, results }
 
 class FlashMemoryScreen extends ConsumerStatefulWidget {
   const FlashMemoryScreen({super.key, this.level});
@@ -17,10 +20,10 @@ class FlashMemoryScreen extends ConsumerStatefulWidget {
 
 class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  // ── Constants ────────────────────────────────────────────────────────────────
   static const int _totalWords = 5;
   static const int _typingSeconds = 10;
   static const Duration _flashDuration = Duration(milliseconds: 1500);
+  static const Duration _feedbackDuration = Duration(milliseconds: 700);
 
   static const _kCyan = Color(0xFF00FFFF);
   static const _kGreen = Color(0xFF00FF41);
@@ -28,39 +31,26 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
   static const _kBg = Color(0xFF050A0E);
   static const _kSurface = Color(0xFF07120A);
 
-  // ── State ─────────────────────────────────────────────────────────────────
   late List<WordModel> _words;
   bool _initialized = false;
 
   int _currentIndex = 0;
   int _score = 0;
-  bool _gameOver = false;
+  _Phase _phase = _Phase.idle;
+  int _roundId = 0;
 
-  /// True while the word card is being shown (flash phase).
-  bool _flashPhase = false;
-
-  /// True after flash phase ends and user may type.
-  bool _wordVisible = false;
-  bool _inputEnabled = false;
-
-  /// Guards against multiple simultaneous advance calls.
-  bool _isAdvancing = false;
-
-  Color _feedbackColor = Colors.transparent;
-  bool _feedbackActive = false;
   bool _lastAnswerCorrect = false;
+  Color _feedbackColor = Colors.transparent;
 
-  // ── Timer (counts up 0→1 over _typingSeconds) ────────────────────────────
   late AnimationController _timerController;
-
-  /// Remembers whether the timer was running before the app went to background.
   bool _wasTimerRunning = false;
 
-  // ── UI helpers ───────────────────────────────────────────────────────────
+  Timer? _flashTimer;
+  Timer? _feedbackTimer;
+
   final TextEditingController _textController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
@@ -78,7 +68,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
       _wasTimerRunning = _timerController.isAnimating;
       _timerController.stop();
     } else if (state == AppLifecycleState.resumed) {
-      if (_wasTimerRunning && !_gameOver && !_flashPhase) {
+      if (_wasTimerRunning && _phase == _Phase.typing) {
         _timerController.forward();
       }
       _wasTimerRunning = false;
@@ -94,7 +84,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
       _words = notifier.getRandomWords(_totalWords, level: widget.level);
       if (_words.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _startRound();
+          if (mounted) _beginRound();
         });
       }
     }
@@ -103,6 +93,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _cancelAllTimers();
     _timerController
       ..removeStatusListener(_onTimerStatus)
       ..stop()
@@ -112,72 +103,67 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     super.dispose();
   }
 
-  // ── Timer callback ────────────────────────────────────────────────────────
-  /// Called only when the 10-second TYPING timer completes naturally.
+  void _cancelAllTimers() {
+    _flashTimer?.cancel();
+    _flashTimer = null;
+    _feedbackTimer?.cancel();
+    _feedbackTimer = null;
+  }
+
   void _onTimerStatus(AnimationStatus status) {
-    if (!mounted || _gameOver || _isAdvancing || _flashPhase) return;
-    if (status == AnimationStatus.completed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && !_gameOver && !_isAdvancing) _onTimeUp();
-      });
-    }
+    if (status != AnimationStatus.completed) return;
+    if (!mounted || _phase != _Phase.typing) return;
+    final token = _roundId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _roundId != token || _phase != _Phase.typing) return;
+      _handleTimeUp();
+    });
   }
 
-  // ── Round logic ───────────────────────────────────────────────────────────
+  void _beginRound() {
+    if (!mounted || _phase == _Phase.results) return;
 
-  /// Begins a new round:
-  ///   1. Shows the word for [_flashDuration].
-  ///   2. Hides the word and starts the 10-second typing timer.
-  void _startRound() {
-    if (_gameOver || _isAdvancing) return;
-
-    // Reset timer but do NOT start it yet – it starts after the flash phase.
+    _cancelAllTimers();
     _timerController.reset();
+    _roundId++;
+    final token = _roundId;
 
-    setState(() {
-      _wordVisible = true;
-      _flashPhase = true;
-      _inputEnabled = false;
-      _isAdvancing = false;
-      _feedbackColor = Colors.transparent;
-      _feedbackActive = false;
-    });
     _textController.clear();
+    setState(() {
+      _phase = _Phase.flash;
+      _feedbackColor = Colors.transparent;
+      _lastAnswerCorrect = false;
+    });
 
-    // After the flash window, hide the word and START the typing countdown.
-    Future.delayed(_flashDuration, () {
-      if (!mounted || _gameOver) return;
-      setState(() {
-        _wordVisible = false;
-        _flashPhase = false;
-        _inputEnabled = true;
-      });
+    _flashTimer = Timer(_flashDuration, () {
+      if (!mounted || _roundId != token) return;
+      setState(() => _phase = _Phase.typing);
       _inputFocusNode.requestFocus();
-      // Start the 10-second typing timer ONLY after the flash phase ends.
-      _timerController.forward(from: 0.0);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _roundId != token || _phase != _Phase.typing) return;
+        _timerController.forward(from: 0.0);
+      });
     });
   }
 
-  void _onTimeUp() {
-    if (_gameOver || _isAdvancing) return;
+  void _handleTimeUp() {
+    if (_phase != _Phase.typing) return;
     HapticFeedback.heavyImpact();
     _timerController.stop();
     setState(() {
-      _inputEnabled = false;
+      _phase = _Phase.feedback;
       _lastAnswerCorrect = false;
       _feedbackColor = _kRed;
-      _feedbackActive = true;
     });
-    _scheduleAdvance();
+    _scheduleNextRound();
   }
 
   void _onSubmitted(String value) {
-    if (!_inputEnabled || _gameOver || _isAdvancing) return;
+    if (_phase != _Phase.typing) return;
     final trimmed = value.trim().toLowerCase();
     if (trimmed.isEmpty) return;
 
     _timerController.stop();
-    setState(() => _inputEnabled = false);
 
     final expected = _words[_currentIndex].english.trim().toLowerCase();
     final correct = trimmed == expected;
@@ -193,41 +179,34 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     }
 
     setState(() {
+      _phase = _Phase.feedback;
       _lastAnswerCorrect = correct;
       _feedbackColor = correct ? _kGreen : _kRed;
-      _feedbackActive = true;
     });
 
-    _scheduleAdvance();
+    _scheduleNextRound();
   }
 
-  void _scheduleAdvance() {
-    if (_isAdvancing) return;
-    _isAdvancing = true;
+  void _scheduleNextRound() {
+    _cancelAllTimers();
     _timerController.reset();
+    final token = _roundId;
 
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (!mounted) return;
-      setState(() {
-        _feedbackActive = false;
-        _feedbackColor = Colors.transparent;
-      });
+    _feedbackTimer = Timer(_feedbackDuration, () {
+      if (!mounted || _roundId != token) return;
       _currentIndex++;
-      _isAdvancing = false;
-
       if (_currentIndex >= _totalWords) {
-        setState(() => _gameOver = true);
+        setState(() => _phase = _Phase.results);
       } else {
-        _startRound();
+        _beginRound();
       }
     });
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     if (!_initialized || _words.isEmpty) return _buildEmptyState();
-    if (_gameOver) return _buildResultsScreen();
+    if (_phase == _Phase.results) return _buildResultsScreen();
 
     final word = _words[_currentIndex.clamp(0, _words.length - 1)];
 
@@ -235,6 +214,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
+          _cancelAllTimers();
           _timerController.stop();
           Navigator.of(context).pop();
         }
@@ -244,7 +224,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
         resizeToAvoidBottomInset: true,
         body: Stack(
           children: [
-            if (_feedbackActive)
+            if (_phase == _Phase.feedback)
               Positioned.fill(
                 child: IgnorePointer(
                   child: AnimatedContainer(
@@ -277,7 +257,6 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     );
   }
 
-  // ── Sub-widgets ───────────────────────────────────────────────────────────
   Widget _buildEmptyState() {
     return Scaffold(
       backgroundColor: _kBg,
@@ -294,14 +273,14 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
             Text(
               'Kelime bulunamadı.',
               style: GoogleFonts.sourceCodePro(
-                color: const Color(0xFF607060),
+                color: _kCyan.withOpacity(0.4),
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 24),
             GestureDetector(
               onTap: () => Navigator.of(context).pop(),
-              child: _NeonButton(label: 'GERİ DÖN', color: _kCyan),
+              child: const _NeonButton(label: 'GERİ DÖN', color: _kCyan),
             ),
           ],
         ),
@@ -330,7 +309,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
               const Spacer(),
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
-                child: _NeonButton(
+                child: const _NeonButton(
                   label: 'ANA MENÜYE DÖN',
                   color: _kCyan,
                   fullWidth: true,
@@ -393,7 +372,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
         Text(
           AppStrings.flashMemory,
           style: GoogleFonts.sourceCodePro(
-            color: const Color(0xFF304530),
+            color: _kCyan.withOpacity(0.15),
             fontSize: 11,
             letterSpacing: 3,
           ),
@@ -406,7 +385,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF070F07),
+        color: _kSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kCyan.withOpacity(0.12)),
       ),
@@ -429,7 +408,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
                   child: Text(
                     word.english,
                     style: GoogleFonts.sourceCodePro(
-                      color: const Color(0xFF9AAAA0),
+                      color: _kCyan.withOpacity(0.7),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -457,6 +436,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
         children: [
           GestureDetector(
             onTap: () {
+              _cancelAllTimers();
               _timerController.stop();
               Navigator.of(context).pop();
             },
@@ -464,7 +444,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFF0A1A0A),
+                color: _kSurface,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: _kCyan.withOpacity(0.25)),
               ),
@@ -548,8 +528,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
   }
 
   Widget _buildTimerBar() {
-    // ── Flash phase: static "MEMORIZE" indicator ──────────────────────────
-    if (_flashPhase) {
+    if (_phase == _Phase.flash) {
       return Column(
         children: [
           Row(
@@ -588,7 +567,6 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
       );
     }
 
-    // ── Typing phase: animated 10-second countdown ────────────────────────
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _timerController,
@@ -649,19 +627,22 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
       child: RepaintBoundary(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 150),
-          child: _wordVisible
+          child: _phase == _Phase.flash
               ? _FlashWordCard(key: const ValueKey('visible'), word: word)
-              : _HiddenWordCard(key: const ValueKey('hidden')),
+              : const _HiddenWordCard(key: ValueKey('hidden')),
         ),
       ),
     );
   }
 
   Widget _buildInputArea(WordModel word) {
+    final isTyping = _phase == _Phase.typing;
+    final showFeedback = _phase == _Phase.feedback;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_feedbackActive && !_wordVisible)
+        if (showFeedback)
           AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -695,12 +676,12 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
             color: _kSurface.withOpacity(0.9),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _inputEnabled
+              color: isTyping
                   ? _kCyan.withOpacity(0.5)
                   : _kCyan.withOpacity(0.1),
               width: 1.5,
             ),
-            boxShadow: _inputEnabled
+            boxShadow: isTyping
                 ? [
                     BoxShadow(
                       color: _kCyan.withOpacity(0.12),
@@ -713,7 +694,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
           child: TextField(
             controller: _textController,
             focusNode: _inputFocusNode,
-            enabled: _inputEnabled,
+            enabled: isTyping,
             onSubmitted: _onSubmitted,
             textInputAction: TextInputAction.done,
             autocorrect: false,
@@ -724,7 +705,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
             ),
             cursorColor: _kCyan,
             decoration: InputDecoration(
-              hintText: _inputEnabled ? 'Kelimeyi yaz...' : '',
+              hintText: isTyping ? 'Kelimeyi yaz...' : '',
               hintStyle: GoogleFonts.sourceCodePro(
                 color: _kCyan.withOpacity(0.2),
                 fontSize: 16,
@@ -734,7 +715,7 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
                 vertical: 14,
               ),
               border: InputBorder.none,
-              suffixIcon: _inputEnabled
+              suffixIcon: isTyping
                   ? IconButton(
                       icon: Icon(
                         Icons.send_rounded,
@@ -750,8 +731,6 @@ class _FlashMemoryScreenState extends ConsumerState<FlashMemoryScreen>
     );
   }
 }
-
-// ── Reusable card widgets ───────────────────────────────────────────────────
 
 class _FlashWordCard extends StatelessWidget {
   const _FlashWordCard({super.key, required this.word});
