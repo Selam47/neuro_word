@@ -20,9 +20,9 @@ Yapay zeka estetiği, fütüristik grafikler ve oyunlaştırılmış öğrenme m
 
 <table>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/welcome.jpeg" width="200" alt="Giriş Ekranı"/><br/><sub><b>Fütüristik Karşılama</b></sub></td>
+    <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/login.jpeg" width="200" alt="Giriş Ekranı"/><br/><sub><b>Fütüristik Karşılama</b></sub></td>
     <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/home.jpeg" width="200" alt="Ana Ekran"/><br/><sub><b>Cyber Match & Modlar</b></sub></td>
-    <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/database.jpeg" width="200" alt="Kelime Veritabanı"/><br/><sub><b>Gelişmiş Filtreleme</b></sub></td>
+    <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/start.jpeg" width="200" alt="Kelime Veritabanı"/><br/><sub><b>Gelişmiş Filtreleme</b></sub></td>
     <td><img src="https://raw.githubusercontent.com/Selam47/neuro_word/main/screenshots/profile.jpeg" width="200" alt="Profil"/><br/><sub><b>İlerleme Takibi</b></sub></td>
   </tr>
 </table>
