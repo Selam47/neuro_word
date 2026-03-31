@@ -34,3 +34,4 @@ claude_calisma
 key.properties
 **/*.keystore
 **/*.jks
+.env

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuro_word/core/services/user_profile_service.dart';
 import 'package:neuro_word/features/learning/models/rank_model.dart';
@@ -18,7 +19,8 @@ class RankNotifier extends Notifier<RankState> {
   @override
   RankState build() {
     final ws = ref.watch(wordProvider);
-    final learnedIds = ref.watch(userProgressProvider.select((s) => s.learnedIds));
+    final learnedIds =
+        ref.watch(userProgressProvider.select((s) => s.learnedIds));
 
     final profLevel = _profile.proficiencyLevel;
     final startRankId = _startingRankByLevel[profLevel] ?? 1;
@@ -68,8 +70,7 @@ class RankNotifier extends Notifier<RankState> {
       }
     }
 
-    _profile.saveLevelScore(score);
-    _profile.saveRankId(achievedRank);
+    unawaited(_persistRankData(score, achievedRank));
 
     return RankState(
       levelScore: score,
@@ -77,6 +78,11 @@ class RankNotifier extends Notifier<RankState> {
       startingRankId: startRankId,
       levelMastery: mastery,
     );
+  }
+
+  Future<void> _persistRankData(int score, int rankId) async {
+    await _profile.saveLevelScore(score);
+    await _profile.saveRankId(rankId);
   }
 }
 

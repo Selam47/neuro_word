@@ -37,7 +37,7 @@ class SupportersScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'UYGULAMA HAKKINDA',
+                      AppStrings.supportersTitle,
                       style: GoogleFonts.orbitron(
                         color: AppColors.textPrimary,
                         fontSize: 16,
@@ -50,12 +50,8 @@ class SupportersScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                _NeonSectionHeader(title: 'DESTEK VERENLER'),
-
-                const SizedBox(height: 28),
-
                 _PersonCard(
-                  role: 'GELİŞTİRİCİ',
+                  role: AppStrings.developer,
                   name: 'Abdülselam Kaya',
                   accentColor: AppColors.electricBlue,
                   iconData: Icons.terminal_rounded,
@@ -79,7 +75,7 @@ class SupportersScreen extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 _PersonCard(
-                  role: 'DESTEK VEREN',
+                  role: AppStrings.supporter,
                   name: 'Mehmet Emin Dikmen',
                   accentColor: AppColors.cyberPurple,
                   iconData: Icons.favorite_rounded,
@@ -124,104 +120,6 @@ class SupportersScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _NeonSectionHeader extends StatelessWidget {
-  const _NeonSectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.electricBlue.withOpacity(0.12),
-            AppColors.cyberPurple.withOpacity(0.08),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border(
-          left: BorderSide(
-            color: AppColors.electricBlue,
-            width: 3,
-          ),
-          top: BorderSide(
-            color: AppColors.electricBlue.withOpacity(0.3),
-            width: 1,
-          ),
-          bottom: BorderSide(
-            color: AppColors.cyberPurple.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.electricBlue.withOpacity(0.08),
-            blurRadius: 20,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.electricBlue,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.electricBlue.withOpacity(0.8),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          Text(
-            title,
-            style: GoogleFonts.orbitron(
-              color: AppColors.electricBlue,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 3,
-              shadows: [
-                Shadow(
-                  color: AppColors.electricBlue.withOpacity(0.6),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.cyberPurple,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.cyberPurple.withOpacity(0.8),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

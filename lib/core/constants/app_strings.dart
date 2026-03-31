@@ -32,9 +32,9 @@ class AppStrings {
   static const savedCollection = 'HAFIZA BANKASI';
   static const savedCollectionEmpty =
       'Henüz kaydedilmiş bir veri bulunamadı.';
-  static const masteredCollection = 'USTALAŞILAN KELİMELER';
+  static const masteredCollection = 'NÖRAL ARŞİV';
   static const masteredCollectionEmpty =
-      'Henüz ustalaşılan kelime bulunmuyor.\nKelimelere tıklayarak öğrenildi olarak işaretle.';
+      'Nöral arşivde henüz veri yok.\nKelimelere tıklayarak öğrenildi olarak işaretle.';
   static const mastered = 'USTALAŞILDI';
   static const rankHierarchy = 'RANK HİYERARŞİSİ';
 
@@ -56,10 +56,12 @@ class AppStrings {
   static const totalWordsInSession = 'Toplam Kelime';
   static const accuracyLabel = 'Başarı Oranı';
   static const greatJob = 'Harika iş!';
-  static String keepPracticing(double percent) => '%${percent.toStringAsFixed(1)} tamamlandı';
+  static String keepPracticing(double percent) =>
+      '%${percent.toStringAsFixed(1)} tamamlandı';
   static const backToDashboard = 'Ana Sayfaya Dön';
   static const wordJourneyTitle = '2000 Kelimelik Yolculuk';
-  static String progressSubtitle(int learned, int total) => '$total kelimeden $learned tanesi öğrenildi';
+  static String progressSubtitle(int learned, int total) =>
+      '$total kelimeden $learned tanesi öğrenildi';
   static const missed = 'Bilinmeyen';
 
   static const contactTitle = 'İLETİŞİM';
@@ -80,7 +82,8 @@ class AppStrings {
 
   static const systemInitializing = 'SİSTEM BAŞLATILIYOR...';
   static const levelWarning =
-      'Dikkat: Seviye seçiminize göre kişiselleştirilmiş kelime veri kümesi yükleniyor...';
+      'Dikkat: Seviye seçiminize göre kişiselleştirilmiş '
+      'kelime veri kümesi yükleniyor...';
   static const onboardingSubtitle = 'İngilizce öğrenmenin geleceği';
   static const usernamePrompt = 'KULLANICI ADIN NE?';
   static const usernamePlaceholder = 'Örn: Alex, Kaşif, Mira...';
@@ -91,4 +94,31 @@ class AppStrings {
   static const loginButton = 'GİRİŞ YAP';
   static const searchHint = 'Ara (Kelime veya Anlam)...';
   static const welcomeMessage = 'HOŞ GELDİNİZ';
+
+  static const menuAbout = 'Uygulama Hakkında';
+  static const menuContact = 'İletişim';
+  static const menuExplore = 'Keşfet';
+  static const retryButton = 'YENİDEN DENE';
+  static const dataFlowError = 'Veri Akış Hatası';
+  static const noDataFound = 'Sistemde böyle bir veri bulunamadı';
+  static const allFilter = 'Tümü';
+  static const savedFilter = 'Kaydedilenler';
+  static const selectLevelSheet = 'SEVİYE SEÇ';
+  static const selectLevelPrompt = 'Hangi seviyede pratik yapmak istiyorsun?';
+  static const allLevels = 'Tüm Seviyeler';
+  static const locked = 'KİLİTLİ';
+  static const active = 'AKTİF';
+  static const unlocked = 'KİLİT AÇIK';
+  static String wordCount(int count) => '$count kelime';
+  static const noWordsLoaded = 'Kelime yüklenmedi';
+  static String unlockPrompt(String pct) =>
+      'Kilidi aç: B2\'yi %$pct → %60 tamamla';
+  static String masteryRequired(int pct) => '%$pct ustalık gerekli';
+
+  static const statsTotal = 'Toplam';
+  static const statsLearned = 'Öğrenilen';
+  static const statsFavorite = 'Favori';
+
+  static const developer = 'GELİŞTİRİCİ';
+  static const supporter = 'DESTEK VEREN';
 }

@@ -250,7 +250,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         children: [
           _buildChip(
-            label: 'Tümü',
+            label: AppStrings.allFilter,
             isSelected: activeLevel == null && !onlySaved,
             color: AppColors.electricBlue,
             onTap: () {
@@ -261,7 +261,7 @@ class _AdvancedFilterBar extends ConsumerWidget {
           const SizedBox(width: 8),
 
           _buildChip(
-            label: 'Kaydedilenler',
+            label: AppStrings.savedFilter,
             isSelected: onlySaved,
             color: AppColors.neonPink,
             onTap: () => notifier.toggleSaved(!onlySaved),
@@ -382,7 +382,7 @@ class _LiveWordListState extends ConsumerState<_LiveWordList> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Sistemde böyle bir veri bulunamadı',
+                AppStrings.noDataFound,
                 style: GoogleFonts.rajdhani(
                   color: AppColors.textMuted,
                   fontSize: 16,
@@ -586,11 +586,19 @@ class _TopBar extends StatelessWidget {
                 return [
                   _buildPopupMenuItem(
                     'supporters',
-                    'Destek Verenler',
-                    Icons.favorite,
+                    AppStrings.menuAbout,
+                    Icons.info_outline_rounded,
                   ),
-                  _buildPopupMenuItem('contact', 'İletişim', Icons.mail),
-                  _buildPopupMenuItem('explore', 'Keşfet', Icons.explore),
+                  _buildPopupMenuItem(
+                    'contact',
+                    AppStrings.menuContact,
+                    Icons.mail,
+                  ),
+                  _buildPopupMenuItem(
+                    'explore',
+                    AppStrings.menuExplore,
+                    Icons.explore,
+                  ),
                 ];
               },
             ),
@@ -654,7 +662,7 @@ class _QuickStatsRow extends ConsumerWidget {
       children: [
         Expanded(
           child: _StatCard(
-            label: 'Toplam',
+            label: AppStrings.statsTotal,
             value: _fmt(totalCount),
             icon: Icons.data_usage_rounded,
             color: AppColors.textPrimary,
@@ -663,7 +671,7 @@ class _QuickStatsRow extends ConsumerWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            label: 'Öğrenilen',
+            label: AppStrings.statsLearned,
             value: _fmt(learnedCount),
             icon: Icons.check_circle_outline_rounded,
             color: AppColors.neonGreen,
@@ -672,7 +680,7 @@ class _QuickStatsRow extends ConsumerWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            label: 'Favori',
+            label: AppStrings.statsFavorite,
             value: _fmt(favoriteCount),
             icon: Icons.bookmark_border_rounded,
             color: AppColors.neonPink,
@@ -900,7 +908,7 @@ class _LevelSelectorSheet extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'SEVİYE SEÇ',
+                AppStrings.selectLevelSheet,
                 style: GoogleFonts.orbitron(
                   color: AppColors.textPrimary,
                   fontSize: 15,
@@ -914,7 +922,7 @@ class _LevelSelectorSheet extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 13),
             child: Text(
-              'Hangi seviyede pratik yapmak istiyorsun?',
+              AppStrings.selectLevelPrompt,
               style: GoogleFonts.rajdhani(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -924,8 +932,8 @@ class _LevelSelectorSheet extends ConsumerWidget {
           const SizedBox(height: 20),
 
           _LevelTile(
-            label: 'Tüm Seviyeler',
-            sublabel: '${wordState.dbTotalWordCount > 0 ? wordState.dbTotalWordCount : wordState.allWords.length} kelime',
+            label: AppStrings.allLevels,
+            sublabel: AppStrings.wordCount(wordState.dbTotalWordCount > 0 ? wordState.dbTotalWordCount : wordState.allWords.length),
             color: AppColors.electricBlue,
             isLocked: false,
             onTap: () {
@@ -946,10 +954,10 @@ class _LevelSelectorSheet extends ConsumerWidget {
               child: _LevelTile(
                 label: level,
                 sublabel: locked
-                    ? 'Kilidi aç: B2\'yi %$b2Pct → %60 tamamla'
+                    ? AppStrings.unlockPrompt(b2Pct)
                     : count > 0
-                    ? '$count kelime'
-                    : 'Kelime yüklenmedi',
+                    ? AppStrings.wordCount(count)
+                    : AppStrings.noWordsLoaded,
                 color: AppColors.forLevel(level),
                 isLocked: locked,
                 isDisabled: count == 0 && !locked,
@@ -1085,7 +1093,7 @@ class _LevelTile extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'KİLİTLİ',
+                  AppStrings.locked,
                   style: GoogleFonts.orbitron(
                     color: AppColors.accentOrange,
                     fontSize: 9,
@@ -1149,7 +1157,7 @@ class _ErrorCard extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Veri Akış Hatası',
+            AppStrings.dataFlowError,
             style: GoogleFonts.orbitron(
               color: AppColors.warningRed,
               fontSize: 18,
@@ -1167,7 +1175,7 @@ class _ErrorCard extends ConsumerWidget {
             onPressed: () => ref.read(wordProvider.notifier).reload(),
             icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
             label: Text(
-              'YENİDEN DENE',
+              AppStrings.retryButton,
               style: GoogleFonts.orbitron(color: AppColors.textPrimary),
             ),
             style: TextButton.styleFrom(
